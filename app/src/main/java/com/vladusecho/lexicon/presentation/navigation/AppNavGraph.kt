@@ -8,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import androidx.navigation.toRoute
+import com.vladusecho.lexicon.presentation.screen.CreateDefinitionScreen
 import com.vladusecho.lexicon.presentation.screen.DetailsScreen
 import com.vladusecho.lexicon.presentation.screen.FavouriteScreen
 import com.vladusecho.lexicon.presentation.screen.HomeScreen
@@ -35,6 +36,9 @@ fun AppNavGraph(
                 HomeScreen(
                     onShortDefinitionClick = {
                         navState.navHostController.navigate(NavScreen.Details(it))
+                    },
+                    onAddDefinitionClick = {
+                        navState.navHostController.navigate(NavScreen.CreateDefinition)
                     }
                 )
             }
@@ -42,6 +46,13 @@ fun AppNavGraph(
                 val args = backStackEntry.toRoute<NavScreen.Details>()
                 DetailsScreen(
                     id = args.id,
+                    onBackClick = {
+                        navState.navHostController.navigateUp()
+                    }
+                )
+            }
+            composable<NavScreen.CreateDefinition> {
+                CreateDefinitionScreen(
                     onBackClick = {
                         navState.navHostController.navigateUp()
                     }

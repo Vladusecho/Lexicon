@@ -7,5 +7,5 @@ class GetDefinitionsUseCase @Inject constructor(
     private val definitionRepository: DefinitionRepository
 ) {
 
-    suspend operator fun invoke() = definitionRepository.getDefinitions()
+    operator fun invoke() = definitionRepository.getDefinitions()
 }
