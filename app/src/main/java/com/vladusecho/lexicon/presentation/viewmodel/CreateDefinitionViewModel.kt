@@ -18,7 +18,7 @@ class CreateDefinitionViewModel @Inject constructor(
     private val createDefinitionUseCase: CreateDefinitionUseCase
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow<CreateDefinitionState>(CreateDefinitionState.Initial)
+    private val _state = MutableStateFlow<CreateDefinitionState>(CreateDefinitionState.Success)
     val state = _state.asStateFlow()
 
     private var _word by mutableStateOf("")
@@ -33,7 +33,7 @@ class CreateDefinitionViewModel @Inject constructor(
             when (command) {
                 is CreateDefinitionCommand.CreateDefinition -> {
                     createDefinitionUseCase(command.definition)
-                    _state.value = CreateDefinitionState.Success
+                    _state.value = CreateDefinitionState.Finish
                 }
 
                 is CreateDefinitionCommand.UpdateDescription -> {
@@ -49,7 +49,8 @@ class CreateDefinitionViewModel @Inject constructor(
 
     sealed interface CreateDefinitionState {
         object Success : CreateDefinitionState
-        object Initial : CreateDefinitionState
+
+        object Finish : CreateDefinitionState
         object Loading : CreateDefinitionState
         object Error : CreateDefinitionState
     }

@@ -9,9 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -45,7 +42,10 @@ fun DetailsScreen(
             factory.create(id)
         }
     ),
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onEditClick: (
+        id: Int,
+    ) -> Unit
 ) {
 
     val state = viewModel.state.collectAsStateWithLifecycle()
@@ -73,6 +73,19 @@ fun DetailsScreen(
                         tint = Color.White
                     )
                 }
+            },
+            actions = {
+                IconButton(
+                    onClick = {
+                        onEditClick(id)
+                    }
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_edit),
+                        contentDescription = null,
+                        tint = Color.White
+                    )
+                }
             }
         )
         DetailsScreenContent(
@@ -91,6 +104,7 @@ fun DetailsScreenContent(
         DetailsViewModel.DetailsState.Error -> {
 
         }
+
         DetailsViewModel.DetailsState.Loading -> {
             Box(
                 modifier = modifier
@@ -102,6 +116,7 @@ fun DetailsScreenContent(
                 )
             }
         }
+
         is DetailsViewModel.DetailsState.Success -> {
             Column(
                 modifier = modifier

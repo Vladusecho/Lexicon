@@ -1,6 +1,5 @@
 package com.vladusecho.lexicon.presentation.viewmodel
 
-import android.view.View
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vladusecho.lexicon.domain.entity.Definition
@@ -9,10 +8,11 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
-import javax.inject.Inject
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 
 @HiltViewModel(
     assistedFactory = DetailsViewModel.Factory::class
@@ -22,20 +22,16 @@ class DetailsViewModel @AssistedInject constructor(
     @Assisted("id") private val id: Int
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow<DetailsState>(DetailsState.Loading)
-    val state = _state.asStateFlow()
-
-    init {
-        viewModelScope.launch {
-            _state.value = DetailsState.Loading
-            try {
-                val definition = getDefinitionByIdUseCase(id)
-                _state.value = DetailsState.Success(definition)
-            } catch (e: Exception) {
-                _state.value = DetailsState.Error
-            }
+    val state: StateFlow<DetailsState> = getDefinitionByIdUseCase(id)
+        .map { definition ->
+            DetailsState.Success(definition) as DetailsState
         }
-    }
+        .catch { emit(DetailsState.Error) }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = DetailsState.Loading
+        )
 
     sealed interface DetailsState {
         data class Success(val definition: Definition) : DetailsState
@@ -47,6 +43,6 @@ class DetailsViewModel @AssistedInject constructor(
     interface Factory {
         fun create(
             @Assisted("id") id: Int
-        ) : DetailsViewModel
+        ): DetailsViewModel
     }
 }

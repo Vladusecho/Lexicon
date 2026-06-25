@@ -25,9 +25,8 @@ class SimpleDefinitionRepositoryImpl @Inject constructor() : DefinitionRepositor
         )
     )
 
-    override suspend fun getDefinition(id: Int): Definition {
-        delay(1000)
-        return _definitions.value.first { it.id == id }
+    override fun getDefinition(id: Int): Flow<Definition> {
+        return _definitions.map { it.first { definition -> definition.id == id } }
     }
 
     override fun getDefinitions(): Flow<List<Definition>> {
@@ -37,6 +36,18 @@ class SimpleDefinitionRepositoryImpl @Inject constructor() : DefinitionRepositor
     override suspend fun createDefinition(definition: Definition) {
         val currentList = _definitions.value
         val updatedList = currentList + definition
+        _definitions.value = updatedList
+    }
+
+    override suspend fun updateDefinition(definition: Definition) {
+        val currentList = _definitions.value
+        val updatedList = currentList.map {
+            if (it.id == definition.id) {
+                definition
+            } else {
+                it
+            }
+        }
         _definitions.value = updatedList
     }
 }
