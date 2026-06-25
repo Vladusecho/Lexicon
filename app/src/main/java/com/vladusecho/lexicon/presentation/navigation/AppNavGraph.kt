@@ -52,6 +52,9 @@ fun AppNavGraph(
                     },
                     onEditClick = {
                         navState.navHostController.navigate(NavScreen.EditDefinition(args.id))
+                    },
+                    onDeleteClick = {
+                        navState.navHostController.navigateUp()
                     }
                 )
             }

@@ -38,9 +38,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vladusecho.lexicon.R
 import com.vladusecho.lexicon.domain.entity.Definition
-import com.vladusecho.lexicon.presentation.viewmodel.DetailsViewModel
 import com.vladusecho.lexicon.presentation.viewmodel.EditDefinitionViewModel
-import kotlin.random.Random
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,9 +55,13 @@ fun EditDefinitionScreen(
     val state = viewModel.state.collectAsStateWithLifecycle()
     val currentState = state.value
 
-    LaunchedEffect(key1 = currentState) {
-        if (currentState is EditDefinitionViewModel.EditDefinitionState.Finish) {
-            onBackClick()
+    LaunchedEffect(key1 = Unit) {
+        viewModel.event.collect { event ->
+            when (event) {
+                EditDefinitionViewModel.EditDefinitionEvent.FinishEdit -> {
+                    onBackClick()
+                }
+            }
         }
     }
 
@@ -141,6 +143,7 @@ fun EditDefinitionScreenContent(
         EditDefinitionViewModel.EditDefinitionState.Error -> {
 
         }
+
         EditDefinitionViewModel.EditDefinitionState.Loading -> {
             Box(
                 modifier = modifier
@@ -152,6 +155,7 @@ fun EditDefinitionScreenContent(
                 )
             }
         }
+
         is EditDefinitionViewModel.EditDefinitionState.Success -> {
             val focusManager = LocalFocusManager.current
 
@@ -251,7 +255,5 @@ fun EditDefinitionScreenContent(
                 }
             }
         }
-
-        EditDefinitionViewModel.EditDefinitionState.Finish -> {}
     }
 }

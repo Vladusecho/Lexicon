@@ -1,6 +1,5 @@
 package com.vladusecho.lexicon.presentation.viewmodel
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -13,7 +12,9 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.take
@@ -51,13 +52,15 @@ class EditDefinitionViewModel @AssistedInject constructor(
         }
     }
 
+    private val _event = MutableSharedFlow<EditDefinitionEvent>()
+    val event = _event.asSharedFlow()
 
     fun processCommand(command: EditDefinitionCommand) {
         viewModelScope.launch {
             when (command) {
                 is EditDefinitionCommand.EditDefinition -> {
                     editDefinitionUseCase(command.definition)
-                    _state.value = EditDefinitionState.Finish
+                    _event.emit(EditDefinitionEvent.FinishEdit)
                 }
 
                 is EditDefinitionCommand.UpdateDescription -> {
@@ -75,8 +78,6 @@ class EditDefinitionViewModel @AssistedInject constructor(
         data object Success : EditDefinitionState
         data object Loading : EditDefinitionState
         data object Error : EditDefinitionState
-
-        data object Finish : EditDefinitionState
     }
 
     sealed interface EditDefinitionCommand {
@@ -91,6 +92,10 @@ class EditDefinitionViewModel @AssistedInject constructor(
         data class UpdateDescription(
             val description: String
         ) : EditDefinitionCommand
+    }
+
+    sealed interface EditDefinitionEvent {
+        data object FinishEdit : EditDefinitionEvent
     }
 
     @AssistedFactory

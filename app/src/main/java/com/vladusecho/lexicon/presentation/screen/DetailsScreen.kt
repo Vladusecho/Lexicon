@@ -17,6 +17,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,11 +46,22 @@ fun DetailsScreen(
     onBackClick: () -> Unit,
     onEditClick: (
         id: Int,
-    ) -> Unit
+    ) -> Unit,
+    onDeleteClick: () -> Unit
 ) {
 
     val state = viewModel.state.collectAsStateWithLifecycle()
     val currentState = state.value
+
+    LaunchedEffect(key1 = Unit) {
+        viewModel.event.collect { event ->
+            when (event) {
+                DetailsViewModel.DetailsEvent.DeleteDefinition -> {
+                    onDeleteClick()
+                }
+            }
+        }
+    }
 
     Column() {
         CenterAlignedTopAppBar(
@@ -75,6 +87,19 @@ fun DetailsScreen(
                 }
             },
             actions = {
+                IconButton(
+                    onClick = {
+                        viewModel.processCommand(
+                            DetailsViewModel.DetailsCommand.DeleteDefinition
+                        )
+                    }
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_trash),
+                        contentDescription = null,
+                        tint = Color.White
+                    )
+                }
                 IconButton(
                     onClick = {
                         onEditClick(id)

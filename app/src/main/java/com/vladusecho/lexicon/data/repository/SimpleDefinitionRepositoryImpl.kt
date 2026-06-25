@@ -14,13 +14,13 @@ class SimpleDefinitionRepositoryImpl @Inject constructor() : DefinitionRepositor
         listOf(
             Definition(
                 id = 1,
-                word = "Толерантность 1",
+                word = "Толерантность",
                 description = "характер, когда человек не обращает внимания на действия остальных людей"
             ),
             Definition(
                 id = 2,
-                word = "Толерантность 2",
-                description = "характер, когда человек не обращает внимания на действия остальных людей"
+                word = "Аффирмации",
+                description = "что то там крутое и мотивирующее"
             ),
         )
     )
@@ -48,6 +48,12 @@ class SimpleDefinitionRepositoryImpl @Inject constructor() : DefinitionRepositor
                 it
             }
         }
+        _definitions.value = updatedList
+    }
+
+    override suspend fun deleteDefinition(id: Int) {
+        val currentList = _definitions.value
+        val updatedList = currentList.filter { it.id != id }
         _definitions.value = updatedList
     }
 }

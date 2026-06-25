@@ -8,7 +8,9 @@ import androidx.lifecycle.viewModelScope
 import com.vladusecho.lexicon.domain.entity.Definition
 import com.vladusecho.lexicon.domain.usecase.CreateDefinitionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -28,12 +30,15 @@ class CreateDefinitionViewModel @Inject constructor(
     val description: String
         get() = _description
 
+    private val _event = MutableSharedFlow<CreateDefinitionEvent>()
+    val event = _event.asSharedFlow()
+
     fun processCommand(command: CreateDefinitionCommand) {
         viewModelScope.launch {
             when (command) {
                 is CreateDefinitionCommand.CreateDefinition -> {
                     createDefinitionUseCase(command.definition)
-                    _state.value = CreateDefinitionState.Finish
+                    _event.emit(CreateDefinitionEvent.FinishCreate)
                 }
 
                 is CreateDefinitionCommand.UpdateDescription -> {
@@ -49,8 +54,6 @@ class CreateDefinitionViewModel @Inject constructor(
 
     sealed interface CreateDefinitionState {
         object Success : CreateDefinitionState
-
-        object Finish : CreateDefinitionState
         object Loading : CreateDefinitionState
         object Error : CreateDefinitionState
     }
@@ -67,5 +70,9 @@ class CreateDefinitionViewModel @Inject constructor(
         data class UpdateDescription(
             val description: String
         ) : CreateDefinitionCommand
+    }
+
+    sealed interface CreateDefinitionEvent {
+        data object FinishCreate : CreateDefinitionEvent
     }
 }

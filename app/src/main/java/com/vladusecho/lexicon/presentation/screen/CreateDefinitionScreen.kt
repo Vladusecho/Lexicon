@@ -54,9 +54,13 @@ fun CreateDefinitionScreen(
     val state = viewModel.state.collectAsStateWithLifecycle()
     val currentState = state.value
 
-    LaunchedEffect(key1 = currentState) {
-        if (currentState is CreateDefinitionViewModel.CreateDefinitionState.Finish) {
-            onBackClick()
+    LaunchedEffect(key1 = Unit) {
+        viewModel.event.collect { event ->
+            when (event) {
+                CreateDefinitionViewModel.CreateDefinitionEvent.FinishCreate -> {
+                    onBackClick()
+                }
+            }
         }
     }
 
@@ -243,8 +247,6 @@ fun CreateDefinitionScreenContent(
         CreateDefinitionViewModel.CreateDefinitionState.Loading -> {
 
         }
-
-        CreateDefinitionViewModel.CreateDefinitionState.Finish -> {}
     }
 }
 

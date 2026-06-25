@@ -12,4 +12,6 @@ interface DefinitionRepository {
     suspend fun createDefinition(definition: Definition)
 
     suspend fun updateDefinition(definition: Definition)
+
+    suspend fun deleteDefinition(id: Int)
 }
