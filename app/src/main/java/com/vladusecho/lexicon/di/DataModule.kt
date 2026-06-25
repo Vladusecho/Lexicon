@@ -7,12 +7,14 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 interface DataModule {
 
     @Binds
+    @Singleton
     fun bindDefinitionRepository(
         definitionRepositoryImpl: SimpleDefinitionRepositoryImpl
     ): DefinitionRepository

@@ -11,17 +11,21 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.vladusecho.lexicon.R
 import com.vladusecho.lexicon.domain.entity.Definition
 import com.vladusecho.lexicon.presentation.element.ShortDefinition
 import com.vladusecho.lexicon.presentation.ui.theme.LexiconTheme
@@ -32,6 +36,7 @@ import com.vladusecho.lexicon.presentation.viewmodel.HomeViewModel
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
     onShortDefinitionClick: (Int) -> Unit,
+    onAddDefinitionClick: () -> Unit
 ) {
 
     val state = viewModel.state.collectAsStateWithLifecycle()
@@ -48,7 +53,18 @@ fun HomeScreen(
             },
             colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                 containerColor = Color(0xff0d1e25)
-            )
+            ),
+            actions = {
+                IconButton(
+                    onClick = onAddDefinitionClick
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_add),
+                        contentDescription = null,
+                        tint = Color.White
+                    )
+                }
+            }
         )
         HomeScreenContent(
             currentState = currentState,

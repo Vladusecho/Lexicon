@@ -19,4 +19,6 @@ sealed class NavScreen {
     @Serializable
 
     object Settings : NavScreen()
+    @Serializable
+    object CreateDefinition : NavScreen()
 }

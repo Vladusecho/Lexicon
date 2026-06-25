@@ -18,23 +18,10 @@ class HomeViewModel @Inject constructor(
     private val _state = MutableStateFlow<HomeState>(HomeState.Loading)
     val state = _state.asStateFlow()
 
-    fun processCommand(command: HomeCommand) {
-        when (command) {
-            is HomeCommand.OpenDefinition -> {
-
-            }
-        }
-    }
-
-
     init {
         viewModelScope.launch {
-            _state.value = HomeState.Loading
-            try {
-                val definitions = getDefinitionsUseCase()
-                _state.value = HomeState.Success(definitions)
-            } catch (e: Exception) {
-                _state.value = HomeState.Error
+            getDefinitionsUseCase().collect {
+                _state.value = HomeState.Success(it)
             }
         }
     }
@@ -45,7 +32,4 @@ class HomeViewModel @Inject constructor(
         object Error : HomeState
     }
 
-    sealed interface HomeCommand {
-        data class OpenDefinition(val id: Int) : HomeCommand
-    }
 }
