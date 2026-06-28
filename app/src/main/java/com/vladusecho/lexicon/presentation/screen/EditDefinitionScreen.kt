@@ -55,6 +55,9 @@ fun EditDefinitionScreen(
     val state = viewModel.state.collectAsStateWithLifecycle()
     val currentState = state.value
 
+    val isFavoriteState = viewModel.isFavorite.collectAsStateWithLifecycle()
+    val isFavorite = isFavoriteState.value
+
     LaunchedEffect(key1 = Unit) {
         viewModel.event.collect { event ->
             when (event) {
@@ -96,7 +99,8 @@ fun EditDefinitionScreen(
                                 definition = Definition(
                                     id = id,
                                     word = viewModel.word,
-                                    description = viewModel.description
+                                    description = viewModel.description,
+                                    isFavorite = isFavorite
                                 )
                             )
                         )

@@ -15,12 +15,14 @@ class SimpleDefinitionRepositoryImpl @Inject constructor() : DefinitionRepositor
             Definition(
                 id = 1,
                 word = "Толерантность",
-                description = "характер, когда человек не обращает внимания на действия остальных людей"
+                description = "характер, когда человек не обращает внимания на действия остальных людей",
+                isFavorite = false
             ),
             Definition(
                 id = 2,
                 word = "Аффирмации",
-                description = "что то там крутое и мотивирующее"
+                description = "что то там крутое и мотивирующее",
+                isFavorite = false
             ),
         )
     )
@@ -54,6 +56,26 @@ class SimpleDefinitionRepositoryImpl @Inject constructor() : DefinitionRepositor
     override suspend fun deleteDefinition(id: Int) {
         val currentList = _definitions.value
         val updatedList = currentList.filter { it.id != id }
+        _definitions.value = updatedList
+    }
+
+    override fun getFavorites(): Flow<List<Definition>> {
+        return _definitions.map { it.filter { definition -> definition.isFavorite } }
+    }
+
+    override fun checkIsFavorite(id: Int): Flow<Boolean> {
+        return _definitions.map { it.any { definition -> definition.id == id && definition.isFavorite } }
+    }
+
+    override suspend fun toggleFavorite(id: Int) {
+        val currentList = _definitions.value
+        val updatedList = currentList.map {
+            if (it.id == id) {
+                it.copy(isFavorite = !it.isFavorite)
+            } else {
+                it
+            }
+        }
         _definitions.value = updatedList
     }
 }

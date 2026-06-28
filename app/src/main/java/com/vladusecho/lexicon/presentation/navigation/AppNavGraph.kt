@@ -8,6 +8,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import androidx.navigation.toRoute
+import com.vladusecho.lexicon.presentation.navigation.navGraph.favouritesScreenGraph
+import com.vladusecho.lexicon.presentation.navigation.navGraph.homeScreenGraph
 import com.vladusecho.lexicon.presentation.screen.CreateDefinitionScreen
 import com.vladusecho.lexicon.presentation.screen.DetailsScreen
 import com.vladusecho.lexicon.presentation.screen.EditDefinitionScreen
@@ -30,54 +32,8 @@ fun AppNavGraph(
             fadeOut(animationSpec = tween(durationMillis = 0))
         }
     ) {
-        navigation<NavScreen.HomeGraph>(
-            startDestination = NavScreen.Home
-        ) {
-            composable<NavScreen.Home> {
-                HomeScreen(
-                    onShortDefinitionClick = {
-                        navState.navHostController.navigate(NavScreen.Details(it))
-                    },
-                    onAddDefinitionClick = {
-                        navState.navHostController.navigate(NavScreen.CreateDefinition)
-                    }
-                )
-            }
-            composable<NavScreen.Details> { backStackEntry ->
-                val args = backStackEntry.toRoute<NavScreen.Details>()
-                DetailsScreen(
-                    id = args.id,
-                    onBackClick = {
-                        navState.navHostController.navigateUp()
-                    },
-                    onEditClick = {
-                        navState.navHostController.navigate(NavScreen.EditDefinition(args.id))
-                    },
-                    onDeleteClick = {
-                        navState.navHostController.navigateUp()
-                    }
-                )
-            }
-            composable<NavScreen.CreateDefinition> {
-                CreateDefinitionScreen(
-                    onBackClick = {
-                        navState.navHostController.navigateUp()
-                    }
-                )
-            }
-            composable<NavScreen.EditDefinition> { backStackEntry ->
-                val args = backStackEntry.toRoute<NavScreen.EditDefinition>()
-                EditDefinitionScreen(
-                    id = args.id,
-                    onBackClick = {
-                        navState.navHostController.navigateUp()
-                    }
-                )
-            }
-        }
-        composable<NavScreen.Favorites> {
-            FavouriteScreen()
-        }
+        homeScreenGraph(navState)
+        favouritesScreenGraph(navState)
         composable<NavScreen.Settings> {
             SettingsScreen()
         }

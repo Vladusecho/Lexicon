@@ -42,11 +42,15 @@ fun HomeScreen(
     val state = viewModel.state.collectAsStateWithLifecycle()
     val currentState = state.value
 
+    val definitionsCount = viewModel.definitionsCount.collectAsStateWithLifecycle()
+    val definitionsCountValue = definitionsCount.value
+
+
     Column() {
         CenterAlignedTopAppBar(
             title = {
                 Text(
-                    text = "Главная",
+                    text = "Главная ($definitionsCountValue)",
                     color = Color.White,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -133,12 +137,20 @@ fun HomeScreenSuccessPreview() {
                         Definition(
                             id = 1,
                             word = "Толерантность",
-                            description = "характер, когда человек не обращает внимания на действия остальных людей"
+                            description = "характер, когда человек не обращает внимания на действия остальных людей",
+                            isFavorite = false
                         ),
                         Definition(
                             id = 2,
                             word = "Толерантность",
-                            description = "характер, когда человек не обращает внимания на действия остальных людей"
+                            description = "характер, когда человек не обращает внимания на действия остальных людей",
+                            isFavorite = false
+                        ),
+                        Definition(
+                            id = 3,
+                            word = "Толерантность",
+                            description = "характер, когда человек не обращает внимания на действия остальных людей",
+                            isFavorite = false
                         ),
                     )
                 ),

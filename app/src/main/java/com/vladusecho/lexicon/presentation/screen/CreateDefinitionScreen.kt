@@ -86,7 +86,8 @@ fun CreateDefinitionScreen(
                                 definition = Definition(
                                     id = Random.nextInt(),
                                     word = viewModel.word,
-                                    description = viewModel.description
+                                    description = viewModel.description,
+                                    isFavorite = false
                                 )
                             )
                         )
