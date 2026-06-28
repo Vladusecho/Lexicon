@@ -276,7 +276,8 @@ fun DetailsScreenSuccessPreview() {
                     Definition(
                         id = 1,
                         word = "Толерантность",
-                        description = "характер, когда человек не обращает внимания на действия остальных людей"
+                        description = "характер, когда человек не обращает внимания на действия остальных людей",
+                        isFavorite = false
                     )
                 )
             )

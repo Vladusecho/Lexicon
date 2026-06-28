@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vladusecho.lexicon.domain.entity.Definition
+import com.vladusecho.lexicon.domain.usecase.CheckIsFavouriteUseCase
 import com.vladusecho.lexicon.domain.usecase.EditDefinitionUseCase
 import com.vladusecho.lexicon.domain.usecase.GetDefinitionByIdUseCase
 import dagger.assisted.Assisted
@@ -14,9 +15,11 @@ import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 
@@ -26,6 +29,7 @@ import kotlinx.coroutines.launch
 class EditDefinitionViewModel @AssistedInject constructor(
     private val getDefinitionByIdUseCase: GetDefinitionByIdUseCase,
     private val editDefinitionUseCase: EditDefinitionUseCase,
+    private val checkIsFavouriteUseCase: CheckIsFavouriteUseCase,
     @Assisted("id") private val id: Int
 ) : ViewModel() {
 
@@ -38,6 +42,13 @@ class EditDefinitionViewModel @AssistedInject constructor(
     private var _description by mutableStateOf("")
     val description: String
         get() = _description
+
+    val isFavorite = checkIsFavouriteUseCase(id)
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = false
+        )
 
     init {
         viewModelScope.launch {

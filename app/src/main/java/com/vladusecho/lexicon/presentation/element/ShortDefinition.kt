@@ -69,7 +69,8 @@ fun ShortDefinitionPreview() {
                 definition = Definition(
                     id = 0,
                     word = "Толерантность",
-                    description = "характер, когда человек не обращает внимания на действия остальных людей"
+                    description = "характер, когда человек не обращает внимания на действия остальных людей",
+                    isFavorite = false
                 ),
                 modifier = Modifier.padding(16.dp),
                 onClick = {}

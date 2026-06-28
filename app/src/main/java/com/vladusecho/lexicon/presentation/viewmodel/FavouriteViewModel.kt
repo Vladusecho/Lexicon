@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vladusecho.lexicon.domain.entity.Definition
 import com.vladusecho.lexicon.domain.usecase.GetDefinitionsUseCase
+import com.vladusecho.lexicon.domain.usecase.GetFavouritesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -12,7 +13,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class FavouriteViewModel @Inject constructor(
-    private val getFavoritesUseCase: GetDefinitionsUseCase
+    private val getFavoritesUseCase: GetFavouritesUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<FavouriteState>(FavouriteState.Loading)

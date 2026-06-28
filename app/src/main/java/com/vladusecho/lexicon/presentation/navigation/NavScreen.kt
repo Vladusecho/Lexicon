@@ -25,4 +25,6 @@ sealed class NavScreen {
     data class  EditDefinition(
         val id: Int
     ) : NavScreen()
+    @Serializable
+    object FavouritesGraph
 }
