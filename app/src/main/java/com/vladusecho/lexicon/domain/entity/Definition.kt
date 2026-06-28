@@ -4,4 +4,5 @@ data class Definition(
     val id: Int,
     val word: String,
     val description: String,
+    val isFavorite: Boolean = false
 )

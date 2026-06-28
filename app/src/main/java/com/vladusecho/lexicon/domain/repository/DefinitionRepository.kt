@@ -14,4 +14,6 @@ interface DefinitionRepository {
     suspend fun updateDefinition(definition: Definition)
 
     suspend fun deleteDefinition(id: Int)
+
+    fun getFavorites(): Flow<List<Definition>>
 }

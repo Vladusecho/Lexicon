@@ -56,4 +56,8 @@ class SimpleDefinitionRepositoryImpl @Inject constructor() : DefinitionRepositor
         val updatedList = currentList.filter { it.id != id }
         _definitions.value = updatedList
     }
+
+    override fun getFavorites(): Flow<List<Definition>> {
+        return _definitions.map { it.filter { definition -> definition.isFavorite } }
+    }
 }
