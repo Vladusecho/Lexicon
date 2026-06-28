@@ -16,7 +16,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val getDefinitionsUseCase: GetDefinitionsUseCase
+    getDefinitionsUseCase: GetDefinitionsUseCase
 ) : ViewModel() {
 
     val state = getDefinitionsUseCase()
@@ -26,6 +26,19 @@ class HomeViewModel @Inject constructor(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = HomeState.Loading
+        )
+
+    val definitionsCount = state
+        .map {
+            when (it) {
+                is HomeState.Success -> it.definitions.size
+                else -> 0
+            }
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = 0
         )
 
     sealed interface HomeState {

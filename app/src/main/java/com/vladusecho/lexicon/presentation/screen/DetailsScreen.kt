@@ -117,6 +117,7 @@ fun DetailsScreen(
                     onDismissRequest = { displayActions = false },
                     border = BorderStroke(width = 1.dp, color = Color.White),
                     shape = RoundedCornerShape(8.dp),
+                    containerColor = Color(0xff0d1e25),
                     content = {
                         DropdownMenuItem(
                             onClick = {

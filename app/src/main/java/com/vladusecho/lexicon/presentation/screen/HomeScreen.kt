@@ -42,11 +42,15 @@ fun HomeScreen(
     val state = viewModel.state.collectAsStateWithLifecycle()
     val currentState = state.value
 
+    val definitionsCount = viewModel.definitionsCount.collectAsStateWithLifecycle()
+    val definitionsCountValue = definitionsCount.value
+
+
     Column() {
         CenterAlignedTopAppBar(
             title = {
                 Text(
-                    text = "Главная",
+                    text = "Главная ($definitionsCountValue)",
                     color = Color.White,
                     fontWeight = FontWeight.SemiBold
                 )
