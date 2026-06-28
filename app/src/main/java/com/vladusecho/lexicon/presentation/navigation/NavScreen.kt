@@ -21,4 +21,8 @@ sealed class NavScreen {
     object Settings : NavScreen()
     @Serializable
     object CreateDefinition : NavScreen()
+    @Serializable
+    data class  EditDefinition(
+        val id: Int
+    ) : NavScreen()
 }

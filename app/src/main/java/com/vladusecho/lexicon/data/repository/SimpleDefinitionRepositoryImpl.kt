@@ -14,20 +14,19 @@ class SimpleDefinitionRepositoryImpl @Inject constructor() : DefinitionRepositor
         listOf(
             Definition(
                 id = 1,
-                word = "Толерантность 1",
+                word = "Толерантность",
                 description = "характер, когда человек не обращает внимания на действия остальных людей"
             ),
             Definition(
                 id = 2,
-                word = "Толерантность 2",
-                description = "характер, когда человек не обращает внимания на действия остальных людей"
+                word = "Аффирмации",
+                description = "что то там крутое и мотивирующее"
             ),
         )
     )
 
-    override suspend fun getDefinition(id: Int): Definition {
-        delay(1000)
-        return _definitions.value.first { it.id == id }
+    override fun getDefinition(id: Int): Flow<Definition> {
+        return _definitions.map { it.first { definition -> definition.id == id } }
     }
 
     override fun getDefinitions(): Flow<List<Definition>> {
@@ -37,6 +36,24 @@ class SimpleDefinitionRepositoryImpl @Inject constructor() : DefinitionRepositor
     override suspend fun createDefinition(definition: Definition) {
         val currentList = _definitions.value
         val updatedList = currentList + definition
+        _definitions.value = updatedList
+    }
+
+    override suspend fun updateDefinition(definition: Definition) {
+        val currentList = _definitions.value
+        val updatedList = currentList.map {
+            if (it.id == definition.id) {
+                definition
+            } else {
+                it
+            }
+        }
+        _definitions.value = updatedList
+    }
+
+    override suspend fun deleteDefinition(id: Int) {
+        val currentList = _definitions.value
+        val updatedList = currentList.filter { it.id != id }
         _definitions.value = updatedList
     }
 }

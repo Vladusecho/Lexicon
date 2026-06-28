@@ -9,9 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -20,6 +17,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,11 +43,25 @@ fun DetailsScreen(
             factory.create(id)
         }
     ),
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onEditClick: (
+        id: Int,
+    ) -> Unit,
+    onDeleteClick: () -> Unit
 ) {
 
     val state = viewModel.state.collectAsStateWithLifecycle()
     val currentState = state.value
+
+    LaunchedEffect(key1 = Unit) {
+        viewModel.event.collect { event ->
+            when (event) {
+                DetailsViewModel.DetailsEvent.DeleteDefinition -> {
+                    onDeleteClick()
+                }
+            }
+        }
+    }
 
     Column() {
         CenterAlignedTopAppBar(
@@ -73,6 +85,32 @@ fun DetailsScreen(
                         tint = Color.White
                     )
                 }
+            },
+            actions = {
+                IconButton(
+                    onClick = {
+                        viewModel.processCommand(
+                            DetailsViewModel.DetailsCommand.DeleteDefinition
+                        )
+                    }
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_trash),
+                        contentDescription = null,
+                        tint = Color.White
+                    )
+                }
+                IconButton(
+                    onClick = {
+                        onEditClick(id)
+                    }
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_edit),
+                        contentDescription = null,
+                        tint = Color.White
+                    )
+                }
             }
         )
         DetailsScreenContent(
@@ -91,6 +129,7 @@ fun DetailsScreenContent(
         DetailsViewModel.DetailsState.Error -> {
 
         }
+
         DetailsViewModel.DetailsState.Loading -> {
             Box(
                 modifier = modifier
@@ -102,6 +141,7 @@ fun DetailsScreenContent(
                 )
             }
         }
+
         is DetailsViewModel.DetailsState.Success -> {
             Column(
                 modifier = modifier

@@ -10,6 +10,7 @@ import androidx.navigation.navigation
 import androidx.navigation.toRoute
 import com.vladusecho.lexicon.presentation.screen.CreateDefinitionScreen
 import com.vladusecho.lexicon.presentation.screen.DetailsScreen
+import com.vladusecho.lexicon.presentation.screen.EditDefinitionScreen
 import com.vladusecho.lexicon.presentation.screen.FavouriteScreen
 import com.vladusecho.lexicon.presentation.screen.HomeScreen
 import com.vladusecho.lexicon.presentation.screen.SettingsScreen
@@ -48,11 +49,26 @@ fun AppNavGraph(
                     id = args.id,
                     onBackClick = {
                         navState.navHostController.navigateUp()
+                    },
+                    onEditClick = {
+                        navState.navHostController.navigate(NavScreen.EditDefinition(args.id))
+                    },
+                    onDeleteClick = {
+                        navState.navHostController.navigateUp()
                     }
                 )
             }
             composable<NavScreen.CreateDefinition> {
                 CreateDefinitionScreen(
+                    onBackClick = {
+                        navState.navHostController.navigateUp()
+                    }
+                )
+            }
+            composable<NavScreen.EditDefinition> { backStackEntry ->
+                val args = backStackEntry.toRoute<NavScreen.EditDefinition>()
+                EditDefinitionScreen(
+                    id = args.id,
                     onBackClick = {
                         navState.navHostController.navigateUp()
                     }

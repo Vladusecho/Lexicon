@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -21,8 +22,6 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,21 +32,23 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vladusecho.lexicon.R
 import com.vladusecho.lexicon.domain.entity.Definition
-import com.vladusecho.lexicon.presentation.ui.theme.LexiconTheme
-import com.vladusecho.lexicon.presentation.viewmodel.CreateDefinitionViewModel
-import kotlin.random.Random
+import com.vladusecho.lexicon.presentation.viewmodel.EditDefinitionViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateDefinitionScreen(
-    viewModel: CreateDefinitionViewModel = hiltViewModel(),
+fun EditDefinitionScreen(
+    id: Int,
+    viewModel: EditDefinitionViewModel = hiltViewModel(
+        creationCallback = { factory: EditDefinitionViewModel.Factory ->
+            factory.create(id)
+        }
+    ),
     onBackClick: () -> Unit,
 ) {
 
@@ -57,20 +58,18 @@ fun CreateDefinitionScreen(
     LaunchedEffect(key1 = Unit) {
         viewModel.event.collect { event ->
             when (event) {
-                CreateDefinitionViewModel.CreateDefinitionEvent.FinishCreate -> {
+                EditDefinitionViewModel.EditDefinitionEvent.FinishEdit -> {
                     onBackClick()
                 }
             }
         }
     }
 
-    Column(
-
-    ) {
+    Column() {
         CenterAlignedTopAppBar(
             title = {
                 Text(
-                    text = "Добавление",
+                    text = "Редактирование",
                     color = Color.White,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -78,13 +77,24 @@ fun CreateDefinitionScreen(
             colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                 containerColor = Color(0xff0d1e25)
             ),
+            navigationIcon = {
+                IconButton(
+                    onClick = onBackClick
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_back),
+                        contentDescription = null,
+                        tint = Color.White
+                    )
+                }
+            },
             actions = {
                 IconButton(
                     onClick = {
                         viewModel.processCommand(
-                            CreateDefinitionViewModel.CreateDefinitionCommand.CreateDefinition(
+                            EditDefinitionViewModel.EditDefinitionCommand.EditDefinition(
                                 definition = Definition(
-                                    id = Random.nextInt(),
+                                    id = id,
                                     word = viewModel.word,
                                     description = viewModel.description
                                 )
@@ -98,32 +108,21 @@ fun CreateDefinitionScreen(
                         tint = Color.White
                     )
                 }
-            },
-            navigationIcon = {
-                IconButton(
-                    onClick = onBackClick
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_back),
-                        contentDescription = null,
-                        tint = Color.White
-                    )
-                }
             }
         )
-        CreateDefinitionScreenContent(
+        EditDefinitionScreenContent(
             modifier = Modifier.padding(top = 32.dp),
             currentState = currentState,
             word = viewModel.word,
             description = viewModel.description,
             onWordChange = {
                 viewModel.processCommand(
-                    CreateDefinitionViewModel.CreateDefinitionCommand.UpdateWord(it)
+                    EditDefinitionViewModel.EditDefinitionCommand.UpdateWord(it)
                 )
             },
             onDescriptionChange = {
                 viewModel.processCommand(
-                    CreateDefinitionViewModel.CreateDefinitionCommand.UpdateDescription(it)
+                    EditDefinitionViewModel.EditDefinitionCommand.UpdateDescription(it)
                 )
             }
         )
@@ -131,20 +130,33 @@ fun CreateDefinitionScreen(
 }
 
 @Composable
-fun CreateDefinitionScreenContent(
+fun EditDefinitionScreenContent(
     modifier: Modifier = Modifier,
+    currentState: EditDefinitionViewModel.EditDefinitionState,
     word: String,
     description: String,
     onWordChange: (String) -> Unit,
     onDescriptionChange: (String) -> Unit,
-    currentState: CreateDefinitionViewModel.CreateDefinitionState
 ) {
+
     when (currentState) {
-        CreateDefinitionViewModel.CreateDefinitionState.Error -> {
+        EditDefinitionViewModel.EditDefinitionState.Error -> {
 
         }
 
-        CreateDefinitionViewModel.CreateDefinitionState.Success -> {
+        EditDefinitionViewModel.EditDefinitionState.Loading -> {
+            Box(
+                modifier = modifier
+                    .fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(
+                    color = Color(0xff0d1e25)
+                )
+            }
+        }
+
+        is EditDefinitionViewModel.EditDefinitionState.Success -> {
             val focusManager = LocalFocusManager.current
 
             Column(
@@ -243,25 +255,5 @@ fun CreateDefinitionScreenContent(
                 }
             }
         }
-
-        CreateDefinitionViewModel.CreateDefinitionState.Loading -> {
-
-        }
-    }
-}
-
-@Composable
-@Preview(
-    showBackground = true
-)
-fun CreateDefinitionScreenSuccessPreview() {
-    LexiconTheme() {
-        CreateDefinitionScreenContent(
-            currentState = CreateDefinitionViewModel.CreateDefinitionState.Success,
-            word = "Толерантность",
-            description = "характер, когда человек не обращает внимания на действия остальных людей",
-            onWordChange = {},
-            onDescriptionChange = {}
-        )
     }
 }

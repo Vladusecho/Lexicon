@@ -5,10 +5,13 @@ import kotlinx.coroutines.flow.Flow
 
 interface DefinitionRepository {
 
-    suspend fun getDefinition(id: Int): Definition
+    fun getDefinition(id: Int): Flow<Definition>
 
     fun getDefinitions(): Flow<List<Definition>>
 
     suspend fun createDefinition(definition: Definition)
 
+    suspend fun updateDefinition(definition: Definition)
+
+    suspend fun deleteDefinition(id: Int)
 }

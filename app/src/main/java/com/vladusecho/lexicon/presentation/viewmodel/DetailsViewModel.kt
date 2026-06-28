@@ -1,38 +1,53 @@
 package com.vladusecho.lexicon.presentation.viewmodel
 
-import android.view.View
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vladusecho.lexicon.domain.entity.Definition
+import com.vladusecho.lexicon.domain.usecase.DeleteDefinitionUseCase
 import com.vladusecho.lexicon.domain.usecase.GetDefinitionByIdUseCase
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @HiltViewModel(
     assistedFactory = DetailsViewModel.Factory::class
 )
 class DetailsViewModel @AssistedInject constructor(
     private val getDefinitionByIdUseCase: GetDefinitionByIdUseCase,
+    private val deleteDefinitionUseCase: DeleteDefinitionUseCase,
     @Assisted("id") private val id: Int
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow<DetailsState>(DetailsState.Loading)
-    val state = _state.asStateFlow()
+    val state: StateFlow<DetailsState> = getDefinitionByIdUseCase(id)
+        .map { definition ->
+            DetailsState.Success(definition) as DetailsState
+        }
+        .catch { emit(DetailsState.Error) }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = DetailsState.Loading
+        )
 
-    init {
+    private val _event = MutableSharedFlow<DetailsEvent>()
+    val event = _event.asSharedFlow()
+
+    fun processCommand(command: DetailsCommand) {
         viewModelScope.launch {
-            _state.value = DetailsState.Loading
-            try {
-                val definition = getDefinitionByIdUseCase(id)
-                _state.value = DetailsState.Success(definition)
-            } catch (e: Exception) {
-                _state.value = DetailsState.Error
+            when (command) {
+                is DetailsCommand.DeleteDefinition -> {
+                    deleteDefinitionUseCase(id)
+                    _event.emit(DetailsEvent.DeleteDefinition)
+                }
             }
         }
     }
@@ -43,10 +58,18 @@ class DetailsViewModel @AssistedInject constructor(
         object Error : DetailsState
     }
 
+    sealed interface DetailsCommand {
+        data object DeleteDefinition : DetailsCommand
+    }
+
+    sealed interface DetailsEvent {
+        data object DeleteDefinition : DetailsEvent
+    }
+
     @AssistedFactory
     interface Factory {
         fun create(
             @Assisted("id") id: Int
-        ) : DetailsViewModel
+        ): DetailsViewModel
     }
 }
