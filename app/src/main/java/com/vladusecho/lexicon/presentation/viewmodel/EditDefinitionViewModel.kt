@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
@@ -32,9 +33,6 @@ class EditDefinitionViewModel @AssistedInject constructor(
     private val checkIsFavouriteUseCase: CheckIsFavouriteUseCase,
     @Assisted("id") private val id: Int
 ) : ViewModel() {
-
-    private val _state = MutableStateFlow<EditDefinitionState>(EditDefinitionState.Loading)
-    val state = _state.asStateFlow()
 
     private var _word by mutableStateOf("")
     val word: String
@@ -50,18 +48,19 @@ class EditDefinitionViewModel @AssistedInject constructor(
             initialValue = false
         )
 
-    init {
-        viewModelScope.launch {
-            getDefinitionByIdUseCase(id)
-                .take(1)
-                .catch { _state.value = EditDefinitionState.Error }
-                .collect { definition ->
-                    _word = definition.word
-                    _description = definition.description
-                    _state.value = EditDefinitionState.Success
-                }
+    val state = getDefinitionByIdUseCase(id)
+        .take(1)
+        .map { definition ->
+            _word = definition.word
+            _description = definition.description
+            EditDefinitionState.Success as EditDefinitionState
         }
-    }
+        .catch { emit(EditDefinitionState.Error) }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = EditDefinitionState.Loading
+        )
 
     private val _event = MutableSharedFlow<EditDefinitionEvent>()
     val event = _event.asSharedFlow()
