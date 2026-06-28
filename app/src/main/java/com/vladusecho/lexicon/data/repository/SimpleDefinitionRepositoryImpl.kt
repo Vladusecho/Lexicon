@@ -60,4 +60,20 @@ class SimpleDefinitionRepositoryImpl @Inject constructor() : DefinitionRepositor
     override fun getFavorites(): Flow<List<Definition>> {
         return _definitions.map { it.filter { definition -> definition.isFavorite } }
     }
+
+    override fun checkIsFavorite(id: Int): Flow<Boolean> {
+        return _definitions.map { it.any { definition -> definition.id == id && definition.isFavorite } }
+    }
+
+    override suspend fun toggleFavorite(id: Int) {
+        val currentList = _definitions.value
+        val updatedList = currentList.map {
+            if (it.id == id) {
+                it.copy(isFavorite = !it.isFavorite)
+            } else {
+                it
+            }
+        }
+        _definitions.value = updatedList
+    }
 }

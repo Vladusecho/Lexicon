@@ -1,5 +1,6 @@
 package com.vladusecho.lexicon.presentation.screen
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,13 +12,21 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MenuItemColors
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,6 +61,11 @@ fun DetailsScreen(
 
     val state = viewModel.state.collectAsStateWithLifecycle()
     val currentState = state.value
+
+    val isFavoriteState = viewModel.isFavorite.collectAsStateWithLifecycle()
+    val isFavorite = isFavoriteState.value
+
+    var displayActions by remember { mutableStateOf(false) }
 
     LaunchedEffect(key1 = Unit) {
         viewModel.event.collect { event ->
@@ -89,33 +103,96 @@ fun DetailsScreen(
             actions = {
                 IconButton(
                     onClick = {
-                        viewModel.processCommand(
-                            DetailsViewModel.DetailsCommand.DeleteDefinition
+                        displayActions = !displayActions
+                    }
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_more),
+                        contentDescription = null,
+                        tint = Color.White
+                    )
+                }
+                DropdownMenu(
+                    expanded = displayActions,
+                    onDismissRequest = { displayActions = false },
+                    border = BorderStroke(width = 1.dp, color = Color.White),
+                    shape = RoundedCornerShape(8.dp),
+                    content = {
+                        DropdownMenuItem(
+                            onClick = {
+                                onEditClick(id)
+                            },
+                            text = {
+                                Text(
+                                    text = "Редактировать",
+                                    color = Color.White
+                                )
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_edit),
+                                    contentDescription = null,
+                                    tint = Color.White
+                                )
+
+                            }
+                        )
+                        DropdownMenuItem(
+                            onClick = {
+                                viewModel.processCommand(
+                                    DetailsViewModel.DetailsCommand.ToggleFavourite(id)
+                                )
+                            },
+                            text = {
+                                Text(
+                                    text = if (isFavorite) {
+                                        "Из избранного"
+                                    } else {
+                                        "В избранное"
+                                    },
+                                    color = Color.White
+                                )
+                            },
+                            leadingIcon = {
+                                val icon = if (!isFavorite) {
+                                    R.drawable.ic_favorite
+                                } else {
+                                    R.drawable.ic_not_favourite
+                                }
+                                Icon(
+                                    painter = painterResource(icon),
+                                    contentDescription = null,
+                                    tint = Color.White
+                                )
+                            }
+                        )
+                        DropdownMenuItem(
+                            onClick = {
+                                viewModel.processCommand(
+                                    DetailsViewModel.DetailsCommand.DeleteDefinition
+                                )
+                            },
+                            text = {
+                                Text(
+                                    text = "Удалить",
+                                    color = Color.White
+                                )
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_trash),
+                                    contentDescription = null,
+                                    tint = Color.White
+                                )
+                            }
                         )
                     }
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_trash),
-                        contentDescription = null,
-                        tint = Color.White
-                    )
-                }
-                IconButton(
-                    onClick = {
-                        onEditClick(id)
-                    }
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_edit),
-                        contentDescription = null,
-                        tint = Color.White
-                    )
-                }
+                )
             }
         )
         DetailsScreenContent(
             modifier = Modifier.padding(top = 32.dp),
-            currentState = currentState
+            currentState = currentState,
         )
     }
 }
