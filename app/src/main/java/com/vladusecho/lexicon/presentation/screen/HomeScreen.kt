@@ -104,51 +104,62 @@ fun HomeScreenContent(
         }
 
         is HomeViewModel.HomeState.Success -> {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 8.dp),
-                contentPadding = PaddingValues(vertical = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
+            DefinitionsListWithAlphabetTitle(
+                definitionsList = currentState.definitions,
+                onShortDefinitionClick = onShortDefinitionClick
+            )
+        }
+    }
+}
 
-                var previousLetter = ' '
+@Composable
+fun DefinitionsListWithAlphabetTitle(
+    definitionsList: List<Definition>,
+    onShortDefinitionClick: (Int) -> Unit
+) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 8.dp),
+        contentPadding = PaddingValues(vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
 
-                items(
-                    items = currentState.definitions,
-                    key = { it.id }
-                ) {
+        var previousLetter = ' '
 
-                    val currentLetter = it.word[0].lowercase().toCharArray()[0]
+        items(
+            items = definitionsList,
+            key = { it.id }
+        ) {
 
-                    val letterBarText = if (currentLetter == previousLetter) {
-                        false.also {
-                            previousLetter = ' '
-                        }
-                    } else {
-                        true
-                    }
+            val currentLetter = it.word[0].lowercase().toCharArray()[0]
 
-                    Column(
-
-                    ) {
-                        if (letterBarText) {
-                            Text(
-                                modifier = Modifier.fillMaxWidth(),
-                                color = Color.Blue,
-                                fontWeight = FontWeight.SemiBold,
-                                text = "---" + currentLetter.toString().uppercase() + "---",
-                                textAlign = TextAlign.Center
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                        }
-                        ShortDefinition(
-                            definition = it,
-                            onClick = onShortDefinitionClick
-                        )
-                        previousLetter = currentLetter
-                    }
+            val letterBarText = if (currentLetter == previousLetter) {
+                false.also {
+                    previousLetter = ' '
                 }
+            } else {
+                true
+            }
+
+            Column(
+
+            ) {
+                if (letterBarText) {
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = Color.Blue,
+                        fontWeight = FontWeight.SemiBold,
+                        text = "---" + currentLetter.toString().uppercase() + "---",
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+                ShortDefinition(
+                    definition = it,
+                    onClick = onShortDefinitionClick
+                )
+                previousLetter = currentLetter
             }
         }
     }

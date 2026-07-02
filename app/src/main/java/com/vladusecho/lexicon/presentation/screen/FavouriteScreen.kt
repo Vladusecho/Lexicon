@@ -80,23 +80,10 @@ fun FavouriteScreenContent(
             }
         }
         is FavouriteViewModel.FavouriteState.Success -> {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 8.dp),
-                contentPadding = PaddingValues(vertical = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(
-                    items = currentState.favourites,
-                    key = { it.id }
-                ) {
-                    ShortDefinition(
-                        definition = it,
-                        onClick = onShortDefinitionClick
-                    )
-                }
-            }
+            DefinitionsListWithAlphabetTitle(
+                definitionsList = currentState.favourites,
+                onShortDefinitionClick = onShortDefinitionClick
+            )
         }
     }
 }

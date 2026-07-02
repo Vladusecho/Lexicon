@@ -42,6 +42,7 @@ android {
 
 dependencies {
     implementation(libs.hilt.android)
+    testImplementation(libs.junit.jupiter)
     ksp(libs.hilt.android.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.compose.navigation)
