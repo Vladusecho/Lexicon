@@ -1,4 +1,4 @@
-package com.vladusecho.lexicon.domain.usecase
+package com.vladusecho.lexicon.domain.usecase.definition
 
 import com.vladusecho.lexicon.domain.entity.Definition
 import com.vladusecho.lexicon.domain.repository.DefinitionRepository
