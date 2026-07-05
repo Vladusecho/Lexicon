@@ -19,13 +19,23 @@ class SettingsViewModel @Inject constructor(
     private val toggleDarkModeUseCase: ToggleDarkModeUseCase
 ) : ViewModel() {
 
-    val state = getSettingsUseCase()
+    val settings = getSettingsUseCase()
+
+    val state = settings
         .map { SettingsState.Success(it) as SettingsState }
         .catch { emit(SettingsState.Error) }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = SettingsState.Loading
+        )
+
+    val isDarkMode = settings
+        .map { it.isDarkMode }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = false
         )
 
     fun processCommand(command: SettingsCommand) {
