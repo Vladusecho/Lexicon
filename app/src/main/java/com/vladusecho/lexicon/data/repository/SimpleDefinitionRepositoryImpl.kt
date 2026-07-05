@@ -32,7 +32,7 @@ class SimpleDefinitionRepositoryImpl @Inject constructor() : DefinitionRepositor
     }
 
     override fun getDefinitions(): Flow<List<Definition>> {
-        return _definitions.map { it.sortedBy { definition -> definition.word } }
+        return _definitions.map { it.sortedBy { definition -> definition.word.lowercase() } }
     }
 
     override suspend fun createDefinition(definition: Definition) {
@@ -60,7 +60,7 @@ class SimpleDefinitionRepositoryImpl @Inject constructor() : DefinitionRepositor
     }
 
     override fun getFavorites(): Flow<List<Definition>> {
-        return _definitions.map { it.filter { definition -> definition.isFavorite } }
+        return _definitions.map { it.filter { definition -> definition.isFavorite }.sortedBy { definition -> definition.word.lowercase() } }
     }
 
     override fun checkIsFavorite(id: Int): Flow<Boolean> {

@@ -81,11 +81,16 @@ fun CreateDefinitionScreen(
             actions = {
                 IconButton(
                     onClick = {
+
+                        val formattedWord = viewModel.word.trim().replaceFirstChar {
+                            if (it.isLowerCase()) it.titlecase() else it.toString()
+                        }
+
                         viewModel.processCommand(
                             CreateDefinitionViewModel.CreateDefinitionCommand.CreateDefinition(
                                 definition = Definition(
                                     id = Random.nextInt(),
-                                    word = viewModel.word,
+                                    word = formattedWord,
                                     description = viewModel.description,
                                     isFavorite = false
                                 )

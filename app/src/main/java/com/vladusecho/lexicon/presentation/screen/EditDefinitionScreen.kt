@@ -94,11 +94,16 @@ fun EditDefinitionScreen(
             actions = {
                 IconButton(
                     onClick = {
+
+                        val formattedWord = viewModel.word.trim().replaceFirstChar {
+                            if (it.isLowerCase()) it.titlecase() else it.toString()
+                        }
+
                         viewModel.processCommand(
                             EditDefinitionViewModel.EditDefinitionCommand.EditDefinition(
                                 definition = Definition(
                                     id = id,
-                                    word = viewModel.word,
+                                    word = formattedWord,
                                     description = viewModel.description,
                                     isFavorite = isFavorite
                                 )
