@@ -1,6 +1,7 @@
 package com.vladusecho.lexicon.data.repository
 
 import com.vladusecho.lexicon.domain.entity.Definition
+import com.vladusecho.lexicon.domain.entity.Settings
 import com.vladusecho.lexicon.domain.repository.DefinitionRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -26,6 +27,13 @@ class SimpleDefinitionRepositoryImpl @Inject constructor() : DefinitionRepositor
             ),
         )
     )
+
+    private val _settings = MutableStateFlow(
+        Settings(
+            isDarkMode = false
+        )
+    )
+
 
     override fun getDefinition(id: Int): Flow<Definition> {
         return _definitions.map { it.first { definition -> definition.id == id } }
@@ -77,5 +85,15 @@ class SimpleDefinitionRepositoryImpl @Inject constructor() : DefinitionRepositor
             }
         }
         _definitions.value = updatedList
+    }
+
+    override fun getSettings(): Flow<Settings> {
+        return _settings
+    }
+
+    override suspend fun toggleDarkMode(isDarkMode: Boolean) {
+        val currentSettings = _settings.value
+        val updatedSettings = currentSettings.copy(isDarkMode = isDarkMode)
+        _settings.value = updatedSettings
     }
 }

@@ -3,7 +3,7 @@ package com.vladusecho.lexicon.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vladusecho.lexicon.domain.entity.Definition
-import com.vladusecho.lexicon.domain.usecase.GetFavouritesUseCase
+import com.vladusecho.lexicon.domain.usecase.definition.GetFavouritesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.catch

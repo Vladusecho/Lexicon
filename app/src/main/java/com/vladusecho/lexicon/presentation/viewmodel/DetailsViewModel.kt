@@ -3,10 +3,10 @@ package com.vladusecho.lexicon.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vladusecho.lexicon.domain.entity.Definition
-import com.vladusecho.lexicon.domain.usecase.CheckIsFavouriteUseCase
-import com.vladusecho.lexicon.domain.usecase.DeleteDefinitionUseCase
-import com.vladusecho.lexicon.domain.usecase.GetDefinitionByIdUseCase
-import com.vladusecho.lexicon.domain.usecase.ToggleFavouriteUseCase
+import com.vladusecho.lexicon.domain.usecase.definition.CheckIsFavouriteUseCase
+import com.vladusecho.lexicon.domain.usecase.definition.DeleteDefinitionUseCase
+import com.vladusecho.lexicon.domain.usecase.definition.GetDefinitionByIdUseCase
+import com.vladusecho.lexicon.domain.usecase.definition.ToggleFavouriteUseCase
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
