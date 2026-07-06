@@ -1,5 +1,6 @@
 package com.vladusecho.lexicon.presentation.screen
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +17,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -55,12 +57,12 @@ fun HomeScreen(
             title = {
                 Text(
                     text = "Главная ($definitionsCountValue)",
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.tertiary,
                     fontWeight = FontWeight.SemiBold
                 )
             },
             colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                containerColor = Color(0xff0d1e25)
+                containerColor = MaterialTheme.colorScheme.secondary
             ),
             actions = {
                 IconButton(
@@ -69,7 +71,7 @@ fun HomeScreen(
                     Icon(
                         painter = painterResource(id = R.drawable.ic_add),
                         contentDescription = null,
-                        tint = Color.White
+                        tint = MaterialTheme.colorScheme.tertiary
                     )
                 }
             }
@@ -120,6 +122,7 @@ fun DefinitionsListWithAlphabetTitle(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
             .padding(horizontal = 8.dp),
         contentPadding = PaddingValues(vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -148,7 +151,7 @@ fun DefinitionsListWithAlphabetTitle(
                 if (letterBarText) {
                     Text(
                         modifier = Modifier.fillMaxWidth(),
-                        color = Color.Blue,
+                        color = MaterialTheme.colorScheme.tertiary,
                         fontWeight = FontWeight.SemiBold,
                         text = "---" + currentLetter.toString().uppercase() + "---",
                         textAlign = TextAlign.Center
