@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -43,12 +44,12 @@ fun SettingsScreen(
             title = {
                 Text(
                     text = "Настройки",
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.tertiary,
                     fontWeight = FontWeight.SemiBold
                 )
             },
             colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                containerColor = Color(0xff0d1e25)
+                containerColor = MaterialTheme.colorScheme.secondary
             ),
         )
         SettingsScreenContent(
@@ -78,6 +79,7 @@ fun SettingsScreenContent(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background)
                     .padding(horizontal = 8.dp)
                     .padding(top = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -86,15 +88,15 @@ fun SettingsScreenContent(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(8.dp))
-                        .background(Color(0xfff1f1f1))
-                        .padding(horizontal = 8.dp, vertical = 8.dp),
+                        .background(MaterialTheme.colorScheme.secondary)
+                        .padding(horizontal = 24.dp, vertical = 8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = "Темная тема",
                         fontWeight = FontWeight.SemiBold,
-                        color = Color.Black
+                        color = MaterialTheme.colorScheme.tertiary
                     )
                     Switch(
                         checked = currentState.settings.isDarkMode,

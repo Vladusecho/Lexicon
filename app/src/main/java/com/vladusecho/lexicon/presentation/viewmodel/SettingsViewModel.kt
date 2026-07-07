@@ -1,5 +1,6 @@
 package com.vladusecho.lexicon.presentation.viewmodel
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vladusecho.lexicon.domain.entity.Settings
@@ -9,6 +10,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -30,8 +32,11 @@ class SettingsViewModel @Inject constructor(
             initialValue = SettingsState.Loading
         )
 
+    val isSettingsLoaded = mutableStateOf(true)
+
     val isDarkMode = settings
         .map { it.isDarkMode }
+        .onEach { isSettingsLoaded.value = false }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),

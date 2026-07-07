@@ -16,6 +16,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -73,12 +74,12 @@ fun EditDefinitionScreen(
             title = {
                 Text(
                     text = "Редактирование",
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.tertiary,
                     fontWeight = FontWeight.SemiBold
                 )
             },
             colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                containerColor = Color(0xff0d1e25)
+                containerColor = MaterialTheme.colorScheme.secondary
             ),
             navigationIcon = {
                 IconButton(
@@ -87,7 +88,7 @@ fun EditDefinitionScreen(
                     Icon(
                         painter = painterResource(id = R.drawable.ic_back),
                         contentDescription = null,
-                        tint = Color.White
+                        tint = MaterialTheme.colorScheme.tertiary
                     )
                 }
             },
@@ -114,13 +115,12 @@ fun EditDefinitionScreen(
                     Icon(
                         painter = painterResource(id = R.drawable.ic_check),
                         contentDescription = null,
-                        tint = Color.White
+                        tint = MaterialTheme.colorScheme.tertiary
                     )
                 }
             }
         )
         EditDefinitionScreenContent(
-            modifier = Modifier.padding(top = 32.dp),
             currentState = currentState,
             word = viewModel.word,
             description = viewModel.description,
@@ -171,13 +171,15 @@ fun EditDefinitionScreenContent(
             Column(
                 modifier = modifier
                     .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background)
                     .padding(horizontal = 16.dp)
+                    .padding(top = 32.dp)
             ) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(8.dp))
-                        .background(Color(0xfff1f1f1)),
+                        .background(MaterialTheme.colorScheme.secondary),
                     contentAlignment = Alignment.Center
                 ) {
                     TextField(
@@ -186,7 +188,7 @@ fun EditDefinitionScreenContent(
                         placeholder = {
                             Text(
                                 text = "Введите слово",
-                                color = Color.Gray,
+                                color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.7f),
                                 fontWeight = FontWeight.Normal,
                                 fontSize = 24.sp
                             )
@@ -200,10 +202,10 @@ fun EditDefinitionScreenContent(
                             errorIndicatorColor = Color.Transparent,
                             unfocusedContainerColor = Color.Transparent,
                             focusedContainerColor = Color.Transparent,
-                            cursorColor = Color.Black,
+                            cursorColor = MaterialTheme.colorScheme.tertiary,
                         ),
                         textStyle = TextStyle(
-                            color = Color.Black,
+                            color = MaterialTheme.colorScheme.tertiary,
                             fontWeight = FontWeight.Bold,
                             fontSize = 24.sp
                         ),
@@ -223,7 +225,7 @@ fun EditDefinitionScreenContent(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(8.dp))
-                        .background(Color(0xfff1f1f1)),
+                        .background(MaterialTheme.colorScheme.secondary),
                     contentAlignment = Alignment.Center
                 ) {
                     TextField(
@@ -232,7 +234,7 @@ fun EditDefinitionScreenContent(
                         placeholder = {
                             Text(
                                 text = "Введите описание",
-                                color = Color.Gray,
+                                color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.7f),
                                 fontWeight = FontWeight.Normal,
                                 fontSize = 20.sp
                             )
@@ -244,10 +246,10 @@ fun EditDefinitionScreenContent(
                             errorIndicatorColor = Color.Transparent,
                             unfocusedContainerColor = Color.Transparent,
                             focusedContainerColor = Color.Transparent,
-                            cursorColor = Color.Black,
+                            cursorColor = MaterialTheme.colorScheme.tertiary,
                         ),
                         textStyle = TextStyle(
-                            color = Color.Black,
+                            color = MaterialTheme.colorScheme.tertiary,
                             fontWeight = FontWeight.Normal,
                             fontSize = 20.sp
                         ),

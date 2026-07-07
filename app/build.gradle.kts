@@ -41,6 +41,8 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.core.splashscreen)
+    implementation(libs.androidx.datastore.preferences)
     implementation(libs.hilt.android)
     testImplementation(libs.junit.jupiter)
     ksp(libs.hilt.android.compiler)

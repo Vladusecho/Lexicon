@@ -2,10 +2,17 @@ package com.vladusecho.lexicon.presentation.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+//Dark mode
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+val DarkGrayishCyan = Color(0xff333E42)
+val DarkCyanBlue = Color(0xff0d1e25)
+
+//Light mode
+
+val LightGrayishBlue = Color(0xffC1CACE)
+val GrayishBlue = Color(0xff4A5260)
+
+//Others
+
+val White = Color(0xffffffff)
+val Black = Color(0xff000000)

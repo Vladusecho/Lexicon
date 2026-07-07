@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -36,17 +37,17 @@ fun ShortDefinition(
                     definition.id
                 )
             }
-            .background(Color(0xfff1f1f1))
+            .background(MaterialTheme.colorScheme.secondary)
             .padding(horizontal = 8.dp, vertical = 16.dp)
     ) {
         Text(
             text = definition.word + " - ",
-            color = Color.Blue,
-            fontWeight = FontWeight.SemiBold
+            color = MaterialTheme.colorScheme.tertiary,
+            fontWeight = FontWeight.Bold
         )
         Text(
             text = definition.description,
-            color = Color.Black,
+            color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.7f),
             fontWeight = FontWeight.Normal,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
@@ -58,8 +59,35 @@ fun ShortDefinition(
 @Preview(
     showBackground = true
 )
-fun ShortDefinitionPreview() {
+fun ShortDefinitionLightPreview() {
     LexiconTheme() {
+        Box(
+            modifier = Modifier
+                .fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            ShortDefinition(
+                definition = Definition(
+                    id = 0,
+                    word = "Толерантность",
+                    description = "характер, когда человек не обращает внимания на действия остальных людей",
+                    isFavorite = false
+                ),
+                modifier = Modifier.padding(16.dp),
+                onClick = {}
+            )
+        }
+    }
+}
+
+@Composable
+@Preview(
+    showBackground = true
+)
+fun ShortDefinitionDarkPreview() {
+    LexiconTheme(
+        darkTheme = true
+    ) {
         Box(
             modifier = Modifier
                 .fillMaxSize(),

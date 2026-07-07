@@ -18,6 +18,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuItemColors
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -82,12 +83,12 @@ fun DetailsScreen(
             title = {
                 Text(
                     text = "Определение",
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.tertiary,
                     fontWeight = FontWeight.SemiBold
                 )
             },
             colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                containerColor = Color(0xff0d1e25)
+                containerColor = MaterialTheme.colorScheme.secondary
             ),
             navigationIcon = {
                 IconButton(
@@ -96,7 +97,7 @@ fun DetailsScreen(
                     Icon(
                         painter = painterResource(id = R.drawable.ic_back),
                         contentDescription = null,
-                        tint = Color.White
+                        tint = MaterialTheme.colorScheme.tertiary
                     )
                 }
             },
@@ -109,15 +110,15 @@ fun DetailsScreen(
                     Icon(
                         painter = painterResource(id = R.drawable.ic_more),
                         contentDescription = null,
-                        tint = Color.White
+                        tint = MaterialTheme.colorScheme.tertiary
                     )
                 }
                 DropdownMenu(
                     expanded = displayActions,
                     onDismissRequest = { displayActions = false },
-                    border = BorderStroke(width = 1.dp, color = Color.White),
+                    border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.tertiary),
                     shape = RoundedCornerShape(8.dp),
-                    containerColor = Color(0xff0d1e25),
+                    containerColor = MaterialTheme.colorScheme.secondary,
                     content = {
                         DropdownMenuItem(
                             onClick = {
@@ -126,14 +127,14 @@ fun DetailsScreen(
                             text = {
                                 Text(
                                     text = "Редактировать",
-                                    color = Color.White
+                                    color = MaterialTheme.colorScheme.tertiary
                                 )
                             },
                             leadingIcon = {
                                 Icon(
                                     painter = painterResource(id = R.drawable.ic_edit),
                                     contentDescription = null,
-                                    tint = Color.White
+                                    tint = MaterialTheme.colorScheme.tertiary
                                 )
 
                             }
@@ -151,7 +152,7 @@ fun DetailsScreen(
                                     } else {
                                         "В избранное"
                                     },
-                                    color = Color.White
+                                    color = MaterialTheme.colorScheme.tertiary
                                 )
                             },
                             leadingIcon = {
@@ -163,7 +164,7 @@ fun DetailsScreen(
                                 Icon(
                                     painter = painterResource(icon),
                                     contentDescription = null,
-                                    tint = Color.White
+                                    tint = MaterialTheme.colorScheme.tertiary
                                 )
                             }
                         )
@@ -176,14 +177,14 @@ fun DetailsScreen(
                             text = {
                                 Text(
                                     text = "Удалить",
-                                    color = Color.White
+                                    color = MaterialTheme.colorScheme.tertiary
                                 )
                             },
                             leadingIcon = {
                                 Icon(
                                     painter = painterResource(id = R.drawable.ic_trash),
                                     contentDescription = null,
-                                    tint = Color.White
+                                    tint = MaterialTheme.colorScheme.tertiary
                                 )
                             }
                         )
@@ -192,7 +193,6 @@ fun DetailsScreen(
             }
         )
         DetailsScreenContent(
-            modifier = Modifier.padding(top = 32.dp),
             currentState = currentState,
         )
     }
@@ -224,19 +224,21 @@ fun DetailsScreenContent(
             Column(
                 modifier = modifier
                     .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background)
                     .padding(horizontal = 16.dp)
+                    .padding(top = 32.dp)
             ) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(8.dp))
-                        .background(Color(0xfff1f1f1))
+                        .background(MaterialTheme.colorScheme.secondary)
                         .padding(horizontal = 8.dp, vertical = 16.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = currentState.definition.word,
-                        color = Color.Black,
+                        color = MaterialTheme.colorScheme.tertiary,
                         fontWeight = FontWeight.Bold,
                         fontSize = 24.sp
                     )
@@ -246,13 +248,13 @@ fun DetailsScreenContent(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(8.dp))
-                        .background(Color(0xfff1f1f1))
+                        .background(MaterialTheme.colorScheme.secondary)
                         .padding(horizontal = 8.dp, vertical = 16.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = currentState.definition.description,
-                        color = Color.Black,
+                        color = MaterialTheme.colorScheme.tertiary,
                         fontWeight = FontWeight.Normal,
                         fontSize = 20.sp
                     )
