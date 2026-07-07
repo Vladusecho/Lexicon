@@ -1,5 +1,12 @@
 package com.vladusecho.lexicon.data.repository
 
+import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.preferencesDataStore
+import com.vladusecho.lexicon.data.local.DataStoreHelper
+import com.vladusecho.lexicon.data.local.dataStore
 import com.vladusecho.lexicon.domain.entity.Definition
 import com.vladusecho.lexicon.domain.entity.Settings
 import com.vladusecho.lexicon.domain.repository.DefinitionRepository
@@ -9,7 +16,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
-class SimpleDefinitionRepositoryImpl @Inject constructor() : DefinitionRepository {
+
+class SimpleDefinitionRepositoryImpl @Inject constructor(
+    private val dataStoreHelper: DataStoreHelper
+) : DefinitionRepository {
 
     private val _definitions = MutableStateFlow(
         listOf(
@@ -27,13 +37,6 @@ class SimpleDefinitionRepositoryImpl @Inject constructor() : DefinitionRepositor
             ),
         )
     )
-
-    private val _settings = MutableStateFlow(
-        Settings(
-            isDarkMode = false
-        )
-    )
-
 
     override fun getDefinition(id: Int): Flow<Definition> {
         return _definitions.map { it.first { definition -> definition.id == id } }
@@ -88,12 +91,12 @@ class SimpleDefinitionRepositoryImpl @Inject constructor() : DefinitionRepositor
     }
 
     override fun getSettings(): Flow<Settings> {
-        return _settings
+        return dataStoreHelper.getSettings()
     }
 
     override suspend fun toggleDarkMode(isDarkMode: Boolean) {
-        val currentSettings = _settings.value
-        val updatedSettings = currentSettings.copy(isDarkMode = isDarkMode)
-        _settings.value = updatedSettings
+        dataStoreHelper.context.dataStore.edit {
+            it[dataStoreHelper.isDarkMode] = isDarkMode
+        }
     }
 }

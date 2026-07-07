@@ -31,16 +31,23 @@ import com.vladusecho.lexicon.presentation.ui.theme.LexiconTheme
 import com.vladusecho.lexicon.presentation.viewmodel.SettingsViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import androidx.compose.runtime.collectAsState
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             val settingsViewModel = hiltViewModel<SettingsViewModel>()
             val isDarkModeFlow = settingsViewModel.isDarkMode.collectAsStateWithLifecycle()
+
+            splashScreen.setKeepOnScreenCondition {
+                settingsViewModel.isSettingsLoaded.value
+            }
+
             LexiconTheme(
                 darkTheme = isDarkModeFlow.value
             ) {
@@ -55,7 +62,6 @@ class MainActivity : ComponentActivity() {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(Color.White)
                             .padding(bottom = paddingValues.calculateBottomPadding()),
                     ) {
                         AppNavGraph(
