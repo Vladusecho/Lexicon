@@ -63,6 +63,10 @@ class CreateDefinitionViewModel @Inject constructor(
             is CreateDefinitionCommand.UpdateImageUri -> {
                 imageUri = command.uri
             }
+
+            CreateDefinitionCommand.RemoveImage -> {
+                imageUri = null
+            }
         }
     }
 
@@ -89,6 +93,8 @@ class CreateDefinitionViewModel @Inject constructor(
         data class UpdateImageUri(
             val uri: Uri
         ) : CreateDefinitionCommand
+
+        data object RemoveImage : CreateDefinitionCommand
     }
 
     sealed interface CreateDefinitionEvent {

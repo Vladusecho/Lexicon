@@ -1,7 +1,6 @@
 package com.vladusecho.lexicon.presentation.screen
 
 import android.net.Uri
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -145,6 +144,11 @@ fun CreateDefinitionScreen(
                 viewModel.processCommand(
                     CreateDefinitionViewModel.CreateDefinitionCommand.UpdateImageUri(it)
                 )
+            },
+            onRemoveImageClick = {
+                viewModel.processCommand(
+                    CreateDefinitionViewModel.CreateDefinitionCommand.RemoveImage
+                )
             }
         )
     }
@@ -159,7 +163,8 @@ fun CreateDefinitionScreenContent(
     onImageUriChange: (Uri) -> Unit,
     onWordChange: (String) -> Unit,
     onDescriptionChange: (String) -> Unit,
-    currentState: CreateDefinitionViewModel.CreateDefinitionState
+    currentState: CreateDefinitionViewModel.CreateDefinitionState,
+    onRemoveImageClick: () -> Unit
 ) {
 
     val launcher = rememberLauncherForActivityResult(
@@ -204,6 +209,25 @@ fun CreateDefinitionScreenContent(
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Crop
                         )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(16.dp),
+                            contentAlignment = Alignment.TopEnd
+                        ) {
+                            IconButton(
+                                onClick = onRemoveImageClick,
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .background(Color.Red)
+                            ) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_trash),
+                                    contentDescription = null,
+                                    tint = Color.White,
+                                )
+                            }
+                        }
                     } else {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_add_image),
@@ -325,7 +349,8 @@ fun CreateDefinitionScreenSuccessPreview() {
             onWordChange = {},
             onDescriptionChange = {},
             imageUri = null,
-            onImageUriChange = {}
+            onImageUriChange = {},
+            onRemoveImageClick = {}
         )
     }
 }

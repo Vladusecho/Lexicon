@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -119,50 +118,63 @@ fun DefinitionsListWithAlphabetTitle(
     definitionsList: List<Definition>,
     onShortDefinitionClick: (Int) -> Unit
 ) {
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(horizontal = 8.dp),
-        contentPadding = PaddingValues(vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
+    if (definitionsList.isEmpty()) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                color = MaterialTheme.colorScheme.tertiary,
+                fontWeight = FontWeight.SemiBold,
+                text = "Здесь пока ничего нет...",
+                textAlign = TextAlign.Center
+            )
+        }
 
-        var previousLetter = ' '
-
-        items(
-            items = definitionsList,
-            key = { it.id }
+    } else {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .padding(horizontal = 8.dp),
+            contentPadding = PaddingValues(vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
 
-            val currentLetter = it.word[0].lowercase().toCharArray()[0]
 
-            val letterBarText = if (currentLetter == previousLetter) {
-                false.also {
-                    previousLetter = ' '
+            items(
+                count = definitionsList.size,
+                key = { index -> definitionsList[index].id }
+            ) { index ->
+
+                val item = definitionsList[index]
+
+                val currentLetter = item.word.firstOrNull()?.uppercaseChar() ?: '?'
+                val previousLetter = if (index > 0) {
+                    definitionsList[index - 1].word.firstOrNull()?.uppercaseChar()
+                } else {
+                    null
                 }
-            } else {
-                true
-            }
 
-            Column(
+                val showHeader = previousLetter != currentLetter
 
-            ) {
-                if (letterBarText) {
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        color = MaterialTheme.colorScheme.tertiary,
-                        fontWeight = FontWeight.SemiBold,
-                        text = "---" + currentLetter.toString().uppercase() + "---",
-                        textAlign = TextAlign.Center
+                Column {
+                    if (showHeader) {
+                        Text(
+                            modifier = Modifier.fillMaxWidth(),
+                            color = MaterialTheme.colorScheme.tertiary,
+                            fontWeight = FontWeight.SemiBold,
+                            text = "---" + currentLetter.toString().uppercase() + "---",
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                    ShortDefinition(
+                        definition = item,
+                        onClick = onShortDefinitionClick
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
                 }
-                ShortDefinition(
-                    definition = it,
-                    onClick = onShortDefinitionClick
-                )
-                previousLetter = currentLetter
             }
         }
     }
