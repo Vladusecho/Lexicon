@@ -1,5 +1,6 @@
 package com.vladusecho.lexicon.presentation.viewmodel
 
+import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -22,6 +23,9 @@ class CreateDefinitionViewModel @Inject constructor(
 
     private val _state = MutableStateFlow<CreateDefinitionState>(CreateDefinitionState.Success)
     val state = _state.asStateFlow()
+
+    var imageUri by mutableStateOf<Uri?>(null)
+        private set
 
     private var _word by mutableStateOf("")
     val word: String
@@ -48,6 +52,10 @@ class CreateDefinitionViewModel @Inject constructor(
                 is CreateDefinitionCommand.UpdateWord -> {
                     _word = command.word
                 }
+
+                is CreateDefinitionCommand.UpdateImageUri -> {
+                    imageUri = command.uri
+                }
             }
         }
     }
@@ -69,6 +77,10 @@ class CreateDefinitionViewModel @Inject constructor(
 
         data class UpdateDescription(
             val description: String
+        ) : CreateDefinitionCommand
+
+        data class UpdateImageUri(
+            val uri: android.net.Uri
         ) : CreateDefinitionCommand
     }
 
