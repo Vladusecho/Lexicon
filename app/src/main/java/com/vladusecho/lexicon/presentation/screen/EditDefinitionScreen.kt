@@ -1,13 +1,19 @@
 package com.vladusecho.lexicon.presentation.screen
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -28,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -37,16 +44,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
 import com.vladusecho.lexicon.R
 import com.vladusecho.lexicon.domain.entity.Definition
 import com.vladusecho.lexicon.presentation.viewmodel.EditDefinitionViewModel
+import com.vladusecho.lexicon.presentation.viewmodel.EditDefinitionViewModelFactory
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditDefinitionScreen(
     id: Int,
     viewModel: EditDefinitionViewModel = hiltViewModel(
-        creationCallback = { factory: EditDefinitionViewModel.Factory ->
+        creationCallback = { factory: EditDefinitionViewModelFactory ->
             factory.create(id)
         }
     ),
@@ -107,7 +116,8 @@ fun EditDefinitionScreen(
                                     word = formattedWord,
                                     description = viewModel.description,
                                     isFavorite = isFavorite
-                                )
+                                ),
+                                imageUri = viewModel.imageUri
                             )
                         )
                     }
@@ -133,6 +143,12 @@ fun EditDefinitionScreen(
                 viewModel.processCommand(
                     EditDefinitionViewModel.EditDefinitionCommand.UpdateDescription(it)
                 )
+            },
+            imageUri = viewModel.imageUri,
+            onImageUriChange = {
+                viewModel.processCommand(
+                    EditDefinitionViewModel.EditDefinitionCommand.UpdateImageUri(it)
+                )
             }
         )
     }
@@ -146,7 +162,19 @@ fun EditDefinitionScreenContent(
     description: String,
     onWordChange: (String) -> Unit,
     onDescriptionChange: (String) -> Unit,
+    imageUri: Uri?,
+    onImageUriChange: (Uri) -> Unit
 ) {
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = {
+            if (it != null) {
+                onImageUriChange(it)
+            }
+        }
+    )
+
 
     when (currentState) {
         EditDefinitionViewModel.EditDefinitionState.Error -> {
@@ -175,6 +203,34 @@ fun EditDefinitionScreenContent(
                     .padding(horizontal = 16.dp)
                     .padding(top = 32.dp)
             ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(MaterialTheme.colorScheme.secondary)
+                        .aspectRatio(1 / 1f)
+                        .clickable {
+                            launcher.launch("image/*")
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (imageUri != null) {
+                        AsyncImage(
+                            model = imageUri,
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_add_image),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.7f),
+                            modifier = Modifier.size(128.dp)
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(24.dp))
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -220,7 +276,7 @@ fun EditDefinitionScreenContent(
                         ),
                     )
                 }
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(24.dp))
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()

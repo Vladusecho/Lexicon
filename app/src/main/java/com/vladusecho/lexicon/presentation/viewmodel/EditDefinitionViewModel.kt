@@ -1,10 +1,12 @@
 package com.vladusecho.lexicon.presentation.viewmodel
 
+import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.vladusecho.lexicon.data.local.FileManagerHelper
 import com.vladusecho.lexicon.domain.entity.Definition
 import com.vladusecho.lexicon.domain.usecase.definition.CheckIsFavouriteUseCase
 import com.vladusecho.lexicon.domain.usecase.definition.EditDefinitionUseCase
@@ -21,16 +23,21 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
+import androidx.core.net.toUri
 
 @HiltViewModel(
-    assistedFactory = EditDefinitionViewModel.Factory::class
+    assistedFactory = EditDefinitionViewModelFactory::class
 )
 class EditDefinitionViewModel @AssistedInject constructor(
     private val getDefinitionByIdUseCase: GetDefinitionByIdUseCase,
     private val editDefinitionUseCase: EditDefinitionUseCase,
     private val checkIsFavouriteUseCase: CheckIsFavouriteUseCase,
+    private val fileManagerHelper: FileManagerHelper,
     @Assisted("id") private val id: Int
 ) : ViewModel() {
+
+    var imageUri by mutableStateOf<Uri?>(null)
+        private set
 
     private var _word by mutableStateOf("")
     val word: String
@@ -51,6 +58,7 @@ class EditDefinitionViewModel @AssistedInject constructor(
         .map { definition ->
             _word = definition.word
             _description = definition.description
+            imageUri = definition.imgUri?.toUri()
             EditDefinitionState.Success as EditDefinitionState
         }
         .catch { emit(EditDefinitionState.Error) }
@@ -64,23 +72,32 @@ class EditDefinitionViewModel @AssistedInject constructor(
     val event = _event.asSharedFlow()
 
     fun processCommand(command: EditDefinitionCommand) {
-        viewModelScope.launch {
-            when (command) {
-                is EditDefinitionCommand.EditDefinition -> {
-                    editDefinitionUseCase(command.definition)
+        when (command) {
+            is EditDefinitionCommand.EditDefinition -> {
+                viewModelScope.launch {
+                    val finalImageUri = command.imageUri?.let {
+                        fileManagerHelper.saveImageToInternalStorage(it)
+                    }
+                    val finalDefinition = command.definition.copy(imgUri = finalImageUri)
+                    editDefinitionUseCase(finalDefinition)
                     _event.emit(EditDefinitionEvent.FinishEdit)
                 }
+            }
 
-                is EditDefinitionCommand.UpdateDescription -> {
-                    _description = command.description
-                }
+            is EditDefinitionCommand.UpdateDescription -> {
+                _description = command.description
+            }
 
-                is EditDefinitionCommand.UpdateWord -> {
-                    _word = command.word
-                }
+            is EditDefinitionCommand.UpdateWord -> {
+                _word = command.word
+            }
+
+            is EditDefinitionCommand.UpdateImageUri -> {
+                imageUri = command.uri
             }
         }
     }
+
 
     sealed interface EditDefinitionState {
         data object Success : EditDefinitionState
@@ -90,7 +107,8 @@ class EditDefinitionViewModel @AssistedInject constructor(
 
     sealed interface EditDefinitionCommand {
         data class EditDefinition(
-            val definition: Definition
+            val definition: Definition,
+            val imageUri: Uri? = null
         ) : EditDefinitionCommand
 
         data class UpdateWord(
@@ -100,16 +118,20 @@ class EditDefinitionViewModel @AssistedInject constructor(
         data class UpdateDescription(
             val description: String
         ) : EditDefinitionCommand
+
+        data class UpdateImageUri(
+            val uri: Uri
+        ) : EditDefinitionCommand
     }
 
     sealed interface EditDefinitionEvent {
         data object FinishEdit : EditDefinitionEvent
     }
+}
 
-    @AssistedFactory
-    interface Factory {
-        fun create(
-            @Assisted("id") id: Int
-        ): EditDefinitionViewModel
-    }
+@AssistedFactory
+interface EditDefinitionViewModelFactory {
+    fun create(
+        @Assisted("id") id: Int
+    ): EditDefinitionViewModel
 }
