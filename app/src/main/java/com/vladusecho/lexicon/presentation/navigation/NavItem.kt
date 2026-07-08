@@ -14,7 +14,7 @@ sealed class NavItem(
 
     object Favorites : NavItem(
         iconId = R.drawable.ic_favorite,
-        screen = NavScreen.Favorites,
+        screen = NavScreen.FavouritesGraph,
     )
 
     object Settings : NavItem(

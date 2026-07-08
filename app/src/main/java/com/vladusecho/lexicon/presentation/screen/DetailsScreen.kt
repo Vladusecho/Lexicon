@@ -4,12 +4,14 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
@@ -223,61 +225,67 @@ fun DetailsScreenContent(
         }
 
         is DetailsViewModel.DetailsState.Success -> {
-            Column(
+            LazyColumn(
                 modifier = modifier
                     .fillMaxSize()
                     .background(MaterialTheme.colorScheme.background)
-                    .padding(horizontal = 16.dp)
-                    .padding(top = 32.dp)
+                    .padding(horizontal = 16.dp),
+                contentPadding = PaddingValues(vertical = 32.dp)
             ) {
-                if (currentState.definition.imgUri != null) {
+                item {
+                    if (currentState.definition.imgUri != null) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(MaterialTheme.colorScheme.secondary)
+                                .aspectRatio(1 / 1f),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            AsyncImage(
+                                model = currentState.definition.imgUri,
+                                contentDescription = null,
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
+                item {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(8.dp))
                             .background(MaterialTheme.colorScheme.secondary)
-                            .aspectRatio(1 / 1f),
+                            .padding(horizontal = 8.dp, vertical = 16.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        AsyncImage(
-                            model = currentState.definition.imgUri,
-                            contentDescription = null,
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
+                        Text(
+                            text = currentState.definition.word,
+                            color = MaterialTheme.colorScheme.tertiary,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 24.sp
                         )
                     }
+                    Spacer(modifier = Modifier.height(24.dp))
                 }
-                Spacer(modifier = Modifier.height(24.dp))
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(MaterialTheme.colorScheme.secondary)
-                        .padding(horizontal = 8.dp, vertical = 16.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = currentState.definition.word,
-                        color = MaterialTheme.colorScheme.tertiary,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 24.sp
-                    )
-                }
-                Spacer(modifier = Modifier.height(24.dp))
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(MaterialTheme.colorScheme.secondary)
-                        .padding(horizontal = 8.dp, vertical = 16.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = currentState.definition.description,
-                        color = MaterialTheme.colorScheme.tertiary,
-                        fontWeight = FontWeight.Normal,
-                        fontSize = 20.sp
-                    )
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(MaterialTheme.colorScheme.secondary)
+                            .padding(horizontal = 8.dp, vertical = 16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = currentState.definition.description,
+                            color = MaterialTheme.colorScheme.tertiary,
+                            fontWeight = FontWeight.Normal,
+                            fontSize = 20.sp
+                        )
+                    }
                 }
             }
         }

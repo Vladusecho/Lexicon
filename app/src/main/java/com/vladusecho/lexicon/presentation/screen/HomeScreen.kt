@@ -141,8 +141,6 @@ fun DefinitionsListWithAlphabetTitle(
             contentPadding = PaddingValues(vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-
-
             items(
                 count = definitionsList.size,
                 key = { index -> definitionsList[index].id }
