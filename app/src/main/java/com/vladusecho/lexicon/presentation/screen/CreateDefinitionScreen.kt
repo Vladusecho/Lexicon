@@ -100,8 +100,9 @@ fun CreateDefinitionScreen(
                                     id = Random.nextInt(),
                                     word = formattedWord,
                                     description = viewModel.description,
-                                    isFavorite = false
-                                )
+                                    isFavorite = false,
+                                ),
+                                imageUri = viewModel.imageUri
                             )
                         )
                     }
