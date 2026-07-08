@@ -1,6 +1,7 @@
 package com.vladusecho.lexicon.presentation.screen
 
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -34,6 +35,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -71,9 +73,7 @@ fun CreateDefinitionScreen(
         }
     }
 
-    Column(
-
-    ) {
+    Column {
         CenterAlignedTopAppBar(
             title = {
                 Text(
@@ -104,12 +104,13 @@ fun CreateDefinitionScreen(
                                 imageUri = viewModel.imageUri
                             )
                         )
-                    }
+                    },
+                    enabled = viewModel.allCorrect
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_check),
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.tertiary
+                        tint = if (viewModel.allCorrect) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.tertiary.copy(alpha = 0.3f)
                     )
                 }
             },
@@ -149,7 +150,7 @@ fun CreateDefinitionScreen(
                 viewModel.processCommand(
                     CreateDefinitionViewModel.CreateDefinitionCommand.RemoveImage
                 )
-            }
+            },
         )
     }
 }
@@ -350,7 +351,7 @@ fun CreateDefinitionScreenSuccessPreview() {
             onDescriptionChange = {},
             imageUri = null,
             onImageUriChange = {},
-            onRemoveImageClick = {}
+            onRemoveImageClick = {},
         )
     }
 }

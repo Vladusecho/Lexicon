@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vladusecho.lexicon.data.local.FileManagerHelper
@@ -23,7 +24,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
-import androidx.core.net.toUri
 
 @HiltViewModel(
     assistedFactory = EditDefinitionViewModelFactory::class
@@ -45,6 +45,8 @@ class EditDefinitionViewModel @AssistedInject constructor(
     private var _description by mutableStateOf("")
     val description: String
         get() = _description
+
+    val allCorrect get() = word.isNotBlank() && description.isNotBlank()
 
     val isFavorite = checkIsFavouriteUseCase(id)
         .stateIn(
@@ -74,6 +76,7 @@ class EditDefinitionViewModel @AssistedInject constructor(
     fun processCommand(command: EditDefinitionCommand) {
         when (command) {
             is EditDefinitionCommand.EditDefinition -> {
+
                 viewModelScope.launch {
                     val finalImageUri = command.imageUri?.let {
                         fileManagerHelper.saveImageToInternalStorage(it)
@@ -94,6 +97,10 @@ class EditDefinitionViewModel @AssistedInject constructor(
 
             is EditDefinitionCommand.UpdateImageUri -> {
                 imageUri = command.uri
+            }
+
+            EditDefinitionCommand.RemoveImage -> {
+                imageUri = null
             }
         }
     }
@@ -122,6 +129,8 @@ class EditDefinitionViewModel @AssistedInject constructor(
         data class UpdateImageUri(
             val uri: Uri
         ) : EditDefinitionCommand
+
+        data object RemoveImage : EditDefinitionCommand
     }
 
     sealed interface EditDefinitionEvent {

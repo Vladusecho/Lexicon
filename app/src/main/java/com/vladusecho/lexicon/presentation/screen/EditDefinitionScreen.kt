@@ -1,6 +1,7 @@
 package com.vladusecho.lexicon.presentation.screen
 
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -35,6 +36,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -120,12 +122,13 @@ fun EditDefinitionScreen(
                                 imageUri = viewModel.imageUri
                             )
                         )
-                    }
+                    },
+                    enabled = viewModel.allCorrect
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_check),
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.tertiary
+                        tint = if (viewModel.allCorrect) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.tertiary.copy(alpha = 0.3f)
                     )
                 }
             }
@@ -149,6 +152,11 @@ fun EditDefinitionScreen(
                 viewModel.processCommand(
                     EditDefinitionViewModel.EditDefinitionCommand.UpdateImageUri(it)
                 )
+            },
+            onRemoveImageClick = {
+                viewModel.processCommand(
+                    EditDefinitionViewModel.EditDefinitionCommand.RemoveImage
+                )
             }
         )
     }
@@ -163,7 +171,8 @@ fun EditDefinitionScreenContent(
     onWordChange: (String) -> Unit,
     onDescriptionChange: (String) -> Unit,
     imageUri: Uri?,
-    onImageUriChange: (Uri) -> Unit
+    onImageUriChange: (Uri) -> Unit,
+    onRemoveImageClick: () -> Unit
 ) {
 
     val launcher = rememberLauncherForActivityResult(
@@ -221,6 +230,25 @@ fun EditDefinitionScreenContent(
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Crop
                         )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(16.dp),
+                            contentAlignment = Alignment.TopEnd
+                        ) {
+                            IconButton(
+                                onClick = onRemoveImageClick,
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .background(Color.Red)
+                            ) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_trash),
+                                    contentDescription = null,
+                                    tint = Color.White,
+                                )
+                            }
+                        }
                     } else {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_add_image),

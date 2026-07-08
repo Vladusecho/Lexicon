@@ -36,12 +36,14 @@ class CreateDefinitionViewModel @Inject constructor(
     val description: String
         get() = _description
 
+    val allCorrect get() = word.isNotBlank() && description.isNotBlank()
     private val _event = MutableSharedFlow<CreateDefinitionEvent>()
     val event = _event.asSharedFlow()
 
     fun processCommand(command: CreateDefinitionCommand) {
         when (command) {
             is CreateDefinitionCommand.CreateDefinition -> {
+
                 viewModelScope.launch {
                     val finalImagePath = command.imageUri?.let {
                         fileManagerHelper.saveImageToInternalStorage(it)
