@@ -7,5 +7,5 @@ class SearchDefinitionUseCase @Inject constructor(
     private val repository: DefinitionRepository
 ){
 
-    operator fun invoke(query: String) = repository.search(query)
+    operator fun invoke(query: String, searchFavourite: Boolean = false) = repository.search(query, searchFavourite)
 }

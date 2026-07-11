@@ -98,10 +98,15 @@ class SimpleDefinitionRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun search(query: String): Flow<List<Definition>> {
+    override fun search(query: String, searchFavourite: Boolean): Flow<List<Definition>> {
         return _definitions.map {
-            it.filter { definition -> definition.word.startsWith(query.trim(), ignoreCase = true) }
-                .sortedBy { definition -> definition.word.lowercase() }
+            if (searchFavourite) {
+                it.filter { definition -> definition.isFavorite && definition.word.startsWith(query.trim(), ignoreCase = true) }
+                    .sortedBy { definition -> definition.word.lowercase() }
+            } else {
+                it.filter { definition -> definition.word.startsWith(query.trim(), ignoreCase = true) }
+                    .sortedBy { definition -> definition.word.lowercase() }
+            }
         }
     }
 }
