@@ -21,7 +21,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 @HiltViewModel(
-    assistedFactory = DetailsViewModel.Factory::class
+    assistedFactory = DetailsViewModelFactory::class
 )
 class DetailsViewModel @AssistedInject constructor(
     private val getDefinitionByIdUseCase: GetDefinitionByIdUseCase,
@@ -82,11 +82,11 @@ class DetailsViewModel @AssistedInject constructor(
     sealed interface DetailsEvent {
         data object DeleteDefinition : DetailsEvent
     }
+}
 
-    @AssistedFactory
-    interface Factory {
-        fun create(
-            @Assisted("id") id: Int
-        ): DetailsViewModel
-    }
+@AssistedFactory
+interface DetailsViewModelFactory {
+    fun create(
+        @Assisted("id") id: Int
+    ): DetailsViewModel
 }
