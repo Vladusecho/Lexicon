@@ -1,16 +1,11 @@
 package com.vladusecho.lexicon.data.repository
 
-import android.content.Context
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.preferencesDataStore
 import com.vladusecho.lexicon.data.local.DataStoreHelper
 import com.vladusecho.lexicon.data.local.dataStore
 import com.vladusecho.lexicon.domain.entity.Definition
 import com.vladusecho.lexicon.domain.entity.Settings
 import com.vladusecho.lexicon.domain.repository.DefinitionRepository
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
@@ -71,7 +66,10 @@ class SimpleDefinitionRepositoryImpl @Inject constructor(
     }
 
     override fun getFavorites(): Flow<List<Definition>> {
-        return _definitions.map { it.filter { definition -> definition.isFavorite }.sortedBy { definition -> definition.word.lowercase() } }
+        return _definitions.map {
+            it.filter { definition -> definition.isFavorite }
+                .sortedBy { definition -> definition.word.lowercase() }
+        }
     }
 
     override fun checkIsFavorite(id: Int): Flow<Boolean> {
@@ -97,6 +95,18 @@ class SimpleDefinitionRepositoryImpl @Inject constructor(
     override suspend fun toggleDarkMode(isDarkMode: Boolean) {
         dataStoreHelper.context.dataStore.edit {
             it[dataStoreHelper.isDarkMode] = isDarkMode
+        }
+    }
+
+    override fun search(query: String, searchFavourite: Boolean): Flow<List<Definition>> {
+        return _definitions.map {
+            if (searchFavourite) {
+                it.filter { definition -> definition.isFavorite && definition.word.startsWith(query.trim(), ignoreCase = true) }
+                    .sortedBy { definition -> definition.word.lowercase() }
+            } else {
+                it.filter { definition -> definition.word.startsWith(query.trim(), ignoreCase = true) }
+                    .sortedBy { definition -> definition.word.lowercase() }
+            }
         }
     }
 }

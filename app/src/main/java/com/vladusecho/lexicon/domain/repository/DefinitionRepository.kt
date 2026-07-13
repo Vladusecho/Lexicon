@@ -25,4 +25,6 @@ interface DefinitionRepository {
     fun getSettings(): Flow<Settings>
 
     suspend fun toggleDarkMode(isDarkMode: Boolean)
+
+    fun search(query: String, searchFavourite: Boolean): Flow<List<Definition>>
 }
