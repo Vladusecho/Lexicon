@@ -5,8 +5,14 @@ import androidx.room.Room
 import com.vladusecho.lexicon.data.local.AppDatabase
 import com.vladusecho.lexicon.data.local.DataStoreHelper
 import com.vladusecho.lexicon.data.local.FileManagerHelper
+import com.vladusecho.lexicon.data.repository.DefinitionsRepositoryImpl
+import com.vladusecho.lexicon.data.repository.FavouritesRepositoryImpl
+import com.vladusecho.lexicon.data.repository.SettingsRepositoryImpl
 import com.vladusecho.lexicon.data.repository.SimpleDefinitionRepositoryImpl
 import com.vladusecho.lexicon.domain.repository.DefinitionRepository
+import com.vladusecho.lexicon.domain.repository.DefinitionsRepository
+import com.vladusecho.lexicon.domain.repository.FavouritesRepository
+import com.vladusecho.lexicon.domain.repository.SettingsRepository
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -24,6 +30,18 @@ interface DataModule {
     fun bindDefinitionRepository(
         definitionRepositoryImpl: SimpleDefinitionRepositoryImpl
     ): DefinitionRepository
+
+    @Binds
+    @Singleton
+    fun bindSettingsRepository(
+        settingsRepositoryImpl: SettingsRepositoryImpl
+    ): SettingsRepository
+
+    @Binds
+    @Singleton
+    fun bindFavouritesRepository(
+        favouritesRepositoryImpl: FavouritesRepositoryImpl
+    ): FavouritesRepository
 
     companion object {
 
