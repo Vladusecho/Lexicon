@@ -97,7 +97,7 @@ fun CreateDefinitionScreen(
                         viewModel.processCommand(
                             CreateDefinitionViewModel.CreateDefinitionCommand.CreateDefinition(
                                 definition = Definition(
-                                    id = Random.nextInt(),
+                                    id = 0,
                                     word = formattedWord,
                                     description = viewModel.description,
                                     isFavorite = false,

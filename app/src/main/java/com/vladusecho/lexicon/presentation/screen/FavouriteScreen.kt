@@ -103,7 +103,7 @@ fun FavouriteScreenContent(
                 contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator(
-                    color = Color(0xff0d1e25)
+                    color = MaterialTheme.colorScheme.tertiary
                 )
             }
         }

@@ -28,8 +28,8 @@ interface DataModule {
     @Binds
     @Singleton
     fun bindDefinitionRepository(
-        definitionRepositoryImpl: SimpleDefinitionRepositoryImpl
-    ): DefinitionRepository
+        definitionRepositoryImpl: DefinitionsRepositoryImpl
+    ): DefinitionsRepository
 
     @Binds
     @Singleton
@@ -53,7 +53,7 @@ interface DataModule {
             context,
             AppDatabase::class.java,
             "app_database"
-        )
+        ).build()
 
         @Provides
         @Singleton

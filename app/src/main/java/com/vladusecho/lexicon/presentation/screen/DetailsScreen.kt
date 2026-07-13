@@ -67,7 +67,7 @@ fun DetailsScreen(
     val state = viewModel.state.collectAsStateWithLifecycle()
     val currentState = state.value
 
-    val isFavoriteState = viewModel.isFavorite.collectAsStateWithLifecycle()
+    val isFavoriteState = viewModel.isFavourite.collectAsStateWithLifecycle()
     val isFavorite = isFavoriteState.value
 
     var displayActions by remember { mutableStateOf(false) }
@@ -146,7 +146,7 @@ fun DetailsScreen(
                         DropdownMenuItem(
                             onClick = {
                                 viewModel.processCommand(
-                                    DetailsViewModel.DetailsCommand.ToggleFavourite(id)
+                                    DetailsViewModel.DetailsCommand.ToggleFavourite
                                 )
                             },
                             text = {

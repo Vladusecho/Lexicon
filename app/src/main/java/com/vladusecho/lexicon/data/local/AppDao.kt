@@ -12,7 +12,7 @@ interface AppDao {
     @Query("SELECT * FROM definitions WHERE id = :id")
     fun getDefinition(id: Int): Flow<DefinitionEntity>
 
-    @Query("SELECT * FROM definitions")
+    @Query("SELECT * FROM definitions ORDER BY word ASC")
     fun getDefinitions(): Flow<List<DefinitionEntity>>
 
     @Upsert
@@ -33,6 +33,6 @@ interface AppDao {
     @Query("UPDATE definitions SET isFavorite = :isFavorite WHERE id = :id")
     suspend fun toggleFavorite(id: Int, isFavorite: Boolean)
 
-    @Query("SELECT * FROM definitions WHERE isFavorite = 1")
+    @Query("SELECT * FROM definitions WHERE isFavorite = 1 ORDER BY word ASC")
     fun getFavorites(): Flow<List<DefinitionEntity>>
 }

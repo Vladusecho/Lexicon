@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "definitions")
 data class DefinitionEntity(
     @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
+    val id: Int,
     val word: String,
     val description: String,
     val imgUri: String?,

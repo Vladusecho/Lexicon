@@ -45,7 +45,7 @@ class DetailsViewModel @AssistedInject constructor(
     private val _event = MutableSharedFlow<DetailsEvent>()
     val event = _event.asSharedFlow()
 
-    val isFavorite: StateFlow<Boolean> = checkIsFavouriteUseCase(id)
+    val isFavourite: StateFlow<Boolean> = checkIsFavouriteUseCase(id)
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -61,7 +61,7 @@ class DetailsViewModel @AssistedInject constructor(
                 }
 
                 is DetailsCommand.ToggleFavourite -> {
-                    toggleFavouriteUseCase(id)
+                    toggleFavouriteUseCase(id, !isFavourite.value)
                 }
             }
         }
@@ -76,7 +76,7 @@ class DetailsViewModel @AssistedInject constructor(
     sealed interface DetailsCommand {
         data object DeleteDefinition : DetailsCommand
 
-        data class ToggleFavourite(val id: Int) : DetailsCommand
+        data object ToggleFavourite : DetailsCommand
     }
 
     sealed interface DetailsEvent {

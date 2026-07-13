@@ -1,13 +1,14 @@
 package com.vladusecho.lexicon.domain.usecase.definition
 
 import com.vladusecho.lexicon.domain.repository.DefinitionRepository
+import com.vladusecho.lexicon.domain.repository.FavouritesRepository
 import javax.inject.Inject
 
 class ToggleFavouriteUseCase @Inject constructor(
-    private val definitionRepository: DefinitionRepository
+    private val favouritesRepository: FavouritesRepository
 ) {
 
-    suspend operator fun invoke(id: Int) {
-        definitionRepository.toggleFavorite(id)
+    suspend operator fun invoke(id: Int, isFavourite: Boolean) {
+        favouritesRepository.toggleFavorite(id, isFavourite)
     }
 }
