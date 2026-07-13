@@ -12,7 +12,7 @@ import javax.inject.Inject
 
 class DefinitionsRepositoryImpl @Inject constructor(
     private val appDao: AppDao
-): DefinitionsRepository {
+) : DefinitionsRepository {
     override fun getDefinition(id: Int): Flow<Definition> {
         return appDao.getDefinition(id).map { it.toDefinition() }
     }

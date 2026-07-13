@@ -10,7 +10,7 @@ import javax.inject.Inject
 
 class FavouritesRepositoryImpl @Inject constructor(
     private val appDao: AppDao
-): FavouritesRepository {
+) : FavouritesRepository {
     override fun getFavorites(): Flow<List<Definition>> {
         return appDao.getFavorites().map { it.toDefinitions() }
     }

@@ -8,8 +8,6 @@ import com.vladusecho.lexicon.data.local.FileManagerHelper
 import com.vladusecho.lexicon.data.repository.DefinitionsRepositoryImpl
 import com.vladusecho.lexicon.data.repository.FavouritesRepositoryImpl
 import com.vladusecho.lexicon.data.repository.SettingsRepositoryImpl
-import com.vladusecho.lexicon.data.repository.SimpleDefinitionRepositoryImpl
-import com.vladusecho.lexicon.domain.repository.DefinitionRepository
 import com.vladusecho.lexicon.domain.repository.DefinitionsRepository
 import com.vladusecho.lexicon.domain.repository.FavouritesRepository
 import com.vladusecho.lexicon.domain.repository.SettingsRepository

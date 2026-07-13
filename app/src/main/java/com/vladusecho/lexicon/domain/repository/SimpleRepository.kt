@@ -4,7 +4,7 @@ import com.vladusecho.lexicon.domain.entity.Definition
 import com.vladusecho.lexicon.domain.entity.Settings
 import kotlinx.coroutines.flow.Flow
 
-interface DefinitionRepository {
+interface SimpleRepository {
 
     fun getDefinition(id: Int): Flow<Definition>
 
