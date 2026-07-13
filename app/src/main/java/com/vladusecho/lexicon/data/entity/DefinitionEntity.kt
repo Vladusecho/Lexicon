@@ -1,0 +1,14 @@
+package com.vladusecho.lexicon.data.entity
+
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "definitions")
+data class DefinitionEntity(
+    @PrimaryKey(autoGenerate = true)
+    val id: Int = 0,
+    val word: String,
+    val description: String,
+    val imgUri: String?,
+    val isFavorite: Boolean
+)

@@ -41,6 +41,8 @@ android {
 }
 
 dependencies {
+    implementation(libs.room.core)
+    ksp(libs.room.compiler)
     implementation(libs.coil.compose)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.datastore.preferences)

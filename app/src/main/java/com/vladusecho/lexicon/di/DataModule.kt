@@ -1,6 +1,8 @@
 package com.vladusecho.lexicon.di
 
 import android.content.Context
+import androidx.room.Room
+import com.vladusecho.lexicon.data.local.AppDatabase
 import com.vladusecho.lexicon.data.local.DataStoreHelper
 import com.vladusecho.lexicon.data.local.FileManagerHelper
 import com.vladusecho.lexicon.data.repository.SimpleDefinitionRepositoryImpl
@@ -24,6 +26,23 @@ interface DataModule {
     ): DefinitionRepository
 
     companion object {
+
+        @Provides
+        @Singleton
+        fun provideAppDatabase(
+            @ApplicationContext context: Context
+        ) = Room.databaseBuilder(
+            context,
+            AppDatabase::class.java,
+            "app_database"
+        )
+
+        @Provides
+        @Singleton
+        fun provideAppDao(
+            appDatabase: AppDatabase
+        ) = appDatabase.appDao()
+
 
         @Provides
         @Singleton
