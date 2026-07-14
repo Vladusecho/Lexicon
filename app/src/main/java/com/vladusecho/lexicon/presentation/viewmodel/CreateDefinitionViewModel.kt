@@ -29,12 +29,10 @@ class CreateDefinitionViewModel @Inject constructor(
     var imageUri by mutableStateOf<Uri?>(null)
         private set
 
-    private var _word by mutableStateOf("")
-    val word: String
-        get() = _word
-    private var _description by mutableStateOf("")
-    val description: String
-        get() = _description
+    var word by mutableStateOf("")
+        private set
+    var description by mutableStateOf("")
+        private set
 
     val allCorrect get() = word.isNotBlank() && description.isNotBlank()
     private val _event = MutableSharedFlow<CreateDefinitionEvent>()
@@ -55,11 +53,11 @@ class CreateDefinitionViewModel @Inject constructor(
             }
 
             is CreateDefinitionCommand.UpdateDescription -> {
-                _description = command.description
+                description = command.description
             }
 
             is CreateDefinitionCommand.UpdateWord -> {
-                _word = command.word
+                word = command.word
             }
 
             is CreateDefinitionCommand.UpdateImageUri -> {

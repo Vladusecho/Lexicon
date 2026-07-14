@@ -20,7 +20,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -31,6 +30,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,6 +42,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -49,6 +50,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.vladusecho.lexicon.R
 import com.vladusecho.lexicon.domain.entity.Definition
+import com.vladusecho.lexicon.presentation.element.ErrorView
+import com.vladusecho.lexicon.presentation.element.LoadingView
+import com.vladusecho.lexicon.presentation.ui.theme.LexiconTheme
 import com.vladusecho.lexicon.presentation.viewmodel.EditDefinitionViewModel
 import com.vladusecho.lexicon.presentation.viewmodel.EditDefinitionViewModelFactory
 
@@ -64,11 +68,8 @@ fun EditDefinitionScreen(
     onBackClick: () -> Unit,
 ) {
 
-    val state = viewModel.state.collectAsStateWithLifecycle()
-    val currentState = state.value
-
-    val isFavoriteState = viewModel.isFavorite.collectAsStateWithLifecycle()
-    val isFavorite = isFavoriteState.value
+    val currentState by viewModel.state.collectAsStateWithLifecycle()
+    val isFavorite by viewModel.isFavorite.collectAsStateWithLifecycle()
 
     LaunchedEffect(key1 = Unit) {
         viewModel.event.collect { event ->
@@ -80,7 +81,7 @@ fun EditDefinitionScreen(
         }
     }
 
-    Column() {
+    Column {
         CenterAlignedTopAppBar(
             title = {
                 Text(
@@ -189,19 +190,11 @@ fun EditDefinitionScreenContent(
 
     when (currentState) {
         EditDefinitionViewModel.EditDefinitionState.Error -> {
-
+            ErrorView()
         }
 
         EditDefinitionViewModel.EditDefinitionState.Loading -> {
-            Box(
-                modifier = modifier
-                    .fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(
-                    color = Color(0xff0d1e25)
-                )
-            }
+            LoadingView()
         }
 
         is EditDefinitionViewModel.EditDefinitionState.Success -> {
@@ -242,7 +235,7 @@ fun EditDefinitionScreenContent(
                                 Box(
                                     modifier = Modifier
                                         .clip(RoundedCornerShape(16.dp))
-                                        .clickable{
+                                        .clickable {
                                             onRemoveImageClick()
                                         }
                                         .background(Color.Red)
@@ -360,6 +353,78 @@ fun EditDefinitionScreenContent(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+@Preview(
+    showBackground = true
+)
+fun EditDefinitionScreenSuccessPreview() {
+    LexiconTheme {
+        Box(
+            modifier = Modifier
+                .fillMaxSize(),
+        ) {
+            EditDefinitionScreenContent(
+                currentState = EditDefinitionViewModel.EditDefinitionState.Success,
+                word = "",
+                description = "",
+                onWordChange = {},
+                onDescriptionChange = {},
+                imageUri = null,
+                onImageUriChange = {},
+                onRemoveImageClick = {}
+            )
+        }
+    }
+}
+
+@Composable
+@Preview(
+    showBackground = true
+)
+fun EditDefinitionScreenLoadingPreview() {
+    LexiconTheme {
+        Box(
+            modifier = Modifier
+                .fillMaxSize(),
+        ) {
+            EditDefinitionScreenContent(
+                currentState = EditDefinitionViewModel.EditDefinitionState.Loading,
+                word = "",
+                description = "",
+                onWordChange = {},
+                onDescriptionChange = {},
+                imageUri = null,
+                onImageUriChange = {},
+                onRemoveImageClick = {},
+            )
+        }
+    }
+}
+
+@Composable
+@Preview(
+    showBackground = true
+)
+fun EditDefinitionScreenErrorPreview() {
+    LexiconTheme {
+        Box(
+            modifier = Modifier
+                .fillMaxSize(),
+        ) {
+            EditDefinitionScreenContent(
+                currentState = EditDefinitionViewModel.EditDefinitionState.Error,
+                word = "",
+                description = "",
+                onWordChange = {},
+                onDescriptionChange = {},
+                imageUri = null,
+                onImageUriChange = {},
+                onRemoveImageClick = {},
+            )
         }
     }
 }

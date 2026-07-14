@@ -14,7 +14,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
@@ -30,29 +29,28 @@ class HomeViewModel @Inject constructor(
 
     var query by mutableStateOf("")
         private set
-
     var isSearchActive by mutableStateOf(false)
         private set
 
     @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
-    val state = snapshotFlow { query }
-        .debounce(500)
-        .distinctUntilChanged()
-        .flatMapLatest { query ->
+    // StateFlow with the current state of the search
+    val state = snapshotFlow { query } // Convert query to a flow
+        .debounce(500) // Debounce the flow to avoid making too many requests
+        .distinctUntilChanged() // Only emit a new value if it's different from the previous one
+        .flatMapLatest { query -> // Switch to a new flow based on the query
             if (query.isBlank()) {
                 getDefinitionsUseCase()
             } else {
                 searchDefinitionUseCase(query)
             }
         }
-        .map { HomeState.Success(it) as HomeState }
-        .catch { emit(HomeState.Error) }
+        .map { HomeState.Success(it) as HomeState } // Convert the flow to a state
+        .catch { emit(HomeState.Error) } // Catch any errors and emit an error state
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = HomeState.Loading
         )
-
 
     val definitionsCount = state
         .map {
@@ -88,7 +86,6 @@ class HomeViewModel @Inject constructor(
 
     sealed interface HomeCommand {
         data class QueryInput(val query: String) : HomeCommand
-
         data object SearchActive : HomeCommand
     }
 }

@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -23,6 +22,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,10 +35,11 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vladusecho.lexicon.R
 import com.vladusecho.lexicon.domain.entity.Definition
+import com.vladusecho.lexicon.presentation.element.ErrorView
+import com.vladusecho.lexicon.presentation.element.LoadingView
 import com.vladusecho.lexicon.presentation.element.ShortDefinition
 import com.vladusecho.lexicon.presentation.ui.theme.LexiconTheme
 import com.vladusecho.lexicon.presentation.viewmodel.HomeViewModel
-import kotlin.math.sin
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,13 +49,10 @@ fun HomeScreen(
     onAddDefinitionClick: () -> Unit
 ) {
 
-    val state = viewModel.state.collectAsStateWithLifecycle()
-    val currentState = state.value
+    val currentState by viewModel.state.collectAsStateWithLifecycle()
+    val definitionsCountValue by viewModel.definitionsCount.collectAsStateWithLifecycle()
 
-    val definitionsCount = viewModel.definitionsCount.collectAsStateWithLifecycle()
-    val definitionsCountValue = definitionsCount.value
-
-    Column() {
+    Column {
         CenterAlignedTopAppBar(
             title = {
                 Text(
@@ -113,23 +111,15 @@ fun HomeScreenContent(
 ) {
     when (currentState) {
         HomeViewModel.HomeState.Error -> {
-
+            ErrorView()
         }
 
         HomeViewModel.HomeState.Loading -> {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(
-                    color = MaterialTheme.colorScheme.tertiary
-                )
-            }
+            LoadingView()
         }
 
         is HomeViewModel.HomeState.Success -> {
-            Column() {
+            Column {
                 if (isSearchActive) {
                     Spacer(modifier = Modifier.height(16.dp))
                     TextField(
@@ -243,7 +233,7 @@ fun DefinitionsListWithAlphabetTitle(
     showBackground = true
 )
 fun HomeScreenSuccessPreview() {
-    LexiconTheme() {
+    LexiconTheme {
         Box(
             modifier = Modifier
                 .fillMaxSize(),
@@ -283,13 +273,31 @@ fun HomeScreenSuccessPreview() {
     showBackground = true
 )
 fun HomeScreenLoadingPreview() {
-    LexiconTheme() {
+    LexiconTheme {
         Box(
             modifier = Modifier
                 .fillMaxSize(),
         ) {
             HomeScreenContent(
                 currentState = HomeViewModel.HomeState.Loading,
+                onShortDefinitionClick = {}
+            )
+        }
+    }
+}
+
+@Composable
+@Preview(
+    showBackground = true
+)
+fun HomeScreenErrorPreview() {
+    LexiconTheme {
+        Box(
+            modifier = Modifier
+                .fillMaxSize(),
+        ) {
+            HomeScreenContent(
+                currentState = HomeViewModel.HomeState.Error,
                 onShortDefinitionClick = {}
             )
         }

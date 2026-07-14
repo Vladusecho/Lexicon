@@ -29,9 +29,9 @@ import kotlinx.coroutines.launch
     assistedFactory = EditDefinitionViewModelFactory::class
 )
 class EditDefinitionViewModel @AssistedInject constructor(
-    private val getDefinitionByIdUseCase: GetDefinitionByIdUseCase,
+    getDefinitionByIdUseCase: GetDefinitionByIdUseCase,
+    checkIsFavouriteUseCase: CheckIsFavouriteUseCase,
     private val editDefinitionUseCase: EditDefinitionUseCase,
-    private val checkIsFavouriteUseCase: CheckIsFavouriteUseCase,
     private val fileManagerHelper: FileManagerHelper,
     @Assisted("id") private val id: Int
 ) : ViewModel() {
@@ -80,7 +80,7 @@ class EditDefinitionViewModel @AssistedInject constructor(
                 viewModelScope.launch {
                     val currentImageUri = imageUri
                     val finalImageUri = if (currentImageUri == null) {
-                         null
+                        null
                     } else if (currentImageUri.toString().startsWith("content://")) {
                         fileManagerHelper.saveImageToInternalStorage(currentImageUri)
                     } else {

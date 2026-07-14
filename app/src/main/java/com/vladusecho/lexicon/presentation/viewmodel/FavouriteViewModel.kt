@@ -29,24 +29,23 @@ class FavouriteViewModel @Inject constructor(
 
     var query by mutableStateOf("")
         private set
-
     var isSearchActive by mutableStateOf(false)
         private set
 
-
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
-    val state = snapshotFlow { query }
-        .debounce(500)
-        .distinctUntilChanged()
-        .flatMapLatest { query ->
+    // StateFlow with the current state of the search
+    val state = snapshotFlow { query } // Convert query to a flow
+        .debounce(500) // Debounce the flow to avoid making too many requests
+        .distinctUntilChanged() // Only emit a new value if it's different from the previous one
+        .flatMapLatest { query -> // Switch to a new flow based on the query
             if (query.isBlank()) {
                 getFavoritesUseCase()
             } else {
                 searchDefinitionUseCase(query, true)
             }
         }
-        .map { FavouriteState.Success(it) as FavouriteState}
-        .catch { emit(FavouriteState.Error) }
+        .map { FavouriteState.Success(it) as FavouriteState } // Convert the flow to a state
+        .catch { emit(FavouriteState.Error) } // Catch any errors and emit an error state
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -88,7 +87,6 @@ class FavouriteViewModel @Inject constructor(
 
     sealed interface FavouriteCommand {
         data class QueryInput(val query: String) : FavouriteCommand
-
         data object SearchActive : FavouriteCommand
     }
 }

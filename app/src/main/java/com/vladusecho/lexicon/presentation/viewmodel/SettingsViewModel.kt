@@ -17,29 +17,32 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val getSettingsUseCase: GetSettingsUseCase,
+    getSettingsUseCase: GetSettingsUseCase,
     private val toggleDarkModeUseCase: ToggleDarkModeUseCase
 ) : ViewModel() {
 
+    // Flow with the current settings
     val settings = getSettingsUseCase()
 
+    // StateFlow with the current settings
     val state = settings
         .map { SettingsState.Success(it) as SettingsState }
         .catch { emit(SettingsState.Error) }
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
+            started = SharingStarted.WhileSubscribed(5000),
             initialValue = SettingsState.Loading
         )
 
     val isSettingsLoaded = mutableStateOf(true)
 
+    // StateFlow with the current dark mode setting
     val isDarkMode = settings
         .map { it.isDarkMode }
         .onEach { isSettingsLoaded.value = false }
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
+            started = SharingStarted.WhileSubscribed(5000),
             initialValue = false
         )
 
