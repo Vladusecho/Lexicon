@@ -194,7 +194,7 @@ fun EditDefinitionScreenContent(
         }
 
         EditDefinitionViewModel.EditDefinitionState.Loading -> {
-            LoadingView()
+//            LoadingView()
         }
 
         is EditDefinitionViewModel.EditDefinitionState.Success -> {

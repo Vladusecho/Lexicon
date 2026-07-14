@@ -210,7 +210,7 @@ fun DetailsScreenContent(
         }
 
         DetailsViewModel.DetailsState.Loading -> {
-            LoadingView()
+//            LoadingView()
         }
 
         is DetailsViewModel.DetailsState.Success -> {

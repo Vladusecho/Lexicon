@@ -74,7 +74,7 @@ fun SettingsScreenContent(
         }
 
         SettingsViewModel.SettingsState.Loading -> {
-            LoadingView()
+//            LoadingView()
         }
 
         is SettingsViewModel.SettingsState.Success -> {

@@ -345,7 +345,7 @@ fun CreateDefinitionScreenContent(
         }
 
         CreateDefinitionViewModel.CreateDefinitionState.Loading -> {
-            LoadingView()
+//            LoadingView()
         }
     }
 }
