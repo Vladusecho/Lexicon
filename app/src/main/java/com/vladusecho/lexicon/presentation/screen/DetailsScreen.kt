@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -32,7 +31,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -44,6 +42,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.vladusecho.lexicon.R
 import com.vladusecho.lexicon.domain.entity.Definition
+import com.vladusecho.lexicon.presentation.element.ErrorView
+import com.vladusecho.lexicon.presentation.element.LoadingView
 import com.vladusecho.lexicon.presentation.ui.theme.LexiconTheme
 import com.vladusecho.lexicon.presentation.viewmodel.DetailsViewModel
 import com.vladusecho.lexicon.presentation.viewmodel.DetailsViewModelFactory
@@ -64,11 +64,8 @@ fun DetailsScreen(
     onDeleteClick: () -> Unit
 ) {
 
-    val state = viewModel.state.collectAsStateWithLifecycle()
-    val currentState = state.value
-
-    val isFavoriteState = viewModel.isFavorite.collectAsStateWithLifecycle()
-    val isFavorite = isFavoriteState.value
+    val currentState by viewModel.state.collectAsStateWithLifecycle()
+    val isFavorite by viewModel.isFavourite.collectAsStateWithLifecycle()
 
     var displayActions by remember { mutableStateOf(false) }
 
@@ -82,7 +79,7 @@ fun DetailsScreen(
         }
     }
 
-    Column() {
+    Column {
         CenterAlignedTopAppBar(
             title = {
                 Text(
@@ -146,7 +143,7 @@ fun DetailsScreen(
                         DropdownMenuItem(
                             onClick = {
                                 viewModel.processCommand(
-                                    DetailsViewModel.DetailsCommand.ToggleFavourite(id)
+                                    DetailsViewModel.DetailsCommand.ToggleFavourite
                                 )
                             },
                             text = {
@@ -209,19 +206,11 @@ fun DetailsScreenContent(
 ) {
     when (currentState) {
         DetailsViewModel.DetailsState.Error -> {
-
+            ErrorView()
         }
 
         DetailsViewModel.DetailsState.Loading -> {
-            Box(
-                modifier = modifier
-                    .fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(
-                    color = Color(0xff0d1e25)
-                )
-            }
+            LoadingView()
         }
 
         is DetailsViewModel.DetailsState.Success -> {
@@ -297,7 +286,7 @@ fun DetailsScreenContent(
     showBackground = true
 )
 fun DetailsScreenSuccessPreview() {
-    LexiconTheme() {
+    LexiconTheme {
         Box(
             modifier = Modifier
                 .fillMaxSize(),
@@ -316,12 +305,31 @@ fun DetailsScreenSuccessPreview() {
     }
 }
 
+
+@Composable
+@Preview(
+    showBackground = true
+)
+fun DetailsScreenErrorPreview() {
+    LexiconTheme {
+        Box(
+            modifier = Modifier
+                .fillMaxSize(),
+        ) {
+            DetailsScreenContent(
+                currentState = DetailsViewModel.DetailsState.Error
+            )
+        }
+    }
+}
+
+
 @Composable
 @Preview(
     showBackground = true
 )
 fun DetailsScreenLoadingPreview() {
-    LexiconTheme() {
+    LexiconTheme {
         Box(
             modifier = Modifier
                 .fillMaxSize(),

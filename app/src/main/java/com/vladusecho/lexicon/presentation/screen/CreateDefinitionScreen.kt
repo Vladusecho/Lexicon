@@ -30,6 +30,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,15 +45,15 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.vladusecho.lexicon.R
 import com.vladusecho.lexicon.domain.entity.Definition
+import com.vladusecho.lexicon.presentation.element.ErrorView
+import com.vladusecho.lexicon.presentation.element.LoadingView
 import com.vladusecho.lexicon.presentation.ui.theme.LexiconTheme
 import com.vladusecho.lexicon.presentation.viewmodel.CreateDefinitionViewModel
-import kotlin.random.Random
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -61,8 +62,7 @@ fun CreateDefinitionScreen(
     onBackClick: () -> Unit,
 ) {
 
-    val state = viewModel.state.collectAsStateWithLifecycle()
-    val currentState = state.value
+    val currentState by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(key1 = Unit) {
         viewModel.event.collect { event ->
@@ -97,7 +97,7 @@ fun CreateDefinitionScreen(
                         viewModel.processCommand(
                             CreateDefinitionViewModel.CreateDefinitionCommand.CreateDefinition(
                                 definition = Definition(
-                                    id = Random.nextInt(),
+                                    id = 0,
                                     word = formattedWord,
                                     description = viewModel.description,
                                     isFavorite = false,
@@ -171,6 +171,7 @@ fun CreateDefinitionScreenContent(
     onRemoveImageClick: () -> Unit
 ) {
 
+    // Create a launcher for the image picker
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
         onResult = {
@@ -182,7 +183,7 @@ fun CreateDefinitionScreenContent(
 
     when (currentState) {
         CreateDefinitionViewModel.CreateDefinitionState.Error -> {
-
+            ErrorView()
         }
 
         CreateDefinitionViewModel.CreateDefinitionState.Success -> {
@@ -223,7 +224,7 @@ fun CreateDefinitionScreenContent(
                                 Box(
                                     modifier = Modifier
                                         .clip(RoundedCornerShape(16.dp))
-                                        .clickable{
+                                        .clickable {
                                             onRemoveImageClick()
                                         }
                                         .background(Color.Red)
@@ -344,7 +345,7 @@ fun CreateDefinitionScreenContent(
         }
 
         CreateDefinitionViewModel.CreateDefinitionState.Loading -> {
-
+            LoadingView()
         }
     }
 }
@@ -354,9 +355,47 @@ fun CreateDefinitionScreenContent(
     showBackground = true
 )
 fun CreateDefinitionScreenSuccessPreview() {
-    LexiconTheme() {
+    LexiconTheme {
         CreateDefinitionScreenContent(
             currentState = CreateDefinitionViewModel.CreateDefinitionState.Success,
+            word = "Толерантность",
+            description = "характер, когда человек не обращает внимания на действия остальных людей",
+            onWordChange = {},
+            onDescriptionChange = {},
+            imageUri = null,
+            onImageUriChange = {},
+            onRemoveImageClick = {},
+        )
+    }
+}
+
+@Composable
+@Preview(
+    showBackground = true
+)
+fun CreateDefinitionScreenErrorPreview() {
+    LexiconTheme {
+        CreateDefinitionScreenContent(
+            currentState = CreateDefinitionViewModel.CreateDefinitionState.Error,
+            word = "Толерантность",
+            description = "характер, когда человек не обращает внимания на действия остальных людей",
+            onWordChange = {},
+            onDescriptionChange = {},
+            imageUri = null,
+            onImageUriChange = {},
+            onRemoveImageClick = {},
+        )
+    }
+}
+
+@Composable
+@Preview(
+    showBackground = true
+)
+fun CreateDefinitionScreenLoadingPreview() {
+    LexiconTheme {
+        CreateDefinitionScreenContent(
+            currentState = CreateDefinitionViewModel.CreateDefinitionState.Loading,
             word = "Толерантность",
             description = "характер, когда человек не обращает внимания на действия остальных людей",
             onWordChange = {},

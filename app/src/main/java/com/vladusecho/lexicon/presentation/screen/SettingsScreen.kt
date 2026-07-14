@@ -16,6 +16,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,6 +28,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vladusecho.lexicon.domain.entity.Settings
+import com.vladusecho.lexicon.presentation.element.ErrorView
+import com.vladusecho.lexicon.presentation.element.LoadingView
 import com.vladusecho.lexicon.presentation.ui.theme.LexiconTheme
 import com.vladusecho.lexicon.presentation.viewmodel.SettingsViewModel
 
@@ -36,10 +39,9 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
 
-    val state = viewModel.state.collectAsStateWithLifecycle()
-    val currentState = state.value
+    val currentState by viewModel.state.collectAsStateWithLifecycle()
 
-    Column() {
+    Column {
         CenterAlignedTopAppBar(
             title = {
                 Text(
@@ -68,11 +70,11 @@ fun SettingsScreenContent(
 ) {
     when (currentState) {
         SettingsViewModel.SettingsState.Error -> {
-
+            ErrorView()
         }
 
         SettingsViewModel.SettingsState.Loading -> {
-
+            LoadingView()
         }
 
         is SettingsViewModel.SettingsState.Success -> {
@@ -94,7 +96,7 @@ fun SettingsScreenContent(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Темная тема",
+                        text = "Тёмная тема",
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.tertiary
                     )
@@ -127,7 +129,7 @@ fun SettingsScreenContent(
     showBackground = true
 )
 fun SettingsScreenSuccessPreview() {
-    LexiconTheme() {
+    LexiconTheme {
         SettingsScreenContent(
             currentState = SettingsViewModel.SettingsState.Success(
                 settings = Settings(
@@ -138,3 +140,30 @@ fun SettingsScreenSuccessPreview() {
         )
     }
 }
+
+@Composable
+@Preview(
+    showBackground = true
+)
+fun SettingsScreenLoadingPreview() {
+    LexiconTheme {
+        SettingsScreenContent(
+            currentState = SettingsViewModel.SettingsState.Loading,
+            onDarkModeClick = {}
+        )
+    }
+}
+
+@Composable
+@Preview(
+    showBackground = true
+)
+fun SettingsScreenErrorPreview() {
+    LexiconTheme {
+        SettingsScreenContent(
+            currentState = SettingsViewModel.SettingsState.Error,
+            onDarkModeClick = {}
+        )
+    }
+}
+

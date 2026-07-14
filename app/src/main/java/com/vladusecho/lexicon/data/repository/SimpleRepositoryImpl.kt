@@ -5,16 +5,16 @@ import com.vladusecho.lexicon.data.local.DataStoreHelper
 import com.vladusecho.lexicon.data.local.dataStore
 import com.vladusecho.lexicon.domain.entity.Definition
 import com.vladusecho.lexicon.domain.entity.Settings
-import com.vladusecho.lexicon.domain.repository.DefinitionRepository
+import com.vladusecho.lexicon.domain.repository.SimpleRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 
-class SimpleDefinitionRepositoryImpl @Inject constructor(
+class SimpleRepositoryImpl @Inject constructor(
     private val dataStoreHelper: DataStoreHelper
-) : DefinitionRepository {
+) : SimpleRepository {
 
     private val _definitions = MutableStateFlow(
         listOf(
@@ -101,10 +101,20 @@ class SimpleDefinitionRepositoryImpl @Inject constructor(
     override fun search(query: String, searchFavourite: Boolean): Flow<List<Definition>> {
         return _definitions.map {
             if (searchFavourite) {
-                it.filter { definition -> definition.isFavorite && definition.word.startsWith(query.trim(), ignoreCase = true) }
+                it.filter { definition ->
+                    definition.isFavorite && definition.word.startsWith(
+                        query.trim(),
+                        ignoreCase = true
+                    )
+                }
                     .sortedBy { definition -> definition.word.lowercase() }
             } else {
-                it.filter { definition -> definition.word.startsWith(query.trim(), ignoreCase = true) }
+                it.filter { definition ->
+                    definition.word.startsWith(
+                        query.trim(),
+                        ignoreCase = true
+                    )
+                }
                     .sortedBy { definition -> definition.word.lowercase() }
             }
         }

@@ -6,22 +6,14 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.navigation
-import androidx.navigation.toRoute
 import com.vladusecho.lexicon.presentation.navigation.navGraph.favouritesScreenGraph
 import com.vladusecho.lexicon.presentation.navigation.navGraph.homeScreenGraph
-import com.vladusecho.lexicon.presentation.screen.CreateDefinitionScreen
-import com.vladusecho.lexicon.presentation.screen.DetailsScreen
-import com.vladusecho.lexicon.presentation.screen.EditDefinitionScreen
-import com.vladusecho.lexicon.presentation.screen.FavouriteScreen
-import com.vladusecho.lexicon.presentation.screen.HomeScreen
 import com.vladusecho.lexicon.presentation.screen.SettingsScreen
 
 @Composable
 fun AppNavGraph(
-    navState: NavigationState,
+    navState: NavigationState
 ) {
-
     NavHost(
         navController = navState.navHostController,
         startDestination = NavScreen.HomeGraph,

@@ -1,10 +1,16 @@
 package com.vladusecho.lexicon.di
 
 import android.content.Context
+import androidx.room.Room
+import com.vladusecho.lexicon.data.local.AppDatabase
 import com.vladusecho.lexicon.data.local.DataStoreHelper
 import com.vladusecho.lexicon.data.local.FileManagerHelper
-import com.vladusecho.lexicon.data.repository.SimpleDefinitionRepositoryImpl
-import com.vladusecho.lexicon.domain.repository.DefinitionRepository
+import com.vladusecho.lexicon.data.repository.DefinitionsRepositoryImpl
+import com.vladusecho.lexicon.data.repository.FavouritesRepositoryImpl
+import com.vladusecho.lexicon.data.repository.SettingsRepositoryImpl
+import com.vladusecho.lexicon.domain.repository.DefinitionsRepository
+import com.vladusecho.lexicon.domain.repository.FavouritesRepository
+import com.vladusecho.lexicon.domain.repository.SettingsRepository
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -20,10 +26,39 @@ interface DataModule {
     @Binds
     @Singleton
     fun bindDefinitionRepository(
-        definitionRepositoryImpl: SimpleDefinitionRepositoryImpl
-    ): DefinitionRepository
+        definitionRepositoryImpl: DefinitionsRepositoryImpl
+    ): DefinitionsRepository
+
+    @Binds
+    @Singleton
+    fun bindSettingsRepository(
+        settingsRepositoryImpl: SettingsRepositoryImpl
+    ): SettingsRepository
+
+    @Binds
+    @Singleton
+    fun bindFavouritesRepository(
+        favouritesRepositoryImpl: FavouritesRepositoryImpl
+    ): FavouritesRepository
 
     companion object {
+
+        @Provides
+        @Singleton
+        fun provideAppDatabase(
+            @ApplicationContext context: Context
+        ) = Room.databaseBuilder(
+            context,
+            AppDatabase::class.java,
+            "app_database"
+        ).build()
+
+        @Provides
+        @Singleton
+        fun provideAppDao(
+            appDatabase: AppDatabase
+        ) = appDatabase.appDao()
+
 
         @Provides
         @Singleton

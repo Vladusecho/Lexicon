@@ -10,7 +10,6 @@ val DarkCyanBlue = Color(0xff0d1e25)
 //Light mode
 
 val LightGrayishBlue = Color(0xffC1CACE)
-val GrayishBlue = Color(0xff4A5260)
 
 //Others
 

@@ -24,18 +24,19 @@ import kotlinx.coroutines.launch
     assistedFactory = DetailsViewModelFactory::class
 )
 class DetailsViewModel @AssistedInject constructor(
-    private val getDefinitionByIdUseCase: GetDefinitionByIdUseCase,
+    getDefinitionByIdUseCase: GetDefinitionByIdUseCase,
+    checkIsFavouriteUseCase: CheckIsFavouriteUseCase,
     private val deleteDefinitionUseCase: DeleteDefinitionUseCase,
-    private val checkIsFavouriteUseCase: CheckIsFavouriteUseCase,
     private val toggleFavouriteUseCase: ToggleFavouriteUseCase,
     @Assisted("id") private val id: Int
 ) : ViewModel() {
 
+    // StateFlow with the current state of the definition
     val state: StateFlow<DetailsState> = getDefinitionByIdUseCase(id)
         .map { definition ->
             DetailsState.Success(definition) as DetailsState
-        }
-        .catch { emit(DetailsState.Error) }
+        } // Convert the flow to a state
+        .catch { emit(DetailsState.Error) } // Catch any errors and emit an error state
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -45,7 +46,7 @@ class DetailsViewModel @AssistedInject constructor(
     private val _event = MutableSharedFlow<DetailsEvent>()
     val event = _event.asSharedFlow()
 
-    val isFavorite: StateFlow<Boolean> = checkIsFavouriteUseCase(id)
+    val isFavourite: StateFlow<Boolean> = checkIsFavouriteUseCase(id)
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -61,7 +62,7 @@ class DetailsViewModel @AssistedInject constructor(
                 }
 
                 is DetailsCommand.ToggleFavourite -> {
-                    toggleFavouriteUseCase(id)
+                    toggleFavouriteUseCase(id, !isFavourite.value)
                 }
             }
         }
@@ -75,8 +76,7 @@ class DetailsViewModel @AssistedInject constructor(
 
     sealed interface DetailsCommand {
         data object DeleteDefinition : DetailsCommand
-
-        data class ToggleFavourite(val id: Int) : DetailsCommand
+        data object ToggleFavourite : DetailsCommand
     }
 
     sealed interface DetailsEvent {
