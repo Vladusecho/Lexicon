@@ -34,6 +34,7 @@ class HomeViewModel @Inject constructor(
     var selectedFilter by mutableStateOf(FilterChips.ALL)
         private set
 
+
     @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
     // StateFlow with the current state of the search
     val state = combine(
@@ -50,7 +51,10 @@ class HomeViewModel @Inject constructor(
         )
     } // Combine the 3 flows into a triple
         .map { (query, selectedFilter, definitions) -> // Switch to a new flow based on the selected filter
-            when (selectedFilter) {
+
+            val showAlphabetHeaders = definitions.isNotEmpty() && selectedFilter != FilterChips.RECENT
+
+            val filteredList = when (selectedFilter) {
                 FilterChips.ALL -> {
                     definitions
                 }
@@ -63,8 +67,8 @@ class HomeViewModel @Inject constructor(
                     definitions.sortedByDescending { definition -> definition.id }.take(3)
                 }
             }.filter { definition -> definition.word.startsWith(query.trim(), ignoreCase = true) }
+            HomeState.Success(filteredList, showAlphabetHeaders) as HomeState  // Convert the flow to a state
         }
-        .map { HomeState.Success(it) as HomeState } // Convert the flow to a state
         .catch { emit(HomeState.Error) } // Catch any errors and emit an error state
         .stateIn(
             scope = viewModelScope,
@@ -91,11 +95,6 @@ class HomeViewModel @Inject constructor(
                 query = command.query
             }
 
-            HomeCommand.SearchActive -> {
-                isSearchActive = !isSearchActive
-                if (!isSearchActive) query = ""
-            }
-
             is HomeCommand.FilterClick -> {
                 selectedFilter = command.filter
             }
@@ -103,14 +102,17 @@ class HomeViewModel @Inject constructor(
     }
 
     sealed interface HomeState {
-        data class Success(val definitions: List<Definition>) : HomeState
+        data class Success(
+            val definitions: List<Definition>,
+            val showAlphabetHeaders: Boolean
+        ) : HomeState
+
         object Loading : HomeState
         object Error : HomeState
     }
 
     sealed interface HomeCommand {
         data class QueryInput(val query: String) : HomeCommand
-        data object SearchActive : HomeCommand
 
         data class FilterClick(
             val filter: FilterChips

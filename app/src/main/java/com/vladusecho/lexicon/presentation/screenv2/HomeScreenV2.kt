@@ -167,44 +167,52 @@ fun HomeScreenV2Content(
                     key = { index -> definitions[index].id }
                 ) { index ->
 
-                    val item = definitions[index]
+                    if (currentState.showAlphabetHeaders) {
+                        val item = definitions[index]
 
-                    val currentLetter = item.word.firstOrNull()?.uppercaseChar() ?: '?'
-                    val previousLetter = if (index > 0) {
-                        definitions[index - 1].word.firstOrNull()?.uppercaseChar()
-                    } else {
-                        null
-                    }
-
-                    val showHeader = previousLetter != currentLetter
-
-                    Column {
-                        if (showHeader) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 8.dp),
-                                horizontalArrangement = Arrangement.Center,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                HorizontalDivider(
-                                    modifier = Modifier.weight(1f)
-                                )
-                                Text(
-                                    text = currentLetter.toString(),
-                                    fontSize = 32.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color(0xff24389C),
-                                    modifier = Modifier.weight(1f),
-                                    textAlign = TextAlign.Center
-                                )
-                                HorizontalDivider(
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
+                        val currentLetter = item.word.firstOrNull()?.uppercaseChar() ?: '?'
+                        val previousLetter = if (index > 0) {
+                            definitions[index - 1].word.firstOrNull()?.uppercaseChar()
+                        } else {
+                            null
                         }
+
+                        val showHeader = previousLetter != currentLetter
+
+                        Column {
+                            if (showHeader) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp),
+                                    horizontalArrangement = Arrangement.Center,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    HorizontalDivider(
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    Text(
+                                        text = currentLetter.toString(),
+                                        fontSize = 32.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color(0xff24389C),
+                                        modifier = Modifier.weight(1f),
+                                        textAlign = TextAlign.Center
+                                    )
+                                    HorizontalDivider(
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                }
+                            }
+                            ShortDefinitionV2(
+                                definition = item,
+                                onClick = onShortDefinitionClick,
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                            )
+                        }
+                    } else {
                         ShortDefinitionV2(
-                            definition = item,
+                            definition = definitions[index],
                             onClick = onShortDefinitionClick,
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                         )
@@ -248,6 +256,20 @@ fun LexiconSearchBar(
                 painter = painterResource(id = R.drawable.ic_search),
                 contentDescription = null
             )
+        },
+        trailingIcon = {
+            if (value.isNotEmpty()) {
+                IconButton(
+                    onClick = {
+                        onValueChange("")
+                    }
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_eraser),
+                        contentDescription = null
+                    )
+                }
+            }
         }
     )
 }
@@ -367,7 +389,8 @@ fun HomeScreenContentSuccessPreview() {
                         description = "характер, когда человек не обращает внимания на действия остальных людей или животных",
                         isFavorite = false
                     )
-                )
+                ),
+                showAlphabetHeaders = true
             ),
             onShortDefinitionClick = {},
             value = "",

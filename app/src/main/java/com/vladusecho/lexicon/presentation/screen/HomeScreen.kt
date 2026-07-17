@@ -67,7 +67,7 @@ fun HomeScreen(
             actions = {
                 IconButton(
                     onClick = {
-                        viewModel.processCommand(HomeViewModel.HomeCommand.SearchActive)
+
                     }
                 ) {
                     Icon(
@@ -259,7 +259,8 @@ fun HomeScreenSuccessPreview() {
                             description = "характер, когда человек не обращает внимания на действия остальных людей",
                             isFavorite = false
                         ),
-                    )
+                    ),
+                    showAlphabetHeaders = true
                 ),
                 onShortDefinitionClick = {},
                 isSearchActive = true
