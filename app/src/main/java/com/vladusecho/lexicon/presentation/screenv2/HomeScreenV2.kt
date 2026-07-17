@@ -22,7 +22,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -30,6 +29,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,55 +41,24 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vladusecho.lexicon.R
 import com.vladusecho.lexicon.domain.entity.Definition
+import com.vladusecho.lexicon.presentation.element.LoadingView
 import com.vladusecho.lexicon.presentation.element.ShortDefinitionV2
 import com.vladusecho.lexicon.presentation.ui.theme.LexiconTheme
+import com.vladusecho.lexicon.presentation.viewmodel.HomeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-fun HomeScreen(
-
+fun HomeScreenV2(
+    viewModel: HomeViewModel = hiltViewModel(),
+    onShortDefinitionClick: (Int) -> Unit,
+    onAddDefinitionClick: () -> Unit
 ) {
 
-    val definitions = listOf(
-        Definition(
-            id = 1,
-            word = "Толерантность",
-            description = "характер, когда человек не обращает внимания на действия остальных людей или животных",
-            isFavorite = false
-        ),
-        Definition(
-            id = 2,
-            word = "Волерантность",
-            description = "характер, когда человек не обращает внимания на действия остальных людей или животных",
-            isFavorite = false
-        ),
-        Definition(
-            id = 3,
-            word = "Толерантность",
-            description = "характер, когда человек не обращает внимания на действия остальных людей или животных",
-            isFavorite = false
-        ),
-        Definition(
-            id = 4,
-            word = "Толерантность",
-            description = "характер, когда человек не обращает внимания на действия остальных людей или животных",
-            isFavorite = false
-        ),
-        Definition(
-            id = 6,
-            word = "Толерантность",
-            description = "характер, когда человек не обращает внимания на действия остальных людей или животных",
-            isFavorite = false
-        ),
-        Definition(
-            id = 7,
-            word = "Толерантность",
-            description = "характер, когда человек не обращает внимания на действия остальных людей или животных",
-            isFavorite = false
-        ),
-    )
+    val currentState by viewModel.state.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
@@ -108,7 +77,7 @@ fun HomeScreen(
                 ),
                 actions = {
                     IconButton(
-                        onClick = { }
+                        onClick = onAddDefinitionClick
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_add),
@@ -125,23 +94,61 @@ fun HomeScreen(
                 .fillMaxWidth()
                 .padding(top = paddingValues.calculateTopPadding())
         ) {
-            LazyColumn {
-                item {
-                    Spacer(Modifier.height(24.dp))
-                    LexiconSearchBar(
-                        value = "",
-                        onValueChange = {}
+            HomeScreenV2Content(
+                currentState = currentState,
+                onShortDefinitionClick = onShortDefinitionClick,
+                value = viewModel.query,
+                onValueChange = {
+                    viewModel.processCommand(
+                        HomeViewModel.HomeCommand.QueryInput(it)
                     )
                 }
-                stickyHeader {
-                    Spacer(Modifier.height(16.dp))
-                    FilterList(
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun HomeScreenV2Content(
+    currentState: HomeViewModel.HomeState,
+    onShortDefinitionClick: (Int) -> Unit,
+    value: String,
+    onValueChange: (String) -> Unit
+) {
+    LazyColumn {
+        item {
+            Spacer(Modifier.height(24.dp))
+            LexiconSearchBar(
+                value = value,
+                onValueChange = onValueChange
+            )
+        }
+        stickyHeader {
+            Spacer(Modifier.height(16.dp))
+            FilterList(
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+        item {
+            Spacer(Modifier.height(16.dp))
+        }
+
+        when (currentState) {
+            HomeViewModel.HomeState.Error -> {
+            }
+
+            HomeViewModel.HomeState.Loading -> {
                 item {
-                    Spacer(Modifier.height(16.dp))
+                    Spacer(Modifier.height(32.dp))
+                    LoadingView()
                 }
+            }
+
+            is HomeViewModel.HomeState.Success -> {
+
+                val definitions = currentState.definitions
+
                 items(
                     count = definitions.size,
                     key = { index -> definitions[index].id }
@@ -185,7 +192,7 @@ fun HomeScreen(
                         }
                         ShortDefinitionV2(
                             definition = item,
-                            onClick = {},
+                            onClick = onShortDefinitionClick,
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                         )
                     }
@@ -290,7 +297,66 @@ fun FilterButton(
 )
 fun HomeScreenContentSuccessPreview() {
     LexiconTheme {
-        HomeScreen()
+        HomeScreenV2Content(
+            currentState = HomeViewModel.HomeState.Success(
+                listOf(
+                    Definition(
+                        id = 1,
+                        word = "Толерантность",
+                        description = "характер, когда человек не обращает внимания на действия остальных людей или животных",
+                        isFavorite = false
+                    ),
+                    Definition(
+                        id = 2,
+                        word = "Волерантность",
+                        description = "характер, когда человек не обращает внимания на действия остальных людей или животных",
+                        isFavorite = false
+                    ),
+                    Definition(
+                        id = 3,
+                        word = "Толерантность",
+                        description = "характер, когда человек не обращает внимания на действия остальных людей или животных",
+                        isFavorite = false
+                    ),
+                    Definition(
+                        id = 4,
+                        word = "Толерантность",
+                        description = "характер, когда человек не обращает внимания на действия остальных людей или животных",
+                        isFavorite = false
+                    ),
+                    Definition(
+                        id = 6,
+                        word = "Толерантность",
+                        description = "характер, когда человек не обращает внимания на действия остальных людей или животных",
+                        isFavorite = false
+                    ),
+                    Definition(
+                        id = 7,
+                        word = "Толерантность",
+                        description = "характер, когда человек не обращает внимания на действия остальных людей или животных",
+                        isFavorite = false
+                    )
+                )
+            ),
+            onShortDefinitionClick = {},
+            value = "",
+            onValueChange = {}
+        )
+    }
+}
+
+@Composable
+@Preview(
+    showBackground = true
+)
+fun HomeScreenContentLoadingPreview() {
+    LexiconTheme {
+        HomeScreenV2Content(
+            currentState = HomeViewModel.HomeState.Loading,
+            onShortDefinitionClick = {},
+            value = "",
+            onValueChange = {}
+        )
     }
 }
 

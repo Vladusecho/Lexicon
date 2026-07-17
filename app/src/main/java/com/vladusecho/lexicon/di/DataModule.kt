@@ -8,6 +8,7 @@ import com.vladusecho.lexicon.data.local.FileManagerHelper
 import com.vladusecho.lexicon.data.repository.DefinitionsRepositoryImpl
 import com.vladusecho.lexicon.data.repository.FavouritesRepositoryImpl
 import com.vladusecho.lexicon.data.repository.SettingsRepositoryImpl
+import com.vladusecho.lexicon.data.repository.SimpleRepositoryImpl
 import com.vladusecho.lexicon.domain.repository.DefinitionsRepository
 import com.vladusecho.lexicon.domain.repository.FavouritesRepository
 import com.vladusecho.lexicon.domain.repository.SettingsRepository
@@ -26,7 +27,7 @@ interface DataModule {
     @Binds
     @Singleton
     fun bindDefinitionRepository(
-        definitionRepositoryImpl: DefinitionsRepositoryImpl
+        definitionRepositoryImpl: SimpleRepositoryImpl
     ): DefinitionsRepository
 
     @Binds
