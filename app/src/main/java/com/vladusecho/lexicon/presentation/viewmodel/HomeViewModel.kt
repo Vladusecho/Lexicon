@@ -60,7 +60,7 @@ class HomeViewModel @Inject constructor(
                 }
 
                 FilterChips.RECENT -> {
-                    definitions.sortedByDescending { definition -> definition.id }
+                    definitions.sortedByDescending { definition -> definition.id }.take(3)
                 }
             }.filter { definition -> definition.word.startsWith(query.trim(), ignoreCase = true) }
         }
