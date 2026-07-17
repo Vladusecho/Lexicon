@@ -27,7 +27,7 @@ interface DataModule {
     @Binds
     @Singleton
     fun bindDefinitionRepository(
-        definitionRepositoryImpl: SimpleRepositoryImpl
+        definitionRepositoryImpl: DefinitionsRepositoryImpl
     ): DefinitionsRepository
 
     @Binds

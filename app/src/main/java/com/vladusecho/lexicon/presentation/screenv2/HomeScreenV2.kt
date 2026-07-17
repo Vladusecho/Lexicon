@@ -102,6 +102,12 @@ fun HomeScreenV2(
                     viewModel.processCommand(
                         HomeViewModel.HomeCommand.QueryInput(it)
                     )
+                },
+                selectedFilter = viewModel.selectedFilter,
+                onFilterClick = {
+                    viewModel.processCommand(
+                        HomeViewModel.HomeCommand.FilterClick(it)
+                    )
                 }
             )
         }
@@ -114,7 +120,9 @@ fun HomeScreenV2Content(
     currentState: HomeViewModel.HomeState,
     onShortDefinitionClick: (Int) -> Unit,
     value: String,
-    onValueChange: (String) -> Unit
+    onValueChange: (String) -> Unit,
+    selectedFilter: FilterChips,
+    onFilterClick: (FilterChips) -> Unit
 ) {
     LazyColumn {
         item {
@@ -127,7 +135,9 @@ fun HomeScreenV2Content(
         stickyHeader {
             Spacer(Modifier.height(16.dp))
             FilterList(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                selectedFilter = selectedFilter,
+                onFilterClick = onFilterClick
             )
         }
         item {
@@ -241,7 +251,9 @@ fun LexiconSearchBar(
 
 @Composable
 fun FilterList(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    selectedFilter: FilterChips,
+    onFilterClick: (FilterChips) -> Unit
 ) {
     LazyRow(
         contentPadding = PaddingValues(horizontal = 16.dp),
@@ -252,8 +264,8 @@ fun FilterList(
             FilterButton(
                 name = it.label,
                 iconId = it.iconId,
-                isSelected = it == FilterChips.ALL,
-                onClick = {}
+                isSelected = selectedFilter == it,
+                onClick = { onFilterClick(it) }
             )
         }
     }
@@ -340,7 +352,9 @@ fun HomeScreenContentSuccessPreview() {
             ),
             onShortDefinitionClick = {},
             value = "",
-            onValueChange = {}
+            onValueChange = {},
+            selectedFilter = FilterChips.ALL,
+            onFilterClick = {}
         )
     }
 }
@@ -355,7 +369,9 @@ fun HomeScreenContentLoadingPreview() {
             currentState = HomeViewModel.HomeState.Loading,
             onShortDefinitionClick = {},
             value = "",
-            onValueChange = {}
+            onValueChange = {},
+            selectedFilter = FilterChips.ALL,
+            onFilterClick = {}
         )
     }
 }
