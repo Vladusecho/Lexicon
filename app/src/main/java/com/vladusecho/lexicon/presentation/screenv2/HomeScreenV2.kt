@@ -1,5 +1,6 @@
 package com.vladusecho.lexicon.presentation.screenv2
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,12 +16,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,40 +40,10 @@ import com.vladusecho.lexicon.domain.entity.Definition
 import com.vladusecho.lexicon.presentation.element.ShortDefinitionV2
 import com.vladusecho.lexicon.presentation.ui.theme.LexiconTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(
 
-) {
-    Column() {
-        TopAppBar(
-            title = {
-                Text(
-                    text = "Lexicon",
-                    fontWeight = FontWeight.ExtraBold,
-                    color = Color(0xff24389C)
-                )
-            },
-            modifier = Modifier
-                .shadow(elevation = 3.dp)
-        )
-        Spacer(Modifier.height(24.dp))
-        LexiconSearchBar(
-            value = "",
-            onValueChange = {}
-        )
-        Spacer(Modifier.height(16.dp))
-        FilterList(
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(Modifier.height(16.dp))
-        DefinitionsList()
-    }
-}
-
-@Composable
-fun DefinitionsList(
-    modifier: Modifier = Modifier
 ) {
 
     val definitions = listOf(
@@ -85,17 +59,79 @@ fun DefinitionsList(
             description = "характер, когда человек не обращает внимания на действия остальных людей или животных",
             isFavorite = false
         ),
+        Definition(
+            id = 3,
+            word = "Толерантность",
+            description = "характер, когда человек не обращает внимания на действия остальных людей или животных",
+            isFavorite = false
+        ),
+        Definition(
+            id = 4,
+            word = "Толерантность",
+            description = "характер, когда человек не обращает внимания на действия остальных людей или животных",
+            isFavorite = false
+        ),
+        Definition(
+            id = 1,
+            word = "Толерантность",
+            description = "характер, когда человек не обращает внимания на действия остальных людей или животных",
+            isFavorite = false
+        ),
+        Definition(
+            id = 2,
+            word = "Толерантность",
+            description = "характер, когда человек не обращает внимания на действия остальных людей или животных",
+            isFavorite = false
+        ),
     )
 
-    LazyColumn(
-        contentPadding = PaddingValues(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        modifier = modifier
-    ) {
-        items(items = definitions) {
-            ShortDefinitionV2(
-                definition = it
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = "Lexicon",
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color(0xff24389C)
+                    )
+                },
+                modifier = Modifier
+                    .shadow(elevation = 3.dp),
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.White
+                )
             )
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(paddingValues)
+        ) {
+            LazyColumn {
+                item {
+                    Spacer(Modifier.height(24.dp))
+                    LexiconSearchBar(
+                        value = "",
+                        onValueChange = {}
+                    )
+                }
+                stickyHeader {
+                    Spacer(Modifier.height(16.dp))
+                    FilterList(
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+                item {
+                    Spacer(Modifier.height(16.dp))
+                }
+                items(items = definitions) {
+                    ShortDefinitionV2(
+                        definition = it,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
+                }
+            }
         }
     }
 }
@@ -162,8 +198,8 @@ fun FilterButton(
 ) {
     Row(
         modifier = modifier
-            .clip(CircleShape)
-            .background(if(isSelected) Color(0xff3F51B5) else Color(0xffE7E8E9))
+            .clip(RoundedCornerShape(16.dp))
+            .background(if (isSelected) Color(0xff3F51B5) else Color(0xffE7E8E9))
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -171,12 +207,12 @@ fun FilterButton(
             painter = painterResource(id = iconId),
             contentDescription = null,
             modifier = Modifier.size(16.dp),
-            tint = if(isSelected) Color.White else Color.Black
+            tint = if (isSelected) Color.White else Color.Black
         )
         Spacer(Modifier.width(8.dp))
         Text(
             text = name,
-            color = if(isSelected) Color.White else Color.Black
+            color = if (isSelected) Color.White else Color.Black
         )
     }
 }
@@ -215,5 +251,9 @@ enum class FilterChips(val label: String, val iconId: Int) {
     FAVORITE(
         label = "Избранное",
         iconId = R.drawable.ic_favorite
+    ),
+    RECENT(
+        label = "Недавние",
+        iconId = R.drawable.ic_settings
     )
 }

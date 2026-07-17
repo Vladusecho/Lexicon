@@ -18,14 +18,15 @@ fun NavGraphBuilder.homeScreenGraph(
         startDestination = NavScreen.Home
     ) {
         composable<NavScreen.Home> {
-            HomeScreen(
-                onShortDefinitionClick = {
-                    navState.navHostController.navigate(NavScreen.Details(it))
-                },
-                onAddDefinitionClick = {
-                    navState.navHostController.navigate(NavScreen.CreateDefinition)
-                }
-            )
+//            HomeScreen(
+//                onShortDefinitionClick = {
+//                    navState.navHostController.navigate(NavScreen.Details(it))
+//                },
+//                onAddDefinitionClick = {
+//                    navState.navHostController.navigate(NavScreen.CreateDefinition)
+//                }
+//            )
+            com.vladusecho.lexicon.presentation.screenv2.HomeScreen()
         }
         composable<NavScreen.Details> { backStackEntry ->
             val args = backStackEntry.toRoute<NavScreen.Details>()
