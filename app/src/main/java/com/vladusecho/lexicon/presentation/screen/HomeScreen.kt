@@ -37,7 +37,7 @@ import com.vladusecho.lexicon.R
 import com.vladusecho.lexicon.domain.entity.Definition
 import com.vladusecho.lexicon.presentation.element.ErrorView
 import com.vladusecho.lexicon.presentation.element.LoadingView
-import com.vladusecho.lexicon.presentation.element.ShortDefinition
+import com.vladusecho.lexicon.presentation.element.ShortDefinitionV2
 import com.vladusecho.lexicon.presentation.ui.theme.LexiconTheme
 import com.vladusecho.lexicon.presentation.viewmodel.HomeViewModel
 
@@ -218,7 +218,7 @@ fun DefinitionsListWithAlphabetTitle(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                     }
-                    ShortDefinition(
+                    ShortDefinitionV2(
                         definition = item,
                         onClick = onShortDefinitionClick
                     )

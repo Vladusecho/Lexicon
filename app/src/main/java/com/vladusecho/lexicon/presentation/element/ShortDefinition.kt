@@ -22,7 +22,7 @@ import com.vladusecho.lexicon.domain.entity.Definition
 import com.vladusecho.lexicon.presentation.ui.theme.LexiconTheme
 
 @Composable
-fun ShortDefinition(
+fun ShortDefinitionV2(
     modifier: Modifier = Modifier,
     definition: Definition,
     onClick: (Int) -> Unit
@@ -65,7 +65,7 @@ fun ShortDefinitionLightPreview() {
                 .fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            ShortDefinition(
+            ShortDefinitionV2(
                 definition = Definition(
                     id = 0,
                     word = "Толерантность",
@@ -92,7 +92,7 @@ fun ShortDefinitionDarkPreview() {
                 .fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            ShortDefinition(
+            ShortDefinitionV2(
                 definition = Definition(
                     id = 0,
                     word = "Толерантность",

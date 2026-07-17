@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -31,6 +32,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.vladusecho.lexicon.R
+import com.vladusecho.lexicon.domain.entity.Definition
+import com.vladusecho.lexicon.presentation.element.ShortDefinitionV2
 import com.vladusecho.lexicon.presentation.ui.theme.LexiconTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -59,7 +62,41 @@ fun HomeScreen(
         FilterList(
             modifier = Modifier.fillMaxWidth()
         )
-        Spacer(Modifier.height(32.dp))
+        Spacer(Modifier.height(16.dp))
+        DefinitionsList()
+    }
+}
+
+@Composable
+fun DefinitionsList(
+    modifier: Modifier = Modifier
+) {
+
+    val definitions = listOf(
+        Definition(
+            id = 1,
+            word = "Толерантность",
+            description = "характер, когда человек не обращает внимания на действия остальных людей или животных",
+            isFavorite = false
+        ),
+        Definition(
+            id = 2,
+            word = "Толерантность",
+            description = "характер, когда человек не обращает внимания на действия остальных людей или животных",
+            isFavorite = false
+        ),
+    )
+
+    LazyColumn(
+        contentPadding = PaddingValues(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = modifier
+    ) {
+        items(items = definitions) {
+            ShortDefinitionV2(
+                definition = it
+            )
+        }
     }
 }
 
@@ -74,7 +111,8 @@ fun LexiconSearchBar(
         onValueChange = onValueChange,
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 16.dp)
+            .shadow(elevation = 1.dp, shape = CircleShape),
         colors = TextFieldDefaults.colors(
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
