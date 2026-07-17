@@ -2,6 +2,7 @@ package com.vladusecho.lexicon.presentation.element
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,12 +25,18 @@ import com.vladusecho.lexicon.presentation.ui.theme.LexiconTheme
 @Composable
 fun ShortDefinitionV2(
     modifier: Modifier = Modifier,
-    definition: Definition
+    definition: Definition,
+    onClick: (Int) -> Unit
 ) {
     Column(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
+            .clickable {
+                onClick(
+                    definition.id
+                )
+            }
             .border(1.dp, Color(0xffC5C5D4), RoundedCornerShape(16.dp))
             .background(Color.White)
             .padding(16.dp)
@@ -67,8 +74,9 @@ fun ShortDefinitionV2Preview() {
                 id = 1,
                 word = "Толерантность",
                 description = "характер, когда человек не обращает внимания на действия остальных людей или животных",
-                isFavorite = false
-            )
+                isFavorite = false,
+                ),
+            onClick = {}
         )
     }
 }

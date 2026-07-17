@@ -22,7 +22,7 @@ import com.vladusecho.lexicon.domain.entity.Definition
 import com.vladusecho.lexicon.presentation.ui.theme.LexiconTheme
 
 @Composable
-fun ShortDefinitionV2(
+fun ShortDefinition(
     modifier: Modifier = Modifier,
     definition: Definition,
     onClick: (Int) -> Unit

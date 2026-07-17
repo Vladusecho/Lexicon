@@ -2,6 +2,7 @@ package com.vladusecho.lexicon.presentation.screenv2
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -18,7 +19,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -33,8 +37,10 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.vladusecho.lexicon.R
 import com.vladusecho.lexicon.domain.entity.Definition
 import com.vladusecho.lexicon.presentation.element.ShortDefinitionV2
@@ -55,7 +61,7 @@ fun HomeScreen(
         ),
         Definition(
             id = 2,
-            word = "Толерантность",
+            word = "Волерантность",
             description = "характер, когда человек не обращает внимания на действия остальных людей или животных",
             isFavorite = false
         ),
@@ -72,13 +78,13 @@ fun HomeScreen(
             isFavorite = false
         ),
         Definition(
-            id = 1,
+            id = 6,
             word = "Толерантность",
             description = "характер, когда человек не обращает внимания на действия остальных людей или животных",
             isFavorite = false
         ),
         Definition(
-            id = 2,
+            id = 7,
             word = "Толерантность",
             description = "характер, когда человек не обращает внимания на действия остальных людей или животных",
             isFavorite = false
@@ -99,14 +105,25 @@ fun HomeScreen(
                     .shadow(elevation = 3.dp),
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.White
-                )
+                ),
+                actions = {
+                    IconButton(
+                        onClick = { }
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_add),
+                            contentDescription = null,
+                            tint = Color(0xff24389C)
+                        )
+                    }
+                }
             )
         }
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(paddingValues)
+                .padding(top = paddingValues.calculateTopPadding())
         ) {
             LazyColumn {
                 item {
@@ -125,11 +142,53 @@ fun HomeScreen(
                 item {
                     Spacer(Modifier.height(16.dp))
                 }
-                items(items = definitions) {
-                    ShortDefinitionV2(
-                        definition = it,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                    )
+                items(
+                    count = definitions.size,
+                    key = { index -> definitions[index].id }
+                ) { index ->
+
+                    val item = definitions[index]
+
+                    val currentLetter = item.word.firstOrNull()?.uppercaseChar() ?: '?'
+                    val previousLetter = if (index > 0) {
+                        definitions[index - 1].word.firstOrNull()?.uppercaseChar()
+                    } else {
+                        null
+                    }
+
+                    val showHeader = previousLetter != currentLetter
+
+                    Column {
+                        if (showHeader) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                HorizontalDivider(
+                                    modifier = Modifier.weight(1f)
+                                )
+                                Text(
+                                    text = currentLetter.toString(),
+                                    fontSize = 32.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xff24389C),
+                                    modifier = Modifier.weight(1f),
+                                    textAlign = TextAlign.Center
+                                )
+                                HorizontalDivider(
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                        }
+                        ShortDefinitionV2(
+                            definition = item,
+                            onClick = {},
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                        )
+                    }
                 }
             }
         }
@@ -154,7 +213,10 @@ fun LexiconSearchBar(
             unfocusedIndicatorColor = Color.Transparent,
             disabledIndicatorColor = Color.Transparent,
             errorIndicatorColor = Color.Transparent,
-            unfocusedContainerColor = Color(0xffF3F4F5)
+            unfocusedContainerColor = Color(0xffF3F4F5),
+            focusedContainerColor = Color(0xffF3F4F5),
+            disabledContainerColor = Color(0xffF3F4F5),
+            errorContainerColor = Color(0xffF3F4F5),
         ),
         shape = CircleShape,
         placeholder = {
@@ -183,7 +245,8 @@ fun FilterList(
             FilterButton(
                 name = it.label,
                 iconId = it.iconId,
-                isSelected = it == FilterChips.ALL
+                isSelected = it == FilterChips.ALL,
+                onClick = {}
             )
         }
     }
@@ -194,12 +257,16 @@ fun FilterButton(
     modifier: Modifier = Modifier,
     isSelected: Boolean,
     name: String,
-    iconId: Int
+    iconId: Int,
+    onClick: () -> Unit
 ) {
     Row(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
-            .background(if (isSelected) Color(0xff3F51B5) else Color(0xffE7E8E9))
+            .clickable {
+                onClick()
+            }
+            .background(if (isSelected) Color(0xff3F51B5) else Color(0xffedeeef))
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -231,7 +298,7 @@ fun HomeScreenContentSuccessPreview() {
 @Preview
 fun FilterButtonNotSelectedPreview() {
     LexiconTheme {
-        FilterButton(name = "Все", iconId = R.drawable.ic_home, isSelected = false)
+        FilterButton(name = "Все", iconId = R.drawable.ic_items, isSelected = false, onClick = {})
     }
 }
 
@@ -239,14 +306,14 @@ fun FilterButtonNotSelectedPreview() {
 @Preview
 fun FilterButtonSelectedPreview() {
     LexiconTheme {
-        FilterButton(name = "Все", iconId = R.drawable.ic_home, isSelected = true)
+        FilterButton(name = "Все", iconId = R.drawable.ic_items, isSelected = true, onClick = {})
     }
 }
 
 enum class FilterChips(val label: String, val iconId: Int) {
     ALL(
         label = "Все",
-        iconId = R.drawable.ic_home
+        iconId = R.drawable.ic_items
     ),
     FAVORITE(
         label = "Избранное",
