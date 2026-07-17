@@ -9,8 +9,8 @@ sealed class NavItem(
 ) {
 
     object Home : NavItem(
-        label = "Главная",
-        iconId = R.drawable.ic_home,
+        label = "Словарь",
+        iconId = R.drawable.ic_library,
         screen = NavScreen.HomeGraph,
     )
 

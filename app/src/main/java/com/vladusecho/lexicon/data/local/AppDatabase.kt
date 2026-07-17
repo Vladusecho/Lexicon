@@ -8,7 +8,7 @@ import com.vladusecho.lexicon.data.entity.DefinitionEntity
     entities = [
         DefinitionEntity::class,
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

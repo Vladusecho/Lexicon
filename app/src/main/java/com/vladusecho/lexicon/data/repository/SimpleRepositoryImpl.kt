@@ -1,6 +1,7 @@
 package com.vladusecho.lexicon.data.repository
 
 import com.vladusecho.lexicon.domain.entity.Definition
+import com.vladusecho.lexicon.domain.entity.PartOfSpeech
 import com.vladusecho.lexicon.domain.repository.DefinitionsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,25 +17,29 @@ class SimpleRepositoryImpl @Inject constructor() : DefinitionsRepository {
                 id = 1,
                 word = "Толерантность",
                 description = "терпимость к иному мировоззрению, образу жизни, поведению и обычаям. Она предполагает уважение чужого мнения и активное принятие многообразия культур, но не означает безразличие или отказ от собственных принципов.",
-                isFavorite = false
+                isFavorite = false,
+                partOfSpeech = PartOfSpeech.NOUN
             ),
             Definition(
                 id = 2,
                 word = "Аффирмации",
                 description = "короткие, позитивные утверждения или фразы самовнушения, которые при регулярном повторении помогают создать правильный психологический настрой, справиться со стрессом и улучшить отношение к себе.",
-                isFavorite = false
+                isFavorite = false,
+                  partOfSpeech =  PartOfSpeech.ADJECTIVE
             ),
             Definition(
                 id = 3,
                 word = "Бойкот",
                 description = "прекращение отношений, деловых, политических или личных контактов с отдельным лицом, организацией, компанией или государством в знак протеста против их действий или политики",
-                isFavorite = false
+                isFavorite = false,
+                partOfSpeech =  PartOfSpeech.VERB
             ),
             Definition(
                 id = 4,
                 word = "Вассалитет",
                 description = "средневековая система иерархической зависимости между феодалами. В обмен на земельный надел (феод) и защиту, вассал приносил сеньору клятву верности, обязуясь платить налоги и нести военную службу.",
-                isFavorite = false
+                isFavorite = false,
+                partOfSpeech =  PartOfSpeech.NOUN
             ),
         )
     )

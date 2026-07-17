@@ -70,10 +70,13 @@ fun ShortDefinitionLightPreview() {
                     id = 0,
                     word = "Толерантность",
                     description = "характер, когда человек не обращает внимания на действия остальных людей",
-                    isFavorite = false
+                    isFavorite = false,
+                    imgUri = null,
+                    partOfSpeech = com.vladusecho.lexicon.domain.entity.PartOfSpeech.NOUN
                 ),
                 modifier = Modifier.padding(16.dp),
-                onClick = {}
+                onClick = {},
+                onFavouriteClick = {}
             )
         }
     }
@@ -97,10 +100,13 @@ fun ShortDefinitionDarkPreview() {
                     id = 0,
                     word = "Толерантность",
                     description = "характер, когда человек не обращает внимания на действия остальных людей",
-                    isFavorite = false
+                    isFavorite = false,
+                    imgUri = null,
+                    partOfSpeech = com.vladusecho.lexicon.domain.entity.PartOfSpeech.NOUN
                 ),
                 modifier = Modifier.padding(16.dp),
-                onClick = {}
+                onClick = {},
+                onFavouriteClick = {}
             )
         }
     }

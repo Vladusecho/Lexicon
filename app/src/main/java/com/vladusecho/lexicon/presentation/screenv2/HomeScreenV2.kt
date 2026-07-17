@@ -111,6 +111,11 @@ fun HomeScreenV2(
                     viewModel.processCommand(
                         HomeViewModel.HomeCommand.FilterClick(it)
                     )
+                },
+                onFavouriteClick = { id, isFavourite ->
+                    viewModel.processCommand(
+                        HomeViewModel.HomeCommand.ToggleFavourite(id, isFavourite)
+                    )
                 }
             )
         }
@@ -125,7 +130,8 @@ fun HomeScreenV2Content(
     value: String,
     onValueChange: (String) -> Unit,
     selectedFilter: FilterChips,
-    onFilterClick: (FilterChips) -> Unit
+    onFilterClick: (FilterChips) -> Unit,
+    onFavouriteClick: (Int, Boolean) -> Unit
 ) {
     LazyColumn {
         item {
@@ -207,14 +213,20 @@ fun HomeScreenV2Content(
                             ShortDefinitionV2(
                                 definition = item,
                                 onClick = onShortDefinitionClick,
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                                onFavouriteClick = {
+                                    onFavouriteClick(item.id, !item.isFavorite)
+                                }
                             )
                         }
                     } else {
                         ShortDefinitionV2(
                             definition = definitions[index],
                             onClick = onShortDefinitionClick,
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            onFavouriteClick = {
+                                onFavouriteClick(definitions[index].id, !definitions[index].isFavorite)
+                            }
                         )
                     }
                 }
@@ -357,37 +369,43 @@ fun HomeScreenContentSuccessPreview() {
                         id = 1,
                         word = "Толерантность",
                         description = "характер, когда человек не обращает внимания на действия остальных людей или животных",
-                        isFavorite = false
+                        isFavorite = false,
+                        partOfSpeech = com.vladusecho.lexicon.domain.entity.PartOfSpeech.NOUN
                     ),
                     Definition(
                         id = 2,
                         word = "Волерантность",
                         description = "характер, когда человек не обращает внимания на действия остальных людей или животных",
-                        isFavorite = false
+                        isFavorite = false,
+                        partOfSpeech = com.vladusecho.lexicon.domain.entity.PartOfSpeech.NOUN
                     ),
                     Definition(
                         id = 3,
                         word = "Толерантность",
                         description = "характер, когда человек не обращает внимания на действия остальных людей или животных",
-                        isFavorite = false
+                        isFavorite = false,
+                        partOfSpeech = com.vladusecho.lexicon.domain.entity.PartOfSpeech.NOUN
                     ),
                     Definition(
                         id = 4,
                         word = "Толерантность",
                         description = "характер, когда человек не обращает внимания на действия остальных людей или животных",
-                        isFavorite = false
+                        isFavorite = false,
+                        partOfSpeech = com.vladusecho.lexicon.domain.entity.PartOfSpeech.NOUN
                     ),
                     Definition(
                         id = 6,
                         word = "Толерантность",
                         description = "характер, когда человек не обращает внимания на действия остальных людей или животных",
-                        isFavorite = false
+                        isFavorite = false,
+                        partOfSpeech = com.vladusecho.lexicon.domain.entity.PartOfSpeech.NOUN
                     ),
                     Definition(
                         id = 7,
                         word = "Толерантность",
                         description = "характер, когда человек не обращает внимания на действия остальных людей или животных",
-                        isFavorite = false
+                        isFavorite = false,
+                        partOfSpeech = com.vladusecho.lexicon.domain.entity.PartOfSpeech.NOUN
                     )
                 ),
                 showAlphabetHeaders = true
@@ -396,7 +414,8 @@ fun HomeScreenContentSuccessPreview() {
             value = "",
             onValueChange = {},
             selectedFilter = FilterChips.ALL,
-            onFilterClick = {}
+            onFilterClick = {},
+            onFavouriteClick = { _, _ -> }
         )
     }
 }
@@ -413,7 +432,8 @@ fun HomeScreenContentLoadingPreview() {
             value = "",
             onValueChange = {},
             selectedFilter = FilterChips.ALL,
-            onFilterClick = {}
+            onFilterClick = {},
+            onFavouriteClick = { _, _ -> }
         )
     }
 }
@@ -445,6 +465,22 @@ enum class FilterChips(val label: String, val iconId: Int) {
     ),
     RECENT(
         label = "Недавние",
-        iconId = R.drawable.ic_settings
+        iconId = R.drawable.ic_clock
+    ),
+    VERB(
+        label = "Глагол.",
+        iconId = R.drawable.ic_cubes
+    ),
+    NOUN(
+        label = "Сущ.",
+        iconId = R.drawable.ic_cubes
+    ),
+    ADVERB(
+        label = "Нареч.",
+        iconId = R.drawable.ic_cubes
+    ),
+    ADJECTIVE(
+        label = "Прил.",
+        iconId = R.drawable.ic_cubes
     )
 }
