@@ -35,6 +35,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -66,6 +67,16 @@ fun CreateDefinitionScreenV2(
 ) {
 
     val currentState by viewModel.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(Unit) {
+        viewModel.event.collect {
+            when (it) {
+                CreateDefinitionViewModel.CreateDefinitionEvent.FinishCreate -> {
+                    onBackClick()
+                }
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -163,7 +174,8 @@ fun CreateDefinitionScreenV2(
                 viewModel.processCommand(
                     CreateDefinitionViewModel.CreateDefinitionCommand.PickPartOfSpeech(it)
                 )
-            }
+            },
+            isEnabledSaveButton = viewModel.allCorrect
         )
     }
 }
@@ -181,7 +193,8 @@ fun CreateDefinitionScreenV2Content(
     onRemoveImageClick: () -> Unit,
     onSaveClick: () -> Unit,
     selectedPartOfSpeech: PartOfSpeech,
-    onPartOfSpeechClick: (PartOfSpeech) -> Unit
+    onPartOfSpeechClick: (PartOfSpeech) -> Unit,
+    isEnabledSaveButton: Boolean
 ) {
 
     val scrollState = rememberScrollState()
@@ -209,7 +222,7 @@ fun CreateDefinitionScreenV2Content(
                 )
                 Spacer(Modifier.height(16.dp))
                 TextFieldWithTitle(
-                    title = "Слово",
+                    title = "Слово*",
                     placeholder = "Например: Толерантность",
                     value = word,
                     onValueChange = onWordChange,
@@ -220,7 +233,7 @@ fun CreateDefinitionScreenV2Content(
                 )
                 Spacer(Modifier.height(24.dp))
                 TextFieldWithTitle(
-                    title = "Определение",
+                    title = "Определение*",
                     placeholder = "Опишите значение слова...",
                     value = description,
                     onValueChange = onDescriptionChange,
@@ -229,7 +242,13 @@ fun CreateDefinitionScreenV2Content(
                         .padding(horizontal = 16.dp),
                     singleLine = false
                 )
-                Spacer(Modifier.height(24.dp))
+                Text(
+                    text = "*Обязательно для заполнения",
+                    color = Color(0xff454652).copy(alpha = 0.5f),
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    fontSize = 12.sp
+                )
+                Spacer(Modifier.height(16.dp))
                 Title(
                     text = "ДОПОЛНИТЕЛЬНАЯ ИНФОРМАЦИЯ",
                     modifier = Modifier.padding(horizontal = 16.dp),
@@ -262,7 +281,8 @@ fun CreateDefinitionScreenV2Content(
                 SaveButton(
                     onClick = onSaveClick,
                     modifier = Modifier
-                        .padding(horizontal = 16.dp)
+                        .padding(horizontal = 16.dp),
+                    isEnabledSaveButton = isEnabledSaveButton
                 )
                 Spacer(Modifier.height(24.dp))
             }
@@ -273,6 +293,7 @@ fun CreateDefinitionScreenV2Content(
 @Composable
 fun SaveButton(
     modifier: Modifier = Modifier,
+    isEnabledSaveButton: Boolean,
     onClick: () -> Unit
 ) {
     Button(
@@ -281,7 +302,8 @@ fun SaveButton(
             .fillMaxWidth(),
         colors = ButtonDefaults.buttonColors(
             containerColor = Color(0xff24389C)
-        )
+        ),
+        enabled = isEnabledSaveButton
     ) {
         Text(
             text = "СОХРАНИТЬ",
@@ -484,7 +506,8 @@ fun CreateDefinitionScreenV2SuccessPreview() {
             onRemoveImageClick = {},
             onSaveClick = {},
             selectedPartOfSpeech = PartOfSpeech.NOUN,
-            onPartOfSpeechClick = {}
+            onPartOfSpeechClick = {},
+            isEnabledSaveButton = false
         )
     }
 }
