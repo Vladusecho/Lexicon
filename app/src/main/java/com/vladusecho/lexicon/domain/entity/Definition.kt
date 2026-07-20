@@ -5,5 +5,13 @@ data class Definition(
     val word: String,
     val description: String,
     val imgUri: String? = null,
-    val isFavorite: Boolean
+    val isFavorite: Boolean,
+    val partOfSpeech: PartOfSpeech? = null
 )
+
+enum class PartOfSpeech {
+    NOUN,
+    VERB,
+    ADJECTIVE,
+    ADVERB
+}

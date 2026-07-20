@@ -8,7 +8,8 @@ fun DefinitionEntity.toDefinition() = Definition(
     word = this.word,
     description = this.description,
     imgUri = this.imgUri,
-    isFavorite = this.isFavorite
+    isFavorite = this.isFavorite,
+    partOfSpeech = this.partOfSpeech
 )
 
 fun List<DefinitionEntity>.toDefinitions() = this.map { it.toDefinition() }
@@ -18,5 +19,6 @@ fun Definition.toDefinitionEntity() = DefinitionEntity(
     word = this.word,
     description = this.description,
     imgUri = this.imgUri,
-    isFavorite = this.isFavorite
+    isFavorite = this.isFavorite,
+    partOfSpeech = this.partOfSpeech
 )

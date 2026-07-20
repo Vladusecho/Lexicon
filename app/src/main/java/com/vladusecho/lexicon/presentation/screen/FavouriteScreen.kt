@@ -161,19 +161,22 @@ fun FavouriteScreenSuccessPreview() {
                             id = 1,
                             word = "Толерантность",
                             description = "характер, когда человек не обращает внимания на действия остальных людей",
-                            isFavorite = false
+                            isFavorite = false,
+                            partOfSpeech = com.vladusecho.lexicon.domain.entity.PartOfSpeech.NOUN
                         ),
                         Definition(
                             id = 2,
                             word = "Толерантность",
                             description = "характер, когда человек не обращает внимания на действия остальных людей",
-                            isFavorite = false
+                            isFavorite = false,
+                            partOfSpeech = com.vladusecho.lexicon.domain.entity.PartOfSpeech.NOUN
                         ),
                         Definition(
                             id = 3,
                             word = "Толерантность",
                             description = "характер, когда человек не обращает внимания на действия остальных людей",
-                            isFavorite = false
+                            isFavorite = false,
+                            partOfSpeech = com.vladusecho.lexicon.domain.entity.PartOfSpeech.NOUN
                         ),
                     )
                 ),

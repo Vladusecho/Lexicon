@@ -10,6 +10,7 @@ import com.vladusecho.lexicon.presentation.screen.CreateDefinitionScreen
 import com.vladusecho.lexicon.presentation.screen.DetailsScreen
 import com.vladusecho.lexicon.presentation.screen.EditDefinitionScreen
 import com.vladusecho.lexicon.presentation.screen.HomeScreen
+import com.vladusecho.lexicon.presentation.screenv2.HomeScreenV2
 
 fun NavGraphBuilder.homeScreenGraph(
     navState: NavigationState
@@ -18,7 +19,7 @@ fun NavGraphBuilder.homeScreenGraph(
         startDestination = NavScreen.Home
     ) {
         composable<NavScreen.Home> {
-            HomeScreen(
+            HomeScreenV2(
                 onShortDefinitionClick = {
                     navState.navHostController.navigate(NavScreen.Details(it))
                 },

@@ -7,24 +7,27 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vladusecho.lexicon.domain.entity.Definition
+import com.vladusecho.lexicon.domain.entity.PartOfSpeech
 import com.vladusecho.lexicon.domain.usecase.definition.GetDefinitionsUseCase
-import com.vladusecho.lexicon.domain.usecase.definition.SearchDefinitionUseCase
+import com.vladusecho.lexicon.domain.usecase.definition.ToggleFavouriteUseCase
+import com.vladusecho.lexicon.presentation.screenv2.FilterChips
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     getDefinitionsUseCase: GetDefinitionsUseCase,
-    private val searchDefinitionUseCase: SearchDefinitionUseCase
+    val toggleFavouriteUseCase: ToggleFavouriteUseCase
 ) : ViewModel() {
 
     var query by mutableStateOf("")
@@ -32,19 +35,61 @@ class HomeViewModel @Inject constructor(
     var isSearchActive by mutableStateOf(false)
         private set
 
+    var selectedFilter by mutableStateOf(FilterChips.ALL)
+        private set
+
+
     @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
     // StateFlow with the current state of the search
-    val state = snapshotFlow { query } // Convert query to a flow
-        .debounce(500) // Debounce the flow to avoid making too many requests
-        .distinctUntilChanged() // Only emit a new value if it's different from the previous one
-        .flatMapLatest { query -> // Switch to a new flow based on the query
-            if (query.isBlank()) {
-                getDefinitionsUseCase()
-            } else {
-                searchDefinitionUseCase(query)
-            }
+    val state = combine(
+        snapshotFlow { query } // Convert query to a flow
+            .debounce(500) // Debounce the flow to avoid making too many requests
+            .distinctUntilChanged(), // Only emit a new value if it's different from the previous one
+        snapshotFlow { selectedFilter }, // Convert selectedFilter to a flow
+        getDefinitionsUseCase() // Get the definitions from the use case
+    ) { query, selectedFilter, definitions ->
+        Triple(
+            query,
+            selectedFilter,
+            definitions
+        )
+    } // Combine the 3 flows into a triple
+        .map { (query, selectedFilter, definitions) -> // Switch to a new flow based on the selected filter
+
+            val showAlphabetHeaders =
+                definitions.isNotEmpty() && selectedFilter != FilterChips.RECENT
+
+            val filteredList = when (selectedFilter) {
+                FilterChips.ALL -> {
+                    definitions
+                }
+
+                FilterChips.FAVORITE -> {
+                    definitions.filter { definition -> definition.isFavorite }
+                }
+
+                FilterChips.RECENT -> {
+                    definitions.sortedByDescending { definition -> definition.id }.take(3)
+                }
+
+                FilterChips.VERB -> {
+                    definitions.filter { definition -> definition.partOfSpeech == PartOfSpeech.VERB }
+                }
+                FilterChips.NOUN -> {
+                    definitions.filter { definition -> definition.partOfSpeech == PartOfSpeech.NOUN }
+                }
+                FilterChips.ADVERB -> {
+                    definitions.filter { definition -> definition.partOfSpeech == PartOfSpeech.ADVERB }
+                }
+                FilterChips.ADJECTIVE -> {
+                    definitions.filter { definition -> definition.partOfSpeech == PartOfSpeech.ADJECTIVE }
+                }
+            }.filter { definition -> definition.word.startsWith(query.trim(), ignoreCase = true) }
+            HomeState.Success(
+                filteredList,
+                showAlphabetHeaders
+            ) as HomeState  // Convert the flow to a state
         }
-        .map { HomeState.Success(it) as HomeState } // Convert the flow to a state
         .catch { emit(HomeState.Error) } // Catch any errors and emit an error state
         .stateIn(
             scope = viewModelScope,
@@ -71,21 +116,38 @@ class HomeViewModel @Inject constructor(
                 query = command.query
             }
 
-            HomeCommand.SearchActive -> {
-                isSearchActive = !isSearchActive
-                if (!isSearchActive) query = ""
+            is HomeCommand.FilterClick -> {
+                selectedFilter = command.filter
+            }
+
+            is HomeCommand.ToggleFavourite -> {
+                viewModelScope.launch {
+                    toggleFavouriteUseCase(command.id, isFavourite = command.isFavourite)
+                }
             }
         }
     }
 
     sealed interface HomeState {
-        data class Success(val definitions: List<Definition>) : HomeState
+        data class Success(
+            val definitions: List<Definition>,
+            val showAlphabetHeaders: Boolean
+        ) : HomeState
+
         object Loading : HomeState
         object Error : HomeState
     }
 
     sealed interface HomeCommand {
         data class QueryInput(val query: String) : HomeCommand
-        data object SearchActive : HomeCommand
+
+        data class ToggleFavourite(
+            val id: Int,
+            val isFavourite: Boolean
+        ) : HomeCommand
+
+        data class FilterClick(
+            val filter: FilterChips
+        ) : HomeCommand
     }
 }

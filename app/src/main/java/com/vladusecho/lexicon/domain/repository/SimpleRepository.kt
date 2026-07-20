@@ -16,15 +16,5 @@ interface SimpleRepository {
 
     suspend fun deleteDefinition(id: Int)
 
-    fun getFavorites(): Flow<List<Definition>>
-
-    fun checkIsFavorite(id: Int): Flow<Boolean>
-
-    suspend fun toggleFavorite(id: Int)
-
-    fun getSettings(): Flow<Settings>
-
-    suspend fun toggleDarkMode(isDarkMode: Boolean)
-
     fun search(query: String, searchFavourite: Boolean): Flow<List<Definition>>
 }

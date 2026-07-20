@@ -37,7 +37,7 @@ import com.vladusecho.lexicon.R
 import com.vladusecho.lexicon.domain.entity.Definition
 import com.vladusecho.lexicon.presentation.element.ErrorView
 import com.vladusecho.lexicon.presentation.element.LoadingView
-import com.vladusecho.lexicon.presentation.element.ShortDefinition
+import com.vladusecho.lexicon.presentation.element.ShortDefinitionV2
 import com.vladusecho.lexicon.presentation.ui.theme.LexiconTheme
 import com.vladusecho.lexicon.presentation.viewmodel.HomeViewModel
 
@@ -67,7 +67,7 @@ fun HomeScreen(
             actions = {
                 IconButton(
                     onClick = {
-                        viewModel.processCommand(HomeViewModel.HomeCommand.SearchActive)
+
                     }
                 ) {
                     Icon(
@@ -218,9 +218,10 @@ fun DefinitionsListWithAlphabetTitle(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                     }
-                    ShortDefinition(
+                    ShortDefinitionV2(
                         definition = item,
-                        onClick = onShortDefinitionClick
+                        onClick = onShortDefinitionClick,
+                        onFavouriteClick = {}
                     )
                 }
             }
@@ -245,21 +246,25 @@ fun HomeScreenSuccessPreview() {
                             id = 1,
                             word = "Толерантность",
                             description = "характер, когда человек не обращает внимания на действия остальных людей",
-                            isFavorite = false
+                            isFavorite = false,
+                            partOfSpeech = com.vladusecho.lexicon.domain.entity.PartOfSpeech.NOUN
                         ),
                         Definition(
                             id = 2,
                             word = "Толерантность",
                             description = "характер, когда человек не обращает внимания на действия остальных людей",
-                            isFavorite = false
+                            isFavorite = false,
+                            partOfSpeech = com.vladusecho.lexicon.domain.entity.PartOfSpeech.NOUN
                         ),
                         Definition(
                             id = 3,
                             word = "Толерантность",
                             description = "характер, когда человек не обращает внимания на действия остальных людей",
-                            isFavorite = false
+                            isFavorite = false,
+                            partOfSpeech = com.vladusecho.lexicon.domain.entity.PartOfSpeech.NOUN
                         ),
-                    )
+                    ),
+                    showAlphabetHeaders = true
                 ),
                 onShortDefinitionClick = {},
                 isSearchActive = true

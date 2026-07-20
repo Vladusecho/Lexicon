@@ -118,7 +118,8 @@ fun EditDefinitionScreen(
                                     id = id,
                                     word = formattedWord,
                                     description = viewModel.description,
-                                    isFavorite = isFavorite
+                                    isFavorite = isFavorite,
+                                    partOfSpeech = com.vladusecho.lexicon.domain.entity.PartOfSpeech.NOUN
                                 ),
                                 imageUri = viewModel.imageUri
                             )

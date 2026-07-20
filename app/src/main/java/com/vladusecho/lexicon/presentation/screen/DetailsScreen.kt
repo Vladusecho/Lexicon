@@ -297,7 +297,9 @@ fun DetailsScreenSuccessPreview() {
                         id = 1,
                         word = "Толерантность",
                         description = "характер, когда человек не обращает внимания на действия остальных людей",
-                        isFavorite = false
+                        isFavorite = false,
+                        imgUri = null,
+                        partOfSpeech = com.vladusecho.lexicon.domain.entity.PartOfSpeech.NOUN
                     )
                 )
             )

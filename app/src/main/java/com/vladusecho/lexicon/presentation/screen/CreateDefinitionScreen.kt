@@ -101,6 +101,7 @@ fun CreateDefinitionScreen(
                                     word = formattedWord,
                                     description = viewModel.description,
                                     isFavorite = false,
+                                    partOfSpeech = null
                                 ),
                                 imageUri = viewModel.imageUri
                             )

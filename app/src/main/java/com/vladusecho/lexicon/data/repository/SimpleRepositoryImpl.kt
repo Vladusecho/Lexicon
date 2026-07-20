@@ -1,34 +1,45 @@
 package com.vladusecho.lexicon.data.repository
 
-import androidx.datastore.preferences.core.edit
-import com.vladusecho.lexicon.data.local.DataStoreHelper
-import com.vladusecho.lexicon.data.local.dataStore
 import com.vladusecho.lexicon.domain.entity.Definition
-import com.vladusecho.lexicon.domain.entity.Settings
-import com.vladusecho.lexicon.domain.repository.SimpleRepository
+import com.vladusecho.lexicon.domain.entity.PartOfSpeech
+import com.vladusecho.lexicon.domain.repository.DefinitionsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 
-class SimpleRepositoryImpl @Inject constructor(
-    private val dataStoreHelper: DataStoreHelper
-) : SimpleRepository {
+class SimpleRepositoryImpl @Inject constructor() : DefinitionsRepository {
 
     private val _definitions = MutableStateFlow(
         listOf(
             Definition(
                 id = 1,
                 word = "Толерантность",
-                description = "характер, когда человек не обращает внимания на действия остальных людей",
-                isFavorite = false
+                description = "терпимость к иному мировоззрению, образу жизни, поведению и обычаям. Она предполагает уважение чужого мнения и активное принятие многообразия культур, но не означает безразличие или отказ от собственных принципов.",
+                isFavorite = false,
+                partOfSpeech = PartOfSpeech.NOUN
             ),
             Definition(
                 id = 2,
                 word = "Аффирмации",
-                description = "что то там крутое и мотивирующее",
-                isFavorite = false
+                description = "короткие, позитивные утверждения или фразы самовнушения, которые при регулярном повторении помогают создать правильный психологический настрой, справиться со стрессом и улучшить отношение к себе.",
+                isFavorite = false,
+                  partOfSpeech =  PartOfSpeech.ADJECTIVE
+            ),
+            Definition(
+                id = 3,
+                word = "Бойкот",
+                description = "прекращение отношений, деловых, политических или личных контактов с отдельным лицом, организацией, компанией или государством в знак протеста против их действий или политики",
+                isFavorite = false,
+                partOfSpeech =  PartOfSpeech.VERB
+            ),
+            Definition(
+                id = 4,
+                word = "Вассалитет",
+                description = "средневековая система иерархической зависимости между феодалами. В обмен на земельный надел (феод) и защиту, вассал приносил сеньору клятву верности, обязуясь платить налоги и нести военную службу.",
+                isFavorite = false,
+                partOfSpeech =  PartOfSpeech.NOUN
             ),
         )
     )
@@ -65,38 +76,28 @@ class SimpleRepositoryImpl @Inject constructor(
         _definitions.value = updatedList
     }
 
-    override fun getFavorites(): Flow<List<Definition>> {
-        return _definitions.map {
-            it.filter { definition -> definition.isFavorite }
-                .sortedBy { definition -> definition.word.lowercase() }
-        }
-    }
-
-    override fun checkIsFavorite(id: Int): Flow<Boolean> {
-        return _definitions.map { it.any { definition -> definition.id == id && definition.isFavorite } }
-    }
-
-    override suspend fun toggleFavorite(id: Int) {
-        val currentList = _definitions.value
-        val updatedList = currentList.map {
-            if (it.id == id) {
-                it.copy(isFavorite = !it.isFavorite)
-            } else {
-                it
-            }
-        }
-        _definitions.value = updatedList
-    }
-
-    override fun getSettings(): Flow<Settings> {
-        return dataStoreHelper.getSettings()
-    }
-
-    override suspend fun toggleDarkMode(isDarkMode: Boolean) {
-        dataStoreHelper.context.dataStore.edit {
-            it[dataStoreHelper.isDarkMode] = isDarkMode
-        }
-    }
+//    override fun getFavorites(): Flow<List<Definition>> {
+//        return _definitions.map {
+//            it.filter { definition -> definition.isFavorite }
+//                .sortedBy { definition -> definition.word.lowercase() }
+//        }
+//    }
+//
+//    override fun checkIsFavorite(id: Int): Flow<Boolean> {
+//        return _definitions.map { it.any { definition -> definition.id == id && definition.isFavorite } }
+//    }
+//
+//    override suspend fun toggleFavorite(id: Int) {
+//        val currentList = _definitions.value
+//        val updatedList = currentList.map {
+//            if (it.id == id) {
+//                it.copy(isFavorite = !it.isFavorite)
+//            } else {
+//                it
+//            }
+//        }
+//        _definitions.value = updatedList
+//    }
 
     override fun search(query: String, searchFavourite: Boolean): Flow<List<Definition>> {
         return _definitions.map {
