@@ -45,7 +45,11 @@ fun NavGraphBuilder.homeScreenGraph(
             )
         }
         composable<NavScreen.CreateDefinition> {
-            CreateDefinitionScreenV2()
+            CreateDefinitionScreenV2(
+                onBackClick = {
+                    navState.navHostController.navigateUp()
+                }
+            )
         }
         composable<NavScreen.EditDefinition> { backStackEntry ->
             val args = backStackEntry.toRoute<NavScreen.EditDefinition>()

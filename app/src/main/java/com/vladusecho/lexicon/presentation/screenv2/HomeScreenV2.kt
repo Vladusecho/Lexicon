@@ -225,7 +225,10 @@ fun HomeScreenV2Content(
                             onClick = onShortDefinitionClick,
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                             onFavouriteClick = {
-                                onFavouriteClick(definitions[index].id, !definitions[index].isFavorite)
+                                onFavouriteClick(
+                                    definitions[index].id,
+                                    !definitions[index].isFavorite
+                                )
                             }
                         )
                     }
@@ -329,7 +332,7 @@ fun FilterButton(
     modifier: Modifier = Modifier,
     isSelected: Boolean,
     name: String,
-    iconId: Int,
+    iconId: Int? = null,
     onClick: () -> Unit
 ) {
     Row(
@@ -342,13 +345,15 @@ fun FilterButton(
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            painter = painterResource(id = iconId),
-            contentDescription = null,
-            modifier = Modifier.size(16.dp),
-            tint = if (isSelected) Color.White else Color.Black
-        )
-        Spacer(Modifier.width(8.dp))
+        if (iconId != null) {
+            Icon(
+                painter = painterResource(id = iconId),
+                contentDescription = null,
+                modifier = Modifier.size(16.dp),
+                tint = if (isSelected) Color.White else Color.Black
+            )
+            Spacer(Modifier.width(8.dp))
+        }
         Text(
             text = name,
             color = if (isSelected) Color.White else Color.Black
