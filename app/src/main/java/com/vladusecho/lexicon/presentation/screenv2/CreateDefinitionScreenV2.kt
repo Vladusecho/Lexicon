@@ -107,7 +107,11 @@ fun CreateDefinitionScreenV2(
                 },
                 actions = {
                     Button(
-                        onClick = {},
+                        onClick = {
+                            viewModel.processCommand(
+                                CreateDefinitionViewModel.CreateDefinitionCommand.CleanData
+                            )
+                        },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color.Transparent
                         )

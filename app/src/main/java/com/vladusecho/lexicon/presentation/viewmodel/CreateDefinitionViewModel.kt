@@ -75,6 +75,13 @@ class CreateDefinitionViewModel @Inject constructor(
             is CreateDefinitionCommand.PickPartOfSpeech -> {
                 selectedPartOfSpeech = command.partOfSpeech
             }
+
+            CreateDefinitionCommand.CleanData -> {
+                word = ""
+                description = ""
+                imageUri = null
+                selectedPartOfSpeech = PartOfSpeech.NOUN
+            }
         }
     }
 
@@ -107,6 +114,8 @@ class CreateDefinitionViewModel @Inject constructor(
         data class PickPartOfSpeech(
             val partOfSpeech: PartOfSpeech
         ) : CreateDefinitionCommand
+
+        data object CleanData : CreateDefinitionCommand
     }
 
     sealed interface CreateDefinitionEvent {
