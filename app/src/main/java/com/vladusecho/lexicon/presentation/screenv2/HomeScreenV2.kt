@@ -487,5 +487,13 @@ enum class FilterChips(val label: String, val iconId: Int) {
     ADJECTIVE(
         label = "Прил.",
         iconId = R.drawable.ic_cubes
-    )
+    ),
+    PARTICIPLE(
+        label = "Прич.",
+        iconId = R.drawable.ic_cubes
+    ),
+    ADVERBIAL_PARTICIPLE(
+        label = "Дееприч.",
+        iconId = R.drawable.ic_cubes
+    ),
 }

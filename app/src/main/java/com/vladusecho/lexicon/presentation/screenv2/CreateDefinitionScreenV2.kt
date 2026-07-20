@@ -53,6 +53,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.vladusecho.lexicon.R
+import com.vladusecho.lexicon.domain.entity.Definition
 import com.vladusecho.lexicon.domain.entity.PartOfSpeech
 import com.vladusecho.lexicon.presentation.ui.theme.LexiconTheme
 import com.vladusecho.lexicon.presentation.viewmodel.CreateDefinitionViewModel
@@ -138,6 +139,30 @@ fun CreateDefinitionScreenV2(
                 viewModel.processCommand(
                     CreateDefinitionViewModel.CreateDefinitionCommand.RemoveImage
                 )
+            },
+            onSaveClick = {
+                val formattedWord = viewModel.word.trim().replaceFirstChar {
+                    if (it.isLowerCase()) it.titlecase() else it.toString()
+                }
+
+                viewModel.processCommand(
+                    CreateDefinitionViewModel.CreateDefinitionCommand.CreateDefinition(
+                        definition = Definition(
+                            id = 0,
+                            word = formattedWord,
+                            description = viewModel.description,
+                            isFavorite = false,
+                            partOfSpeech = viewModel.selectedPartOfSpeech
+                        ),
+                        imageUri = viewModel.imageUri
+                    )
+                )
+            },
+            selectedPartOfSpeech = viewModel.selectedPartOfSpeech,
+            onPartOfSpeechClick = {
+                viewModel.processCommand(
+                    CreateDefinitionViewModel.CreateDefinitionCommand.PickPartOfSpeech(it)
+                )
             }
         )
     }
@@ -153,7 +178,10 @@ fun CreateDefinitionScreenV2Content(
     description: String,
     imageUri: Uri?,
     onImageUriChange: (Uri) -> Unit,
-    onRemoveImageClick: () -> Unit
+    onRemoveImageClick: () -> Unit,
+    onSaveClick: () -> Unit,
+    selectedPartOfSpeech: PartOfSpeech,
+    onPartOfSpeechClick: (PartOfSpeech) -> Unit
 ) {
 
     val scrollState = rememberScrollState()
@@ -224,15 +252,15 @@ fun CreateDefinitionScreenV2Content(
                 )
                 Spacer(Modifier.height(16.dp))
                 RowWithPartOfSpeechChoice(
-                    selectedPartOfSpeech = null,
-                    onPartOfSpeechClick = {},
+                    selectedPartOfSpeech = selectedPartOfSpeech,
+                    onPartOfSpeechClick = onPartOfSpeechClick,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                 )
                 Spacer(Modifier.height(24.dp))
                 SaveButton(
-                    onClick = {},
+                    onClick = onSaveClick,
                     modifier = Modifier
                         .padding(horizontal = 16.dp)
                 )
@@ -268,7 +296,7 @@ fun SaveButton(
 @Composable
 fun RowWithPartOfSpeechChoice(
     modifier: Modifier = Modifier,
-    selectedPartOfSpeech: PartOfSpeech?,
+    selectedPartOfSpeech: PartOfSpeech,
     onPartOfSpeechClick: (PartOfSpeech) -> Unit
 ) {
 
@@ -453,7 +481,10 @@ fun CreateDefinitionScreenV2SuccessPreview() {
             description = "",
             imageUri = null,
             onImageUriChange = {},
-            onRemoveImageClick = {}
+            onRemoveImageClick = {},
+            onSaveClick = {},
+            selectedPartOfSpeech = PartOfSpeech.NOUN,
+            onPartOfSpeechClick = {}
         )
     }
 }

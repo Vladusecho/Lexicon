@@ -84,6 +84,13 @@ class HomeViewModel @Inject constructor(
                 FilterChips.ADJECTIVE -> {
                     definitions.filter { definition -> definition.partOfSpeech == PartOfSpeech.ADJECTIVE }
                 }
+
+                FilterChips.PARTICIPLE -> {
+                    definitions.filter { definition -> definition.partOfSpeech == PartOfSpeech.PARTICIPLE }
+                }
+                FilterChips.ADVERBIAL_PARTICIPLE -> {
+                    definitions.filter { definition -> definition.partOfSpeech == PartOfSpeech.ADVERBIAL_PARTICIPLE }
+                }
             }.filter { definition -> definition.word.startsWith(query.trim(), ignoreCase = true) }
             HomeState.Success(
                 filteredList,

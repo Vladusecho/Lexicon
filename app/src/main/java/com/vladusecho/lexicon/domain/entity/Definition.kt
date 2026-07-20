@@ -24,5 +24,10 @@ enum class PartOfSpeech(
     ADVERB(
         label = "Наречие"
     ),
-
+    PARTICIPLE(
+        label = "Причастие"
+    ),
+    ADVERBIAL_PARTICIPLE(
+        label = "Деепричастие"
+    )
 }

@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vladusecho.lexicon.data.local.FileManagerHelper
 import com.vladusecho.lexicon.domain.entity.Definition
+import com.vladusecho.lexicon.domain.entity.PartOfSpeech
 import com.vladusecho.lexicon.domain.usecase.definition.CreateDefinitionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -32,6 +33,9 @@ class CreateDefinitionViewModel @Inject constructor(
     var word by mutableStateOf("")
         private set
     var description by mutableStateOf("")
+        private set
+
+    var selectedPartOfSpeech by mutableStateOf(PartOfSpeech.NOUN)
         private set
 
     val allCorrect get() = word.isNotBlank() && description.isNotBlank()
@@ -67,6 +71,10 @@ class CreateDefinitionViewModel @Inject constructor(
             CreateDefinitionCommand.RemoveImage -> {
                 imageUri = null
             }
+
+            is CreateDefinitionCommand.PickPartOfSpeech -> {
+                selectedPartOfSpeech = command.partOfSpeech
+            }
         }
     }
 
@@ -95,6 +103,10 @@ class CreateDefinitionViewModel @Inject constructor(
         ) : CreateDefinitionCommand
 
         data object RemoveImage : CreateDefinitionCommand
+
+        data class PickPartOfSpeech(
+            val partOfSpeech: PartOfSpeech
+        ) : CreateDefinitionCommand
     }
 
     sealed interface CreateDefinitionEvent {
