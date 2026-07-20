@@ -35,13 +35,19 @@
 2.  **Data:** Реализация репозиториев, работа с Room DAO и файловой системой.
 3.  **Presentation:** ViewModels обрабатывают команды (Commands) и преобразуют потоки данных в состояния экрана (States) и разовые события (Events).
 
-## 📸 Скриншоты
+## 📸 Скриншоты (в разработке)
 
-| Главный экран | Карточка |
-| :---: | :---: |
-| <img width="95%" src="https://github.com/user-attachments/assets/23df9037-81db-428b-b551-ce325a6f7513" /> | <img width="95%" src="https://github.com/user-attachments/assets/7fa5667c-2996-4966-adb1-f6f9420a1d64" /> | 
-| Избранное | Настройки |
-| <img width="95%" src="https://github.com/user-attachments/assets/8bdf91e4-b49f-4cc0-9034-ae11c58a3b0f" /> | <img width="95%" src="https://github.com/user-attachments/assets/b58e725b-3143-478e-9706-28fe80db6970" /> |
+<div align="center">
+  
+| | | |
+|:-:|:-:|:-:|
+| *Главный экран* | *Экран добавления определения* | *Экран просмотра определения* |
+| <img alt="image" width=300 src="https://github.com/user-attachments/assets/ab4296b2-6f17-43c7-8192-b54c76c17115" /> | <img alt="image" width=300 src="https://github.com/user-attachments/assets/fdf5b799-48b2-4778-84bd-be6d7ae1b699" /> | |
+| *Экран настроек* | *Экран обучения* | *Что-то еще* |
+|  | | |
+
+
+</div>
 
 ## 🚀 Планы по развитию
 
