@@ -1,5 +1,8 @@
 package com.vladusecho.lexicon.presentation.screenv2
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -12,12 +15,14 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -30,6 +35,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,18 +48,23 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.vladusecho.lexicon.R
 import com.vladusecho.lexicon.domain.entity.PartOfSpeech
 import com.vladusecho.lexicon.presentation.ui.theme.LexiconTheme
+import com.vladusecho.lexicon.presentation.viewmodel.CreateDefinitionViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateDefinitionScreenV2(
+    viewModel: CreateDefinitionViewModel = hiltViewModel(),
     onBackClick: () -> Unit
 ) {
 
-    val scrollState = rememberScrollState()
+    val currentState by viewModel.state.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
@@ -100,74 +111,133 @@ fun CreateDefinitionScreenV2(
             )
         }
     ) { paddingValues ->
-        Column(
+        CreateDefinitionScreenV2Content(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = paddingValues.calculateTopPadding())
-                .scrollable(scrollState, orientation = Orientation.Horizontal)
-        ) {
-            Spacer(Modifier.height(24.dp))
-            Title(
-                text = "ОСНОВНАЯ ИНФОРМАЦИЯ",
-                modifier = Modifier.padding(horizontal = 16.dp),
-                fontSize = 12
-            )
-            Spacer(Modifier.height(16.dp))
-            TextFieldWithTitle(
-                title = "Слово",
-                placeholder = "Например: Толерантность",
-                value = "",
-                onValueChange = {},
-                modifier = Modifier
+                .padding(top = paddingValues.calculateTopPadding()),
+            currentState = currentState,
+            onWordChange = {
+                viewModel.processCommand(
+                    CreateDefinitionViewModel.CreateDefinitionCommand.UpdateWord(it)
+                )
+            },
+            onDescriptionChange = {
+                viewModel.processCommand(
+                    CreateDefinitionViewModel.CreateDefinitionCommand.UpdateDescription(it)
+                )
+            },
+            word = viewModel.word,
+            description = viewModel.description,
+            imageUri = viewModel.imageUri,
+            onImageUriChange = {
+                viewModel.processCommand(
+                    CreateDefinitionViewModel.CreateDefinitionCommand.UpdateImageUri(it)
+                )
+            },
+            onRemoveImageClick = {
+                viewModel.processCommand(
+                    CreateDefinitionViewModel.CreateDefinitionCommand.RemoveImage
+                )
+            }
+        )
+    }
+}
+
+@Composable
+fun CreateDefinitionScreenV2Content(
+    modifier: Modifier = Modifier,
+    currentState: CreateDefinitionViewModel.CreateDefinitionState,
+    onWordChange: (String) -> Unit,
+    onDescriptionChange: (String) -> Unit,
+    word: String,
+    description: String,
+    imageUri: Uri?,
+    onImageUriChange: (Uri) -> Unit,
+    onRemoveImageClick: () -> Unit
+) {
+
+    val scrollState = rememberScrollState()
+
+    when (currentState) {
+        CreateDefinitionViewModel.CreateDefinitionState.Error -> {
+
+        }
+
+        CreateDefinitionViewModel.CreateDefinitionState.Loading -> {
+
+        }
+
+        CreateDefinitionViewModel.CreateDefinitionState.Success -> {
+            Column(
+                modifier = modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                singleLine = true
-            )
-            Spacer(Modifier.height(24.dp))
-            TextFieldWithTitle(
-                title = "Определение",
-                placeholder = "Опишите значение слова...",
-                value = "",
-                onValueChange = {},
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                singleLine = false
-            )
-            Spacer(Modifier.height(24.dp))
-            Title(
-                text = "ДОПОЛНИТЕЛЬНАЯ ИНФОРМАЦИЯ",
-                modifier = Modifier.padding(horizontal = 16.dp),
-                fontSize = 12
-            )
-            Spacer(Modifier.height(16.dp))
-            BoxWithImageChoice(
-                imageUri = "",
-                onImageClick = {},
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-            )
-            Spacer(Modifier.height(16.dp))
-            Title(
-                text = "ЧАСТЬ РЕЧИ",
-                modifier = Modifier.padding(horizontal = 16.dp),
-                fontSize = 12
-            )
-            Spacer(Modifier.height(16.dp))
-            RowWithPartOfSpeechChoice(
-                selectedPartOfSpeech = null,
-                onPartOfSpeechClick = {},
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-            )
-            Spacer(Modifier.height(24.dp))
-            SaveButton(
-                onClick = {},
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-            )
+                    .verticalScroll(scrollState)
+            ) {
+                Spacer(Modifier.height(24.dp))
+                Title(
+                    text = "ОСНОВНАЯ ИНФОРМАЦИЯ",
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    fontSize = 12
+                )
+                Spacer(Modifier.height(16.dp))
+                TextFieldWithTitle(
+                    title = "Слово",
+                    placeholder = "Например: Толерантность",
+                    value = word,
+                    onValueChange = onWordChange,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    singleLine = true
+                )
+                Spacer(Modifier.height(24.dp))
+                TextFieldWithTitle(
+                    title = "Определение",
+                    placeholder = "Опишите значение слова...",
+                    value = description,
+                    onValueChange = onDescriptionChange,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    singleLine = false
+                )
+                Spacer(Modifier.height(24.dp))
+                Title(
+                    text = "ДОПОЛНИТЕЛЬНАЯ ИНФОРМАЦИЯ",
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    fontSize = 12
+                )
+                Spacer(Modifier.height(16.dp))
+                BoxWithImageChoice(
+                    imageUri = imageUri,
+                    onImageUriChange = onImageUriChange,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    onRemoveImageClick = onRemoveImageClick
+                )
+                Spacer(Modifier.height(16.dp))
+                Title(
+                    text = "ЧАСТЬ РЕЧИ",
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    fontSize = 12
+                )
+                Spacer(Modifier.height(16.dp))
+                RowWithPartOfSpeechChoice(
+                    selectedPartOfSpeech = null,
+                    onPartOfSpeechClick = {},
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                )
+                Spacer(Modifier.height(24.dp))
+                SaveButton(
+                    onClick = {},
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                )
+                Spacer(Modifier.height(24.dp))
+            }
         }
     }
 }
@@ -222,20 +292,31 @@ fun RowWithPartOfSpeechChoice(
 @Composable
 fun BoxWithImageChoice(
     modifier: Modifier = Modifier,
-    imageUri: String,
-    onImageClick: () -> Unit
+    imageUri: Uri?,
+    onImageUriChange: (Uri) -> Unit,
+    onRemoveImageClick: () -> Unit
 ) {
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = {
+            if (it != null) {
+                onImageUriChange(it)
+            }
+        }
+    )
+
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
             .clickable {
-                onImageClick()
+                launcher.launch("image/*")
             }
             .background(Color(0xffe7e8e9))
             .border(1.dp, Color(0xffC5C5D4), RoundedCornerShape(16.dp)),
         contentAlignment = Alignment.Center
     ) {
-        if (imageUri.isNotEmpty()) {
+        if (imageUri != null) {
             AsyncImage(
                 model = imageUri,
                 contentDescription = null,
@@ -244,6 +325,29 @@ fun BoxWithImageChoice(
                     .aspectRatio(1 / 1f),
                 contentScale = ContentScale.Crop
             )
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .aspectRatio(1 / 1f)
+                    .padding(16.dp),
+                contentAlignment = Alignment.TopEnd
+            ) {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(16.dp))
+                        .clickable {
+                            onRemoveImageClick()
+                        }
+                        .background(Color.Red)
+                        .padding(8.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_trash),
+                        contentDescription = null,
+                        tint = Color.White,
+                    )
+                }
+            }
         } else {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -339,10 +443,17 @@ fun Title(
 @Preview(
     showBackground = true
 )
-fun CreateDefinitionScreenV2Preview() {
+fun CreateDefinitionScreenV2SuccessPreview() {
     LexiconTheme {
-        CreateDefinitionScreenV2(
-            onBackClick = {}
+        CreateDefinitionScreenV2Content(
+            currentState = CreateDefinitionViewModel.CreateDefinitionState.Success,
+            onWordChange = {},
+            onDescriptionChange = {},
+            word = "",
+            description = "",
+            imageUri = null,
+            onImageUriChange = {},
+            onRemoveImageClick = {}
         )
     }
 }
