@@ -11,6 +11,7 @@ import com.vladusecho.lexicon.presentation.screen.DetailsScreen
 import com.vladusecho.lexicon.presentation.screen.EditDefinitionScreen
 import com.vladusecho.lexicon.presentation.screen.HomeScreen
 import com.vladusecho.lexicon.presentation.screenv2.CreateDefinitionScreenV2
+import com.vladusecho.lexicon.presentation.screenv2.DetailsScreenV2
 import com.vladusecho.lexicon.presentation.screenv2.HomeScreenV2
 
 fun NavGraphBuilder.homeScreenGraph(
@@ -31,16 +32,13 @@ fun NavGraphBuilder.homeScreenGraph(
         }
         composable<NavScreen.Details> { backStackEntry ->
             val args = backStackEntry.toRoute<NavScreen.Details>()
-            DetailsScreen(
+            DetailsScreenV2(
                 id = args.id,
                 onBackClick = {
                     navState.navHostController.navigateUp()
                 },
                 onEditClick = {
-                    navState.navHostController.navigate(NavScreen.EditDefinition(args.id))
-                },
-                onDeleteClick = {
-                    navState.navHostController.navigateUp()
+                    navState.navHostController.navigate(NavScreen.EditDefinition(it))
                 }
             )
         }

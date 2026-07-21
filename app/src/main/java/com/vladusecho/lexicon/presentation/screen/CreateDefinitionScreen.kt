@@ -50,6 +50,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.vladusecho.lexicon.R
 import com.vladusecho.lexicon.domain.entity.Definition
+import com.vladusecho.lexicon.domain.entity.PartOfSpeech
 import com.vladusecho.lexicon.presentation.element.ErrorView
 import com.vladusecho.lexicon.presentation.element.LoadingView
 import com.vladusecho.lexicon.presentation.ui.theme.LexiconTheme
@@ -101,7 +102,7 @@ fun CreateDefinitionScreen(
                                     word = formattedWord,
                                     description = viewModel.description,
                                     isFavorite = false,
-                                    partOfSpeech = null
+                                    partOfSpeech = PartOfSpeech.PARTICIPLE
                                 ),
                                 imageUri = viewModel.imageUri
                             )
