@@ -42,7 +42,7 @@
 | | | |
 |:-:|:-:|:-:|
 | *Главный экран* | *Экран добавления определения* | *Экран просмотра определения* |
-| <img alt="image" width=300 src="https://github.com/user-attachments/assets/ab4296b2-6f17-43c7-8192-b54c76c17115" /> | <img alt="image" width=300 src="https://github.com/user-attachments/assets/fdf5b799-48b2-4778-84bd-be6d7ae1b699" /> | |
+| <img alt="image" width=300 src="https://github.com/user-attachments/assets/ab4296b2-6f17-43c7-8192-b54c76c17115" /> | <img alt="image" width=300 src="https://github.com/user-attachments/assets/fdf5b799-48b2-4778-84bd-be6d7ae1b699" /> |<img width=300 alt="image" src="https://github.com/user-attachments/assets/58e4f0ed-0f84-4d63-8e0b-fa21edf3fa86" /> |
 | *Экран настроек* | *Экран обучения* | *Что-то еще* |
 |  | | |
 
