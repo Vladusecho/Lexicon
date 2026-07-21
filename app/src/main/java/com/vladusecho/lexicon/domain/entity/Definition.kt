@@ -9,9 +9,25 @@ data class Definition(
     val partOfSpeech: PartOfSpeech? = null
 )
 
-enum class PartOfSpeech {
-    NOUN,
-    VERB,
-    ADJECTIVE,
-    ADVERB
+enum class PartOfSpeech(
+    val label: String
+) {
+    NOUN(
+        label = "Существительное"
+    ),
+    VERB(
+        label = "Глагол"
+    ),
+    ADJECTIVE(
+        label = "Прилагательное"
+    ),
+    ADVERB(
+        label = "Наречие"
+    ),
+    PARTICIPLE(
+        label = "Причастие"
+    ),
+    ADVERBIAL_PARTICIPLE(
+        label = "Деепричастие"
+    )
 }

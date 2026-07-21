@@ -2,6 +2,7 @@ package com.vladusecho.lexicon.presentation.screenv2
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -37,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -142,17 +144,26 @@ fun HomeScreenV2Content(
             )
         }
         stickyHeader {
-            Spacer(Modifier.height(16.dp))
-            FilterList(
-                modifier = Modifier.fillMaxWidth(),
-                selectedFilter = selectedFilter,
-                onFilterClick = onFilterClick
-            )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        Brush.verticalGradient(
+                            0.35f to Color.White.copy(alpha = 0.9f),
+                            0.65f to Color.White.copy(alpha = 0.6f),
+                            1f to Color.Transparent
+                        )
+                    )
+            ) {
+                Spacer(Modifier.height(16.dp))
+                FilterList(
+                    modifier = Modifier.fillMaxWidth(),
+                    selectedFilter = selectedFilter,
+                    onFilterClick = onFilterClick
+                )
+                Spacer(Modifier.height(16.dp))
+            }
         }
-        item {
-            Spacer(Modifier.height(16.dp))
-        }
-
         when (currentState) {
             HomeViewModel.HomeState.Error -> {
             }
@@ -225,7 +236,10 @@ fun HomeScreenV2Content(
                             onClick = onShortDefinitionClick,
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                             onFavouriteClick = {
-                                onFavouriteClick(definitions[index].id, !definitions[index].isFavorite)
+                                onFavouriteClick(
+                                    definitions[index].id,
+                                    !definitions[index].isFavorite
+                                )
                             }
                         )
                     }
@@ -247,7 +261,8 @@ fun LexiconSearchBar(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
-            .shadow(elevation = 1.dp, shape = CircleShape),
+            .border(1.dp, Color(0xffC5C5D4), CircleShape)
+        ,
         colors = TextFieldDefaults.colors(
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
@@ -318,7 +333,6 @@ fun FilterList(
                 iconId = it.iconId,
                 isSelected = selectedFilter == it,
                 onClick = { onFilterClick(it) },
-                modifier = Modifier.animateItem()
             )
         }
     }
@@ -329,11 +343,12 @@ fun FilterButton(
     modifier: Modifier = Modifier,
     isSelected: Boolean,
     name: String,
-    iconId: Int,
+    iconId: Int? = null,
     onClick: () -> Unit
 ) {
     Row(
         modifier = modifier
+            .border(1.dp, Color(0xffC5C5D4), RoundedCornerShape(16.dp))
             .clip(RoundedCornerShape(16.dp))
             .clickable {
                 onClick()
@@ -342,13 +357,15 @@ fun FilterButton(
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            painter = painterResource(id = iconId),
-            contentDescription = null,
-            modifier = Modifier.size(16.dp),
-            tint = if (isSelected) Color.White else Color.Black
-        )
-        Spacer(Modifier.width(8.dp))
+        if (iconId != null) {
+            Icon(
+                painter = painterResource(id = iconId),
+                contentDescription = null,
+                modifier = Modifier.size(16.dp),
+                tint = if (isSelected) Color.White else Color.Black
+            )
+            Spacer(Modifier.width(8.dp))
+        }
         Text(
             text = name,
             color = if (isSelected) Color.White else Color.Black
@@ -482,5 +499,13 @@ enum class FilterChips(val label: String, val iconId: Int) {
     ADJECTIVE(
         label = "Прил.",
         iconId = R.drawable.ic_cubes
-    )
+    ),
+    PARTICIPLE(
+        label = "Прич.",
+        iconId = R.drawable.ic_cubes
+    ),
+    ADVERBIAL_PARTICIPLE(
+        label = "Дееприч.",
+        iconId = R.drawable.ic_cubes
+    ),
 }

@@ -10,6 +10,7 @@ import com.vladusecho.lexicon.presentation.screen.CreateDefinitionScreen
 import com.vladusecho.lexicon.presentation.screen.DetailsScreen
 import com.vladusecho.lexicon.presentation.screen.EditDefinitionScreen
 import com.vladusecho.lexicon.presentation.screen.HomeScreen
+import com.vladusecho.lexicon.presentation.screenv2.CreateDefinitionScreenV2
 import com.vladusecho.lexicon.presentation.screenv2.HomeScreenV2
 
 fun NavGraphBuilder.homeScreenGraph(
@@ -44,7 +45,7 @@ fun NavGraphBuilder.homeScreenGraph(
             )
         }
         composable<NavScreen.CreateDefinition> {
-            CreateDefinitionScreen(
+            CreateDefinitionScreenV2(
                 onBackClick = {
                     navState.navHostController.navigateUp()
                 }
