@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vladusecho.lexicon.data.local.FileManagerHelper
 import com.vladusecho.lexicon.domain.entity.Definition
+import com.vladusecho.lexicon.domain.entity.PartOfSpeech
 import com.vladusecho.lexicon.domain.usecase.definition.CheckIsFavouriteUseCase
 import com.vladusecho.lexicon.domain.usecase.definition.EditDefinitionUseCase
 import com.vladusecho.lexicon.domain.usecase.definition.GetDefinitionByIdUseCase
@@ -46,6 +47,9 @@ class EditDefinitionViewModel @AssistedInject constructor(
     val description: String
         get() = _description
 
+    var selectedPartOfSpeech by mutableStateOf(PartOfSpeech.NOUN)
+        private set
+
     val allCorrect get() = word.isNotBlank() && description.isNotBlank()
 
     val isFavorite = checkIsFavouriteUseCase(id)
@@ -61,6 +65,7 @@ class EditDefinitionViewModel @AssistedInject constructor(
             _word = definition.word
             _description = definition.description
             imageUri = definition.imgUri?.toUri()
+            selectedPartOfSpeech = definition.partOfSpeech
             EditDefinitionState.Success as EditDefinitionState
         }
         .catch { emit(EditDefinitionState.Error) }
@@ -107,6 +112,15 @@ class EditDefinitionViewModel @AssistedInject constructor(
             EditDefinitionCommand.RemoveImage -> {
                 imageUri = null
             }
+            EditDefinitionCommand.CleanData -> {
+                _word = ""
+                _description = ""
+                imageUri = null
+                selectedPartOfSpeech = PartOfSpeech.NOUN
+            }
+            is EditDefinitionCommand.PickPartOfSpeech -> {
+                selectedPartOfSpeech = command.partOfSpeech
+            }
         }
     }
 
@@ -136,6 +150,12 @@ class EditDefinitionViewModel @AssistedInject constructor(
         ) : EditDefinitionCommand
 
         data object RemoveImage : EditDefinitionCommand
+
+        data object CleanData : EditDefinitionCommand
+
+        data class PickPartOfSpeech(
+            val partOfSpeech: PartOfSpeech
+        ) : EditDefinitionCommand
     }
 
     sealed interface EditDefinitionEvent {

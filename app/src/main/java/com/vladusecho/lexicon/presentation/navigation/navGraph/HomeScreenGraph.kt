@@ -6,12 +6,9 @@ import androidx.navigation.navigation
 import androidx.navigation.toRoute
 import com.vladusecho.lexicon.presentation.navigation.NavScreen
 import com.vladusecho.lexicon.presentation.navigation.NavigationState
-import com.vladusecho.lexicon.presentation.screen.CreateDefinitionScreen
-import com.vladusecho.lexicon.presentation.screen.DetailsScreen
-import com.vladusecho.lexicon.presentation.screen.EditDefinitionScreen
-import com.vladusecho.lexicon.presentation.screen.HomeScreen
 import com.vladusecho.lexicon.presentation.screenv2.CreateDefinitionScreenV2
 import com.vladusecho.lexicon.presentation.screenv2.DetailsScreenV2
+import com.vladusecho.lexicon.presentation.screenv2.EditDefinitionScreenV2
 import com.vladusecho.lexicon.presentation.screenv2.HomeScreenV2
 
 fun NavGraphBuilder.homeScreenGraph(
@@ -51,7 +48,7 @@ fun NavGraphBuilder.homeScreenGraph(
         }
         composable<NavScreen.EditDefinition> { backStackEntry ->
             val args = backStackEntry.toRoute<NavScreen.EditDefinition>()
-            EditDefinitionScreen(
+            EditDefinitionScreenV2(
                 id = args.id,
                 onBackClick = {
                     navState.navHostController.navigateUp()
