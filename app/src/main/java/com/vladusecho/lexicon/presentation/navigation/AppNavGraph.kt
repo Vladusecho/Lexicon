@@ -6,7 +6,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.vladusecho.lexicon.presentation.navigation.navGraph.favouritesScreenGraph
 import com.vladusecho.lexicon.presentation.navigation.navGraph.homeScreenGraph
 import com.vladusecho.lexicon.presentation.screen.SettingsScreen
 
@@ -25,7 +24,6 @@ fun AppNavGraph(
         }
     ) {
         homeScreenGraph(navState)
-        favouritesScreenGraph(navState)
         composable<NavScreen.Settings> {
             SettingsScreen()
         }
