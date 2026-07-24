@@ -12,5 +12,5 @@ data class DefinitionEntity(
     val description: String,
     val imgUri: String?,
     val isFavorite: Boolean,
-    val partOfSpeech: PartOfSpeech?
+    val partOfSpeech: PartOfSpeech
 )

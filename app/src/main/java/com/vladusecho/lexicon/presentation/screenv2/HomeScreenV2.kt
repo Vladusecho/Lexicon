@@ -353,7 +353,7 @@ fun FilterButton(
             .clickable {
                 onClick()
             }
-            .background(if (isSelected) Color(0xff3F51B5) else Color(0xffedeeef))
+            .background(if (isSelected) Color(0xff24389C) else Color(0xffedeeef))
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {

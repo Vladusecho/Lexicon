@@ -6,7 +6,7 @@ data class Definition(
     val description: String,
     val imgUri: String? = null,
     val isFavorite: Boolean,
-    val partOfSpeech: PartOfSpeech? = null
+    val partOfSpeech: PartOfSpeech
 )
 
 enum class PartOfSpeech(
