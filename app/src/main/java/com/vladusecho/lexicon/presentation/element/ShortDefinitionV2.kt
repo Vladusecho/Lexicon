@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -44,7 +45,7 @@ fun ShortDefinitionV2(
                 )
             }
             .border(1.dp, Color(0xffC5C5D4), RoundedCornerShape(16.dp))
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.background)
             .padding(16.dp)
     ) {
         Row(
@@ -58,7 +59,7 @@ fun ShortDefinitionV2(
                 overflow = TextOverflow.Ellipsis,
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xff24389C)
+                color = MaterialTheme.colorScheme.primary
             )
             IconButton(
                 onClick = { onFavouriteClick(definition.id) }
@@ -68,7 +69,7 @@ fun ShortDefinitionV2(
                         id = R.drawable.ic_favorite
                     ),
                     contentDescription = null,
-                    tint = Color(0xff3F51B5)
+                    tint = MaterialTheme.colorScheme.primary
                 )
             }
         }
@@ -79,7 +80,7 @@ fun ShortDefinitionV2(
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
             fontSize = 16.sp,
-            color = Color(0xff454652)
+            color = MaterialTheme.colorScheme.tertiary
         )
     }
 }
