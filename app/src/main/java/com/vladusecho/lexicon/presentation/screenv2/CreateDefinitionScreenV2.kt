@@ -368,7 +368,7 @@ fun BoxWithImageChoice(
                 launcher.launch("image/*")
             }
             .background(MaterialTheme.colorScheme.onBackground)
-            .border(1.dp, Color(0xffC5C5D4), RoundedCornerShape(16.dp)),
+            .border(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f), RoundedCornerShape(16.dp)),
         contentAlignment = Alignment.Center
     ) {
         if (imageUri != null) {
@@ -456,7 +456,7 @@ fun TextFieldWithTitle(
             value = value,
             onValueChange = onValueChange,
             modifier = Modifier
-                .border(1.dp, Color(0xffC5C5D4), RoundedCornerShape(16.dp))
+                .border(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f), RoundedCornerShape(16.dp))
                 .fillMaxWidth(),
             colors = TextFieldDefaults.colors(
                 focusedIndicatorColor = Color.Transparent,

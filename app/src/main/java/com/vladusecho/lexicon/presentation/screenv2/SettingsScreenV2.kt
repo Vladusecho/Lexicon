@@ -146,7 +146,7 @@ fun SwitchThemeItem(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .border(1.dp, Color(0xffC5C5D4), RoundedCornerShape(16.dp))
+            .border(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f), RoundedCornerShape(16.dp))
             .padding(16.dp)
     ) {
         Row(

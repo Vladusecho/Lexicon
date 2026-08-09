@@ -261,7 +261,7 @@ fun LexiconSearchBar(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
-            .border(1.dp, Color(0xffC5C5D4), CircleShape),
+            .border(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f), CircleShape),
         colors = TextFieldDefaults.colors(
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
@@ -348,7 +348,7 @@ fun FilterButton(
 ) {
     Row(
         modifier = modifier
-            .border(1.dp, Color(0xffC5C5D4), RoundedCornerShape(16.dp))
+            .border(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f), RoundedCornerShape(16.dp))
             .clip(RoundedCornerShape(16.dp))
             .clickable {
                 onClick()
