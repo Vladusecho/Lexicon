@@ -4,12 +4,14 @@ import androidx.compose.ui.graphics.Color
 
 //Dark mode
 
-val DarkGrayishCyan = Color(0xff333E42)
-val DarkCyanBlue = Color(0xff0d1e25)
+val LittleBlack = Color(0xff0E0E0E)
+val Periwinkle = Color(0xffB9C3FF)
+val DarkGray = Color(0xff1c1b1b)
 
 //Light mode
 
-val LightGrayishBlue = Color(0xffC1CACE)
+val Blue = Color(0xff24389C)
+val LightGray = Color(0xffe7e8e9)
 
 //Others
 

@@ -25,6 +25,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -125,12 +126,13 @@ fun SettingsMainTitle(
             text = "Настройки",
             fontWeight = FontWeight.Bold,
             fontSize = 32.sp,
+            color = MaterialTheme.colorScheme.primary
         )
         Spacer(modifier = Modifier.height(12.dp))
         Text(
             text = "Настройте внешний вид приложения и управляйте данными вашего словаря",
             fontSize = 16.sp,
-            color = Color(0xff454652)
+            color = MaterialTheme.colorScheme.tertiary,
         )
     }
 }
@@ -155,18 +157,20 @@ fun SwitchThemeItem(
             Icon(
                 painter = painterResource(id = R.drawable.ic_brush),
                 contentDescription = null,
-                tint = Color(0xff24389C)
+                tint = MaterialTheme.colorScheme.primary
             )
             Spacer(modifier = Modifier.width(16.dp))
             Text(
                 text = "Тема оформления",
                 fontWeight = FontWeight.Bold,
                 fontSize = 18.sp,
+                color = MaterialTheme.colorScheme.tertiary
             )
         }
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Выберите режим, который лучше всего подходит для ваших глаз."
+            text = "Выберите режим, который лучше всего подходит для ваших глаз.",
+            color = MaterialTheme.colorScheme.tertiary
         )
         Spacer(modifier = Modifier.height(16.dp))
         ThemeSwitcher(
@@ -186,7 +190,7 @@ fun ThemeSwitcher(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(Color(0xffe7e8e9))
+            .background(MaterialTheme.colorScheme.onBackground)
             .height(48.dp),
     ) {
 
@@ -199,16 +203,6 @@ fun ThemeSwitcher(
             label = "indicator"
         )
 
-        val lightTextColor by animateColorAsState(
-            targetValue = if (!isDarkTheme) Color.White else Color.Black,
-            label = "lightTextColor"
-        )
-
-        val darkTextColor by animateColorAsState(
-            targetValue = if (isDarkTheme) Color.White else Color.Black,
-            label = "darkTextColor"
-        )
-
         Box(
             modifier = Modifier
                 .padding(4.dp)
@@ -216,7 +210,7 @@ fun ThemeSwitcher(
                 .fillMaxHeight()
                 .offset(x = indicatorOffset)
                 .clip(RoundedCornerShape(16.dp))
-                .background(Color(0xff24389C))
+                .background(MaterialTheme.colorScheme.primary)
         )
         Row(modifier = Modifier.fillMaxSize()) {
             Box(
@@ -225,14 +219,14 @@ fun ThemeSwitcher(
                     .fillMaxSize()
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
-                        indication = null // Убираем стандартный серый круг при клике
+                        indication = null
                     ) { onThemeChange(false) },
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = "Светлая",
                     fontWeight = FontWeight.Bold,
-                    color = lightTextColor
+                    color = Color.White
                 )
             }
             Box(
@@ -248,7 +242,7 @@ fun ThemeSwitcher(
                 Text(
                     text = "Темная",
                     fontWeight = FontWeight.Bold,
-                    color = darkTextColor
+                    color = Color.Black
                 )
             }
         }
@@ -263,13 +257,13 @@ fun SettingsTopAppBar() {
             Text(
                 text = "Lexicon",
                 fontWeight = FontWeight.ExtraBold,
-                color = Color(0xff24389C)
+                color = MaterialTheme.colorScheme.primary
             )
         },
         modifier = Modifier
-            .shadow(elevation = 3.dp),
+            .shadow(elevation = 3.dp, spotColor = MaterialTheme.colorScheme.tertiary),
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.White
+            containerColor = MaterialTheme.colorScheme.background
         ),
     )
 }
