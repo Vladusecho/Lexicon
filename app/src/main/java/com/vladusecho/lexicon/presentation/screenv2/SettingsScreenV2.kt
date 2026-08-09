@@ -170,7 +170,8 @@ fun SwitchThemeItem(
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = "Выберите режим, который лучше всего подходит для ваших глаз.",
-            color = MaterialTheme.colorScheme.tertiary
+            color = MaterialTheme.colorScheme.tertiary,
+            fontSize = 14.sp
         )
         Spacer(modifier = Modifier.height(16.dp))
         ThemeSwitcher(

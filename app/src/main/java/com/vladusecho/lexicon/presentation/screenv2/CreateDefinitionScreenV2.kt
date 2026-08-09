@@ -28,6 +28,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -82,14 +83,14 @@ fun CreateDefinitionScreenV2(
         topBar = {
             TopAppBar(
                 modifier = Modifier
-                    .shadow(elevation = 3.dp),
+                    .shadow(elevation = 3.dp, spotColor = MaterialTheme.colorScheme.tertiary),
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.White
+                    containerColor = MaterialTheme.colorScheme.background
                 ),
                 title = {
                     Text(
                         text = "Добавление",
-                        color = Color.Black,
+                        color = MaterialTheme.colorScheme.tertiary,
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 16.sp
                     )
@@ -101,7 +102,7 @@ fun CreateDefinitionScreenV2(
                         Icon(
                             painter = painterResource(id = R.drawable.ic_back),
                             contentDescription = null,
-                            tint = Color.Black
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
                 },
@@ -118,7 +119,7 @@ fun CreateDefinitionScreenV2(
                     ) {
                         Text(
                             text = "СБРОСИТЬ",
-                            color = Color(0xff24389C),
+                            color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 16.sp
                         )
@@ -248,7 +249,7 @@ fun CreateDefinitionScreenV2Content(
                 )
                 Text(
                     text = "*Обязательно для заполнения",
-                    color = Color(0xff454652).copy(alpha = 0.5f),
+                    color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.5f),
                     modifier = Modifier.padding(horizontal = 16.dp),
                     fontSize = 12.sp
                 )
@@ -305,13 +306,13 @@ fun SaveButton(
         modifier = modifier
             .fillMaxWidth(),
         colors = ButtonDefaults.buttonColors(
-            containerColor = Color(0xff24389C)
+            containerColor = MaterialTheme.colorScheme.primary
         ),
         enabled = isEnabledSaveButton
     ) {
         Text(
             text = "СОХРАНИТЬ",
-            color = Color.White,
+            color = MaterialTheme.colorScheme.background,
             fontWeight = FontWeight.SemiBold,
             fontSize = 16.sp
         )
@@ -366,7 +367,7 @@ fun BoxWithImageChoice(
             .clickable {
                 launcher.launch("image/*")
             }
-            .background(Color(0xffe7e8e9))
+            .background(MaterialTheme.colorScheme.onBackground)
             .border(1.dp, Color(0xffC5C5D4), RoundedCornerShape(16.dp)),
         contentAlignment = Alignment.Center
     ) {
@@ -410,19 +411,19 @@ fun BoxWithImageChoice(
                 Icon(
                     painter = painterResource(id = R.drawable.ic_add_image),
                     contentDescription = null,
-                    tint = Color(0xff454652),
+                    tint = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.5f),
                     modifier = Modifier.size(42.dp)
                 )
                 Text(
                     text = "Добавить изображение",
-                    color = Color(0xff454652),
+                    color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.5f),
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 16.sp
                 )
                 Spacer(Modifier.height(8.dp))
                 Text(
                     text = "Визуальные ассоциации\nпомогают лучше запоминать",
-                    color = Color(0xff454652),
+                    color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.5f),
                     fontWeight = FontWeight.Normal,
                     fontSize = 12.sp,
                     lineHeight = 12.sp,
@@ -447,7 +448,7 @@ fun TextFieldWithTitle(
     ) {
         Text(
             text = title,
-            color = Color.Black,
+            color = MaterialTheme.colorScheme.tertiary,
             fontWeight = FontWeight.SemiBold,
             fontSize = 16.sp
         )
@@ -462,14 +463,14 @@ fun TextFieldWithTitle(
                 unfocusedIndicatorColor = Color.Transparent,
                 disabledIndicatorColor = Color.Transparent,
                 errorIndicatorColor = Color.Transparent,
-                unfocusedContainerColor = Color.Transparent,
-                focusedContainerColor = Color.Transparent,
+                unfocusedContainerColor = MaterialTheme.colorScheme.onBackground,
+                focusedContainerColor = MaterialTheme.colorScheme.onBackground,
 
                 ),
             placeholder = {
                 Text(
                     text = placeholder,
-                    color = Color(0xff454652).copy(alpha = 0.5f)
+                    color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.5f)
                 )
             },
             shape = RoundedCornerShape(16.dp),
@@ -487,7 +488,7 @@ fun Title(
     Text(
         modifier = modifier,
         text = text,
-        color = Color(0xff24389C),
+        color = MaterialTheme.colorScheme.primary,
         fontWeight = FontWeight.SemiBold,
         fontSize = fontSize.sp
     )
