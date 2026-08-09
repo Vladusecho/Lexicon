@@ -1,15 +1,23 @@
 package com.vladusecho.lexicon.presentation.screenv2
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -23,6 +31,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,7 +39,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -174,51 +182,75 @@ fun ThemeSwitcher(
     isDarkTheme: Boolean,
     onThemeChange: (Boolean) -> Unit
 ) {
-    Row(
+    BoxWithConstraints(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .background(Color(0xffe7e8e9))
             .height(48.dp),
-        verticalAlignment = Alignment.CenterVertically
     ) {
+
+        val maxWidth = maxWidth
+        val tabWidth = maxWidth / 2
+
+        val indicatorOffset by animateDpAsState(
+            targetValue = if (isDarkTheme) tabWidth else 0.dp,
+            animationSpec = spring(stiffness = Spring.StiffnessLow),
+            label = "indicator"
+        )
+
+        val lightTextColor by animateColorAsState(
+            targetValue = if (!isDarkTheme) Color.White else Color.Black,
+            label = "lightTextColor"
+        )
+
+        val darkTextColor by animateColorAsState(
+            targetValue = if (isDarkTheme) Color.White else Color.Black,
+            label = "darkTextColor"
+        )
+
         Box(
             modifier = Modifier
-                .weight(1f)
-                .fillMaxSize()
+                .padding(4.dp)
+                .width(tabWidth - 8.dp)
+                .fillMaxHeight()
+                .offset(x = indicatorOffset)
                 .clip(RoundedCornerShape(16.dp))
-                .background(if (isDarkTheme) Color.Transparent else Color(0xff24389C))
-                .clickable {
-                    onThemeChange(false)
-                },
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "Светлая",
-                modifier = Modifier,
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Bold,
-                color = if (!isDarkTheme) Color.White else Color.Black
-            )
-        }
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxSize()
-                .clip(RoundedCornerShape(16.dp))
-                .background(if (!isDarkTheme) Color.Transparent else Color(0xff24389C))
-                .clickable {
-                    onThemeChange(true)
-                },
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "Темная",
-                modifier = Modifier,
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Bold,
-                color = if (isDarkTheme) Color.White else Color.Black
-            )
+                .background(Color(0xff24389C))
+        )
+        Row(modifier = Modifier.fillMaxSize()) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxSize()
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null // Убираем стандартный серый круг при клике
+                    ) { onThemeChange(false) },
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Светлая",
+                    fontWeight = FontWeight.Bold,
+                    color = lightTextColor
+                )
+            }
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxSize()
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) { onThemeChange(true) },
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Темная",
+                    fontWeight = FontWeight.Bold,
+                    color = darkTextColor
+                )
+            }
         }
     }
 }
