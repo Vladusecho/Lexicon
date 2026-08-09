@@ -94,39 +94,36 @@ fun HomeScreenV2(
             )
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = paddingValues.calculateTopPadding())
-        ) {
-            HomeScreenV2Content(
-                currentState = currentState,
-                onShortDefinitionClick = onShortDefinitionClick,
-                value = viewModel.query,
-                onValueChange = {
-                    viewModel.processCommand(
-                        HomeViewModel.HomeCommand.QueryInput(it)
-                    )
-                },
-                selectedFilter = viewModel.selectedFilter,
-                onFilterClick = {
-                    viewModel.processCommand(
-                        HomeViewModel.HomeCommand.FilterClick(it)
-                    )
-                },
-                onFavouriteClick = { id, isFavourite ->
-                    viewModel.processCommand(
-                        HomeViewModel.HomeCommand.ToggleFavourite(id, isFavourite)
-                    )
-                }
-            )
-        }
+        HomeScreenV2Content(
+            modifier = Modifier.padding(top = paddingValues.calculateTopPadding()),
+            currentState = currentState,
+            onShortDefinitionClick = onShortDefinitionClick,
+            value = viewModel.query,
+            onValueChange = {
+                viewModel.processCommand(
+                    HomeViewModel.HomeCommand.QueryInput(it)
+                )
+            },
+            selectedFilter = viewModel.selectedFilter,
+            onFilterClick = {
+                viewModel.processCommand(
+                    HomeViewModel.HomeCommand.FilterClick(it)
+                )
+            },
+            onFavouriteClick = { id, isFavourite ->
+                viewModel.processCommand(
+                    HomeViewModel.HomeCommand.ToggleFavourite(id, isFavourite)
+                )
+            }
+        )
     }
 }
+
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreenV2Content(
+    modifier: Modifier = Modifier,
     currentState: HomeViewModel.HomeState,
     onShortDefinitionClick: (Int) -> Unit,
     value: String,
@@ -135,7 +132,9 @@ fun HomeScreenV2Content(
     onFilterClick: (FilterChips) -> Unit,
     onFavouriteClick: (Int, Boolean) -> Unit
 ) {
-    LazyColumn {
+    LazyColumn(
+        modifier = modifier
+    ) {
         item {
             Spacer(Modifier.height(24.dp))
             LexiconSearchBar(
@@ -261,8 +260,7 @@ fun LexiconSearchBar(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
-            .border(1.dp, Color(0xffC5C5D4), CircleShape)
-        ,
+            .border(1.dp, Color(0xffC5C5D4), CircleShape),
         colors = TextFieldDefaults.colors(
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
