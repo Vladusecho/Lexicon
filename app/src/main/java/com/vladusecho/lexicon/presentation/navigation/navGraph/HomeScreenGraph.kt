@@ -10,6 +10,7 @@ import com.vladusecho.lexicon.presentation.screenv2.CreateDefinitionScreenV2
 import com.vladusecho.lexicon.presentation.screenv2.DetailsScreenV2
 import com.vladusecho.lexicon.presentation.screenv2.EditDefinitionScreenV2
 import com.vladusecho.lexicon.presentation.screenv2.HomeScreenV2
+import com.vladusecho.lexicon.presentation.screenv2.LoginScreen
 
 fun NavGraphBuilder.homeScreenGraph(
     navState: NavigationState

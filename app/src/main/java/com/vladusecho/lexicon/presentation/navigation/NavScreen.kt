@@ -3,6 +3,9 @@ package com.vladusecho.lexicon.presentation.navigation
 import kotlinx.serialization.Serializable
 
 sealed class NavScreen {
+    @Serializable
+    object Login : NavScreen()
+
 
     @Serializable
     object Home : NavScreen()

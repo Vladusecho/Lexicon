@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.ksp)
     kotlin("plugin.serialization") version "2.3.0"
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -42,6 +43,11 @@ android {
 
 dependencies {
     implementation(libs.room.core)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
+    implementation(libs.firebase.auth)
     ksp(libs.room.compiler)
     implementation(libs.coil.compose)
     implementation(libs.androidx.core.splashscreen)
