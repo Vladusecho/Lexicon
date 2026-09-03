@@ -24,6 +24,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -72,13 +73,13 @@ fun HomeScreenV2(
                     Text(
                         text = "Lexicon",
                         fontWeight = FontWeight.ExtraBold,
-                        color = Color(0xff24389C)
+                        color = MaterialTheme.colorScheme.primary
                     )
                 },
                 modifier = Modifier
-                    .shadow(elevation = 3.dp),
+                    .shadow(elevation = 3.dp, spotColor = MaterialTheme.colorScheme.tertiary),
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.White
+                    containerColor = MaterialTheme.colorScheme.background
                 ),
                 actions = {
                     IconButton(
@@ -87,46 +88,43 @@ fun HomeScreenV2(
                         Icon(
                             painter = painterResource(id = R.drawable.ic_add),
                             contentDescription = null,
-                            tint = Color(0xff24389C)
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
                 }
             )
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = paddingValues.calculateTopPadding())
-        ) {
-            HomeScreenV2Content(
-                currentState = currentState,
-                onShortDefinitionClick = onShortDefinitionClick,
-                value = viewModel.query,
-                onValueChange = {
-                    viewModel.processCommand(
-                        HomeViewModel.HomeCommand.QueryInput(it)
-                    )
-                },
-                selectedFilter = viewModel.selectedFilter,
-                onFilterClick = {
-                    viewModel.processCommand(
-                        HomeViewModel.HomeCommand.FilterClick(it)
-                    )
-                },
-                onFavouriteClick = { id, isFavourite ->
-                    viewModel.processCommand(
-                        HomeViewModel.HomeCommand.ToggleFavourite(id, isFavourite)
-                    )
-                }
-            )
-        }
+        HomeScreenV2Content(
+            modifier = Modifier.padding(top = paddingValues.calculateTopPadding()),
+            currentState = currentState,
+            onShortDefinitionClick = onShortDefinitionClick,
+            value = viewModel.query,
+            onValueChange = {
+                viewModel.processCommand(
+                    HomeViewModel.HomeCommand.QueryInput(it)
+                )
+            },
+            selectedFilter = viewModel.selectedFilter,
+            onFilterClick = {
+                viewModel.processCommand(
+                    HomeViewModel.HomeCommand.FilterClick(it)
+                )
+            },
+            onFavouriteClick = { id, isFavourite ->
+                viewModel.processCommand(
+                    HomeViewModel.HomeCommand.ToggleFavourite(id, isFavourite)
+                )
+            }
+        )
     }
 }
+
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreenV2Content(
+    modifier: Modifier = Modifier,
     currentState: HomeViewModel.HomeState,
     onShortDefinitionClick: (Int) -> Unit,
     value: String,
@@ -135,7 +133,9 @@ fun HomeScreenV2Content(
     onFilterClick: (FilterChips) -> Unit,
     onFavouriteClick: (Int, Boolean) -> Unit
 ) {
-    LazyColumn {
+    LazyColumn(
+        modifier = modifier
+    ) {
         item {
             Spacer(Modifier.height(24.dp))
             LexiconSearchBar(
@@ -149,8 +149,8 @@ fun HomeScreenV2Content(
                     .fillMaxWidth()
                     .background(
                         Brush.verticalGradient(
-                            0.35f to Color.White.copy(alpha = 0.9f),
-                            0.65f to Color.White.copy(alpha = 0.6f),
+                            0.35f to MaterialTheme.colorScheme.background.copy(alpha = 0.9f),
+                            0.65f to MaterialTheme.colorScheme.background.copy(alpha = 0.6f),
                             1f to Color.Transparent
                         )
                     )
@@ -212,7 +212,7 @@ fun HomeScreenV2Content(
                                         text = currentLetter.toString(),
                                         fontSize = 32.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = Color(0xff24389C),
+                                        color = MaterialTheme.colorScheme.primary,
                                         modifier = Modifier.weight(1f),
                                         textAlign = TextAlign.Center
                                     )
@@ -261,17 +261,16 @@ fun LexiconSearchBar(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
-            .border(1.dp, Color(0xffC5C5D4), CircleShape)
-        ,
+            .border(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f), CircleShape),
         colors = TextFieldDefaults.colors(
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
             disabledIndicatorColor = Color.Transparent,
             errorIndicatorColor = Color.Transparent,
-            unfocusedContainerColor = Color(0xffF3F4F5),
-            focusedContainerColor = Color(0xffF3F4F5),
-            disabledContainerColor = Color(0xffF3F4F5),
-            errorContainerColor = Color(0xffF3F4F5),
+            unfocusedContainerColor = MaterialTheme.colorScheme.onBackground,
+            focusedContainerColor = MaterialTheme.colorScheme.onBackground,
+            disabledContainerColor = MaterialTheme.colorScheme.onBackground,
+            errorContainerColor = MaterialTheme.colorScheme.onBackground,
         ),
         shape = CircleShape,
         placeholder = {
@@ -293,7 +292,8 @@ fun LexiconSearchBar(
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_eraser),
-                        contentDescription = null
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
             }
@@ -348,12 +348,12 @@ fun FilterButton(
 ) {
     Row(
         modifier = modifier
-            .border(1.dp, Color(0xffC5C5D4), RoundedCornerShape(16.dp))
+            .border(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f), RoundedCornerShape(16.dp))
             .clip(RoundedCornerShape(16.dp))
             .clickable {
                 onClick()
             }
-            .background(if (isSelected) Color(0xff24389C) else Color(0xffedeeef))
+            .background(if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground)
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -362,13 +362,13 @@ fun FilterButton(
                 painter = painterResource(id = iconId),
                 contentDescription = null,
                 modifier = Modifier.size(16.dp),
-                tint = if (isSelected) Color.White else Color.Black
+                tint = if (isSelected) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.tertiary
             )
             Spacer(Modifier.width(8.dp))
         }
         Text(
             text = name,
-            color = if (isSelected) Color.White else Color.Black
+            color = if (isSelected) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.tertiary
         )
     }
 }

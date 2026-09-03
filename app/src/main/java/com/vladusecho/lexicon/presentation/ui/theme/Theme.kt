@@ -17,14 +17,16 @@ import androidx.core.view.WindowCompat
 import javax.annotation.meta.When
 
 private val DarkColorScheme = darkColorScheme(
-    secondary = DarkCyanBlue, // Top And Bottom Bars
-    tertiary = White, // Text
-    background = DarkGrayishCyan
+    primary = Periwinkle,
+    tertiary = White,
+    onBackground = DarkGray,
+    background = LittleBlack
 )
 
 private val LightColorScheme = lightColorScheme(
-    secondary = LightGrayishBlue, // Top And Bottom Bars
-    tertiary = Black, // Text
+    primary = Blue, // Primary text
+    tertiary = Black,
+    onBackground = LightGray,
     background = White
 )
 

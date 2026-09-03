@@ -17,6 +17,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -111,14 +112,14 @@ fun DetailsScreenV2TopAppBar(
 ) {
     TopAppBar(
         modifier = Modifier
-            .shadow(elevation = 3.dp),
+            .shadow(elevation = 3.dp, spotColor = MaterialTheme.colorScheme.tertiary),
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.White
+            containerColor = MaterialTheme.colorScheme.background
         ),
         title = {
             Text(
                 text = "Определение",
-                color = Color.Black,
+                color = MaterialTheme.colorScheme.tertiary,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 16.sp
             )
@@ -130,7 +131,7 @@ fun DetailsScreenV2TopAppBar(
                 Icon(
                     painter = painterResource(id = R.drawable.ic_back),
                     contentDescription = null,
-                    tint = Color.Black
+                    tint = MaterialTheme.colorScheme.primary
                 )
             }
         },
@@ -143,7 +144,7 @@ fun DetailsScreenV2TopAppBar(
                 Icon(
                     painter = painterResource(id = R.drawable.ic_edit),
                     contentDescription = null,
-                    tint = Color.Black
+                    tint = MaterialTheme.colorScheme.primary
                 )
             }
             IconButton(
@@ -152,7 +153,7 @@ fun DetailsScreenV2TopAppBar(
                 Icon(
                     painter = painterResource(id = if (!isFavorite) R.drawable.ic_favorite else R.drawable.ic_not_favourite),
                     contentDescription = null,
-                    tint = Color.Black
+                    tint = MaterialTheme.colorScheme.primary
                 )
             }
             IconButton(
@@ -161,7 +162,7 @@ fun DetailsScreenV2TopAppBar(
                 Icon(
                     painter = painterResource(id = R.drawable.ic_trash),
                     contentDescription = null,
-                    tint = Color.Black
+                    tint = MaterialTheme.colorScheme.primary
                 )
             }
         }
@@ -181,13 +182,13 @@ fun DetailsScreenV2Content(
 
         }
         DetailsViewModel.DetailsState.Loading -> {
-            LoadingView()
+
         }
         is DetailsViewModel.DetailsState.Success -> {
             Column(
                 modifier = modifier
                     .fillMaxSize()
-                    .background(Color.White)
+                    .background(MaterialTheme.colorScheme.background)
                     .verticalScroll(scrollState)
             ) {
                 Spacer(modifier = Modifier.height(32.dp))
@@ -215,19 +216,19 @@ fun DefinitionWithImage(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .border(1.dp, Color(0xffC5C5D4), RoundedCornerShape(16.dp))
+            .border(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f), RoundedCornerShape(16.dp))
             .padding(16.dp)
     ) {
         Text(
             text = "Определение",
-            color = Color(0xff24389C),
+            color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Normal,
             fontSize = 16.sp,
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = definition.description,
-            color = Color(0xff454652),
+            color = MaterialTheme.colorScheme.tertiary,
             fontWeight = FontWeight.Normal,
             fontSize = 16.sp,
         )
@@ -240,7 +241,7 @@ fun DefinitionWithImage(
                     .fillMaxWidth()
                     .aspectRatio(1 / 1f)
                     .clip(RoundedCornerShape(16.dp))
-                    .border(1.dp, Color(0xffC5C5D4), RoundedCornerShape(16.dp)),
+                    .border(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f), RoundedCornerShape(16.dp)),
                 contentScale = ContentScale.Crop
             )
         }
@@ -258,7 +259,7 @@ fun WordWithPartOfSpeech(
     ) {
         Text(
             text = word,
-            color = Color(0xff24389C),
+            color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Bold,
             fontSize = 32.sp,
         )
@@ -277,12 +278,12 @@ fun PartOfSpeech(
     Row(
         modifier = modifier
             .clip(CircleShape)
-            .background(Color(0xff85f6e5))
+            .background(MaterialTheme.colorScheme.onBackground)
             .padding(vertical = 4.dp, horizontal = 16.dp)
     ) {
         Text(
             text = partOfSpeech.label,
-            color = Color(0xff007166),
+            color = MaterialTheme.colorScheme.tertiary,
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold
         )

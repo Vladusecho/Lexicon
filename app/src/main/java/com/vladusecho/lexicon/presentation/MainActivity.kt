@@ -85,9 +85,9 @@ fun BottomNavigationBar(
     val backStackEntry by navState.navHostController.currentBackStackEntryAsState()
 
     NavigationBar(
-        containerColor = Color(0xffedeeef),
+        containerColor = MaterialTheme.colorScheme.background,
         modifier = Modifier
-            .shadow(elevation = 20.dp)
+            .shadow(elevation = 20.dp, ambientColor = MaterialTheme.colorScheme.tertiary)
     ) {
         val items = listOf(
             NavItem.Home,
@@ -111,7 +111,7 @@ fun BottomNavigationBar(
                     )
                 },
                 colors = NavigationBarItemDefaults.colors(
-                    indicatorColor = Color(0xff85f6e5),
+                    indicatorColor = MaterialTheme.colorScheme.onBackground,
                 ),
                 label = {
                     Text(

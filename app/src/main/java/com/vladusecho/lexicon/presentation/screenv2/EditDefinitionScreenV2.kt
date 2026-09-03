@@ -13,6 +13,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -69,14 +70,14 @@ fun EditDefinitionScreenV2(
         topBar = {
             TopAppBar(
                 modifier = Modifier
-                    .shadow(elevation = 3.dp),
+                    .shadow(elevation = 3.dp, spotColor = MaterialTheme.colorScheme.tertiary),
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.White
+                    containerColor = MaterialTheme.colorScheme.background
                 ),
                 title = {
                     Text(
                         text = "Редактирование",
-                        color = Color.Black,
+                        color = MaterialTheme.colorScheme.tertiary,
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 16.sp
                     )
@@ -88,7 +89,7 @@ fun EditDefinitionScreenV2(
                         Icon(
                             painter = painterResource(id = R.drawable.ic_back),
                             contentDescription = null,
-                            tint = Color.Black
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
                 },
@@ -105,7 +106,7 @@ fun EditDefinitionScreenV2(
                     ) {
                         Text(
                             text = "СБРОСИТЬ",
-                            color = Color(0xff24389C),
+                            color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 16.sp
                         )
@@ -233,7 +234,7 @@ fun EditDefinitionScreenV2Content(
                 )
                 Text(
                     text = "*Обязательно для заполнения",
-                    color = Color(0xff454652).copy(alpha = 0.5f),
+                    color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.5f),
                     modifier = Modifier.padding(horizontal = 16.dp),
                     fontSize = 12.sp
                 )
