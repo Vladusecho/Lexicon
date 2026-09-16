@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "720551715300",
+    "project_id": "lexicon-4d9e0",
+    "storage_bucket": "lexicon-4d9e0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:720551715300:android:ce9b4c85053698e65e27f1",
+        "android_client_info": {
+          "package_name": "com.vladusecho.lexicon"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "720551715300-j97l0oahiql5bgof32rqh9q8okuglolf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.vladusecho.lexicon",
+            "certificate_hash": "4cab8115d285e84b9f4e36935b3845f9da392f9d"
+          }
+        },
+        {
+          "client_id": "720551715300-td4e8a2nehkera6pltgnc67mlfmb8qhj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCs6rmBNwEU9AktQNziMpVesU5fDW5BGAA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "720551715300-td4e8a2nehkera6pltgnc67mlfmb8qhj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

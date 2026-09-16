@@ -7,7 +7,6 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.vladusecho.lexicon.presentation.navigation.navGraph.homeScreenGraph
-import com.vladusecho.lexicon.presentation.screen.SettingsScreen
 import com.vladusecho.lexicon.presentation.screenv2.SettingsScreenV2
 
 @Composable
