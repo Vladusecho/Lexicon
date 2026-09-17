@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
+import kotlin.coroutines.cancellation.CancellationException
 
 
 class SimpleRepositoryImpl @Inject constructor() : DefinitionsRepository {
@@ -52,13 +53,13 @@ class SimpleRepositoryImpl @Inject constructor() : DefinitionsRepository {
         return _definitions.map { it.sortedBy { definition -> definition.word.lowercase() } }
     }
 
-    override suspend fun createDefinition(definition: Definition) {
+    override suspend fun createDefinition(definition: Definition): Result<Unit> = runCatching {
         val currentList = _definitions.value
         val updatedList = currentList + definition
         _definitions.value = updatedList
-    }
+    }.onFailure { if (it is CancellationException) throw it }
 
-    override suspend fun updateDefinition(definition: Definition) {
+    override suspend fun updateDefinition(definition: Definition): Result<Unit> = runCatching {
         val currentList = _definitions.value
         val updatedList = currentList.map {
             if (it.id == definition.id) {
@@ -68,13 +69,13 @@ class SimpleRepositoryImpl @Inject constructor() : DefinitionsRepository {
             }
         }
         _definitions.value = updatedList
-    }
+    }.onFailure { if (it is CancellationException) throw it }
 
-    override suspend fun deleteDefinition(id: Int) {
+    override suspend fun deleteDefinition(id: Int): Result<Unit> = runCatching {
         val currentList = _definitions.value
         val updatedList = currentList.filter { it.id != id }
         _definitions.value = updatedList
-    }
+    }.onFailure { if (it is CancellationException) throw it }
 
 //    override fun getFavorites(): Flow<List<Definition>> {
 //        return _definitions.map {

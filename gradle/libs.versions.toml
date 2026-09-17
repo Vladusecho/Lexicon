@@ -6,6 +6,7 @@ coreSplashscreen = "1.2.0"
 junit = "4.13.2"
 junitVersion = "1.3.0"
 espressoCore = "3.7.0"
+kotlinxSerializationJson = "1.11.0"
 lifecycleRuntimeKtx = "2.10.0"
 activityCompose = "1.13.0"
 kotlin = "2.3.0"
@@ -46,6 +47,7 @@ junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.r
 # DATASTORE PREFERENCES
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 # ROOM (KSP-COMPILER)
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 room-core = { group = "androidx.room", name = "room-ktx", version.ref = "room"}
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room"}
 

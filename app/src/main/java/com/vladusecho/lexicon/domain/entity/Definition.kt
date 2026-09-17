@@ -1,5 +1,8 @@
 package com.vladusecho.lexicon.domain.entity
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Definition(
     val id: Int,
     val word: String,
@@ -9,6 +12,7 @@ data class Definition(
     val partOfSpeech: PartOfSpeech
 )
 
+@Serializable
 enum class PartOfSpeech(
     val label: String
 ) {

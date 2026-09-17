@@ -7,7 +7,7 @@ class DeleteDefinitionUseCase @Inject constructor(
     private val definitionsRepository: DefinitionsRepository
 ) {
 
-    suspend operator fun invoke(id: Int) {
+    suspend operator fun invoke(id: Int) =
         definitionsRepository.deleteDefinition(id)
-    }
+
 }

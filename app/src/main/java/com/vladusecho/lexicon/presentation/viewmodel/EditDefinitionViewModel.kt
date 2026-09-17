@@ -93,7 +93,8 @@ class EditDefinitionViewModel @AssistedInject constructor(
                     }
                     val finalDefinition = command.definition.copy(imgUri = finalImageUri)
                     editDefinitionUseCase(finalDefinition)
-                    _event.emit(EditDefinitionEvent.FinishEdit)
+                        .onSuccess {  _event.emit(EditDefinitionEvent.FinishEdit) }
+                        .onFailure { _event.emit(EditDefinitionEvent.ShowError(it.message ?: "Unknown error")) }
                 }
             }
 
@@ -160,6 +161,8 @@ class EditDefinitionViewModel @AssistedInject constructor(
 
     sealed interface EditDefinitionEvent {
         data object FinishEdit : EditDefinitionEvent
+
+        data class ShowError(val message: String) : EditDefinitionEvent
     }
 }
 

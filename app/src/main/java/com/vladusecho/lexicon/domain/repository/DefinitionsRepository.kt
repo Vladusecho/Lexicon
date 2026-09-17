@@ -9,11 +9,11 @@ interface DefinitionsRepository {
 
     fun getDefinitions(): Flow<List<Definition>>
 
-    suspend fun createDefinition(definition: Definition)
+    suspend fun createDefinition(definition: Definition): Result<Unit>
 
-    suspend fun updateDefinition(definition: Definition)
+    suspend fun updateDefinition(definition: Definition): Result<Unit>
 
-    suspend fun deleteDefinition(id: Int)
+    suspend fun deleteDefinition(id: Int): Result<Unit>
 
     fun search(query: String, searchFavourite: Boolean): Flow<List<Definition>>
 

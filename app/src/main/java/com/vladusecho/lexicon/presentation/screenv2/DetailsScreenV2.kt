@@ -1,5 +1,6 @@
 package com.vladusecho.lexicon.presentation.screenv2
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
@@ -30,6 +31,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -58,11 +60,17 @@ fun DetailsScreenV2(
     onEditClick: (id: Int) -> Unit
 ) {
 
+    val context = LocalContext.current
+
     LaunchedEffect(key1 = Unit) {
         viewModel.event.collect { event ->
             when (event) {
                 DetailsViewModel.DetailsEvent.DeleteDefinition -> {
                     onBackClick()
+                }
+
+                is DetailsViewModel.DetailsEvent.ShowError -> {
+                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
                 }
             }
         }

@@ -58,7 +58,8 @@ class DetailsViewModel @AssistedInject constructor(
             when (command) {
                 is DetailsCommand.DeleteDefinition -> {
                     deleteDefinitionUseCase(id)
-                    _event.emit(DetailsEvent.DeleteDefinition)
+                        .onSuccess { _event.emit(DetailsEvent.DeleteDefinition) }
+                        .onFailure { _event.emit(DetailsEvent.ShowError(it.message ?: "Unknown error")) }
                 }
 
                 is DetailsCommand.ToggleFavourite -> {
@@ -81,6 +82,8 @@ class DetailsViewModel @AssistedInject constructor(
 
     sealed interface DetailsEvent {
         data object DeleteDefinition : DetailsEvent
+
+        data class ShowError(val message: String) : DetailsEvent
     }
 }
 

@@ -52,7 +52,8 @@ class CreateDefinitionViewModel @Inject constructor(
                     }
                     val finalDefinition = command.definition.copy(imgUri = finalImagePath)
                     createDefinitionUseCase(finalDefinition)
-                    _event.emit(CreateDefinitionEvent.FinishCreate)
+                        .onSuccess {  _event.emit(CreateDefinitionEvent.FinishCreate) }
+                        .onFailure { _event.emit(CreateDefinitionEvent.ShowError(it.message ?: "Unknown error")) }
                 }
             }
 
@@ -120,5 +121,7 @@ class CreateDefinitionViewModel @Inject constructor(
 
     sealed interface CreateDefinitionEvent {
         data object FinishCreate : CreateDefinitionEvent
+
+        data class ShowError(val message: String) : CreateDefinitionEvent
     }
 }

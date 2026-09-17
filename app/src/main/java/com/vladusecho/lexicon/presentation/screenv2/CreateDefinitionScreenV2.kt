@@ -1,6 +1,7 @@
 package com.vladusecho.lexicon.presentation.screenv2
 
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -44,6 +45,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -67,6 +69,7 @@ fun CreateDefinitionScreenV2(
     onBackClick: () -> Unit
 ) {
 
+    val context = LocalContext.current
     val currentState by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
@@ -74,6 +77,10 @@ fun CreateDefinitionScreenV2(
             when (it) {
                 CreateDefinitionViewModel.CreateDefinitionEvent.FinishCreate -> {
                     onBackClick()
+                }
+
+                is CreateDefinitionViewModel.CreateDefinitionEvent.ShowError -> {
+                    Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
                 }
             }
         }
