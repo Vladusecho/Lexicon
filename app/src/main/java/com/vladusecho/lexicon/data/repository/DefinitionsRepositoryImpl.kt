@@ -9,6 +9,7 @@ import com.vladusecho.lexicon.domain.repository.DefinitionsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
+import kotlin.coroutines.cancellation.CancellationException
 
 class DefinitionsRepositoryImpl @Inject constructor(
     private val appDao: AppDao
@@ -21,17 +22,17 @@ class DefinitionsRepositoryImpl @Inject constructor(
         return appDao.getDefinitions().map { it.toDefinitions() }
     }
 
-    override suspend fun createDefinition(definition: Definition) {
+    override suspend fun createDefinition(definition: Definition): Result<Unit> = runCatching {
         appDao.upsertDefinition(definition.toDefinitionEntity())
-    }
+    }.onFailure { if (it is CancellationException) throw it }
 
-    override suspend fun updateDefinition(definition: Definition) {
+    override suspend fun updateDefinition(definition: Definition): Result<Unit> = runCatching {
         appDao.upsertDefinition(definition.toDefinitionEntity())
-    }
+    }.onFailure { if (it is CancellationException) throw it }
 
-    override suspend fun deleteDefinition(id: Int) {
+    override suspend fun deleteDefinition(id: Int): Result<Unit> = runCatching {
         appDao.deleteDefinition(id)
-    }
+    }.onFailure { if (it is CancellationException) throw it }
 
     override fun search(
         query: String,

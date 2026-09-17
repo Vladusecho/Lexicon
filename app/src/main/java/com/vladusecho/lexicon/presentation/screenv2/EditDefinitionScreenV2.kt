@@ -1,6 +1,7 @@
 package com.vladusecho.lexicon.presentation.screenv2
 
 import android.net.Uri
+import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -53,6 +55,8 @@ fun EditDefinitionScreenV2(
     onBackClick: () -> Unit,
 ) {
 
+    val context = LocalContext.current
+
     val currentState by viewModel.state.collectAsStateWithLifecycle()
     val isFavorite by viewModel.isFavorite.collectAsStateWithLifecycle()
 
@@ -61,6 +65,10 @@ fun EditDefinitionScreenV2(
             when (it) {
                 EditDefinitionViewModel.EditDefinitionEvent.FinishEdit -> {
                     onBackClick()
+                }
+
+                is EditDefinitionViewModel.EditDefinitionEvent.ShowError -> {
+                    Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
                 }
             }
         }

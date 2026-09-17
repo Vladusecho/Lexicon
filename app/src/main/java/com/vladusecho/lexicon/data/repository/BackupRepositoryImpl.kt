@@ -32,8 +32,8 @@ class BackupRepositoryImpl @Inject constructor(
                 BufferedWriter(OutputStreamWriter(it)).use { writer ->
                     writer.write(jsonString)
                 }
-            } ?: IllegalStateException("Failed to open output stream")
-        }
+            } ?: throw IllegalStateException("Failed to open output stream")
+        }.onFailure { if (it is CancellationException) throw it  }
 
     override suspend fun importDefinitions(uriString: String): Result<Unit> =
         runCatching {
@@ -47,5 +47,5 @@ class BackupRepositoryImpl @Inject constructor(
             definitions.forEach {
                 definitionsRepository.createDefinition(it)
             }
-        }
+        }.onFailure { if (it is CancellationException) throw it }
 }

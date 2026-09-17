@@ -30,6 +30,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -370,6 +371,8 @@ fun ExportImportDefinitions(
                 fontWeight = FontWeight.Bold
             )
         }
+        Spacer(modifier = Modifier.height(16.dp))
+        HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f))
         Spacer(modifier = Modifier.height(16.dp))
         Row(
             modifier = Modifier
