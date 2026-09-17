@@ -5,8 +5,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vladusecho.lexicon.domain.entity.Settings
 import com.vladusecho.lexicon.domain.usecase.definition.ExportDefinitionUseCase
+import com.vladusecho.lexicon.domain.usecase.definition.ImportDefinitionsUseCase
 import com.vladusecho.lexicon.domain.usecase.settings.GetSettingsUseCase
 import com.vladusecho.lexicon.domain.usecase.settings.ToggleDarkModeUseCase
+import com.vladusecho.lexicon.presentation.viewmodel.SettingsViewModel.SettingsEvent.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -22,7 +24,8 @@ import javax.inject.Inject
 class SettingsViewModel @Inject constructor(
     getSettingsUseCase: GetSettingsUseCase,
     private val toggleDarkModeUseCase: ToggleDarkModeUseCase,
-    private val exportDefinitionUseCase: ExportDefinitionUseCase
+    private val exportDefinitionUseCase: ExportDefinitionUseCase,
+    private val importDefinitionUseCase: ImportDefinitionsUseCase
 ) : ViewModel() {
 
     // Flow with the current settings
@@ -66,7 +69,15 @@ class SettingsViewModel @Inject constructor(
                 viewModelScope.launch {
                     exportDefinitionUseCase(command.uriString)
                         .onSuccess { _event.emit(SettingsEvent.ExportSuccess) }
-                        .onFailure { _event.emit(SettingsEvent.ExportError(it.message ?: "Unknown error")) }
+                        .onFailure { _event.emit(ExportError(it.message ?: "Export error")) }
+                }
+            }
+
+            is SettingsCommand.ImportData -> {
+                viewModelScope.launch {
+                    importDefinitionUseCase(command.uriString)
+                        .onSuccess { _event.emit(SettingsEvent.ImportSuccess) }
+                        .onFailure { _event.emit(ImportError(it.message ?: "Import error")) }
                 }
             }
         }
@@ -75,6 +86,9 @@ class SettingsViewModel @Inject constructor(
     sealed interface SettingsEvent {
         data object ExportSuccess : SettingsEvent
         data class ExportError(val message: String) : SettingsEvent
+
+        data object ImportSuccess : SettingsEvent
+        data class ImportError(val message: String) : SettingsEvent
     }
 
     sealed interface SettingsState {
@@ -90,5 +104,7 @@ class SettingsViewModel @Inject constructor(
         data class ToggleDarkMode(val isDarkMode: Boolean) : SettingsCommand
 
         data class ExportData(val uriString: String) : SettingsCommand
+
+        data class ImportData(val uriString: String) : SettingsCommand
     }
 }

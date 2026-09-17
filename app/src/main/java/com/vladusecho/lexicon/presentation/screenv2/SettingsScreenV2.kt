@@ -5,7 +5,6 @@ import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
@@ -54,7 +53,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vladusecho.lexicon.R
 import com.vladusecho.lexicon.domain.entity.Settings
 import com.vladusecho.lexicon.presentation.ui.theme.LexiconTheme
@@ -79,6 +77,17 @@ fun SettingsScreenV2(
         }
     }
 
+    val importLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        uri?.let {
+            viewModel.processCommand(
+                SettingsViewModel.SettingsCommand.ImportData(it.toString())
+            )
+        }
+    }
+
+
     LaunchedEffect(Unit) {
         viewModel.event.collect {
             when (it) {
@@ -87,6 +96,13 @@ fun SettingsScreenV2(
                 }
                 is SettingsViewModel.SettingsEvent.ExportError -> {
                     Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
+                }
+
+                is SettingsViewModel.SettingsEvent.ImportError -> {
+                    Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
+                }
+                SettingsViewModel.SettingsEvent.ImportSuccess -> {
+                    Toast.makeText(context, "Данные успешно импортированы", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -105,7 +121,8 @@ fun SettingsScreenV2(
                     SettingsViewModel.SettingsCommand.ToggleDarkMode(it)
                 )
             },
-            exportLauncher = exportLauncher
+            exportLauncher = exportLauncher,
+            importLauncher = importLauncher
         )
     }
 }
@@ -115,6 +132,7 @@ fun SettingsScreenV2Content(
     modifier: Modifier = Modifier,
     currentState: SettingsViewModel.SettingsState = SettingsViewModel.SettingsState.Loading,
     exportLauncher: ManagedActivityResultLauncher<String, Uri?>,
+    importLauncher: ManagedActivityResultLauncher<Array<String>, Uri?>,
     onThemeChange: (Boolean) -> Unit
 ) {
 
@@ -147,13 +165,16 @@ fun SettingsScreenV2Content(
                     isDarkTheme = currentState.settings.isDarkMode,
                     onThemeChange = onThemeChange
                 )
-                ExportDefinitions(
+                ExportImportDefinitions(
                     modifier = Modifier.padding(
                         horizontal = 16.dp,
                         vertical = 16.dp
                     ),
                     onExportClick = {
                         exportLauncher.launch("lexicon_backup_${System.currentTimeMillis()}.json")
+                    },
+                    onImportClick = {
+                        importLauncher.launch(arrayOf("application/json"))
                     }
                 )
                 Spacer(
@@ -300,9 +321,10 @@ fun ThemeSwitcher(
 }
 
 @Composable
-fun ExportDefinitions(
+fun ExportImportDefinitions(
     modifier: Modifier = Modifier,
-    onExportClick: () -> Unit
+    onExportClick: () -> Unit,
+    onImportClick: () -> Unit
 ) {
     Column(
         modifier = modifier
@@ -344,7 +366,46 @@ fun ExportDefinitions(
         ) {
             Text(
                 text = "Экспортировать",
-                color = Color.White,
+                color = MaterialTheme.colorScheme.background,
+                fontWeight = FontWeight.Bold
+            )
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_import),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(
+                text = "Импорт (JSON)",
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                color = MaterialTheme.colorScheme.tertiary
+            )
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Загрузите все свои определения из JSON файла в приложение, чтобы просматривать их в удобном формате",
+            color = MaterialTheme.colorScheme.tertiary,
+            fontSize = 14.sp
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(
+            onClick = onImportClick,
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary
+            )
+        ) {
+            Text(
+                text = "Импортировать",
+                color = MaterialTheme.colorScheme.background,
                 fontWeight = FontWeight.Bold
             )
         }
@@ -386,6 +447,9 @@ fun SettingsScreenSuccessPreview() {
             onThemeChange = {},
             exportLauncher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.CreateDocument("application/json")
+            ) {},
+            importLauncher = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.OpenDocument()
             ) {}
         )
     }
