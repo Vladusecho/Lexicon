@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.vladusecho.lexicon.domain.entity.Definition
+import com.vladusecho.lexicon.presentation.element.LoadingView
 import com.vladusecho.lexicon.presentation.ui.theme.LexiconTheme
 import com.vladusecho.lexicon.presentation.viewmodel.EducationViewModel
 
@@ -69,6 +70,11 @@ fun EducationScreen(
                 viewModel.processCommand(
                     EducationViewModel.EducationCommand.ShowImg(!viewModel.isImgShown)
                 )
+            },
+            onContinueClick = {
+                viewModel.processCommand(
+                    EducationViewModel.EducationCommand.ShowNextWord
+                )
             }
         )
     }
@@ -81,23 +87,26 @@ fun EducationScreenContent(
     isDefinitionShown: Boolean,
     isImgShown: Boolean,
     onDefinitionClick: () -> Unit,
-    onImgClick: () -> Unit
+    onImgClick: () -> Unit,
+    onContinueClick: () -> Unit
 ) {
-    when (currentState) {
-        EducationViewModel.EducationState.Loading -> {}
-        is EducationViewModel.EducationState.Error -> {}
-        is EducationViewModel.EducationState.Success -> {
-            Column(
-                modifier = modifier
-                    .verticalScroll(rememberScrollState())
-            ) {
-                Spacer(modifier = Modifier.height(32.dp))
-                MainTitle(
-                    modifier = Modifier.padding(
-                        horizontal = 16.dp,
-                    )
-                )
-                Spacer(modifier = Modifier.height(32.dp))
+    Column(
+        modifier = modifier
+            .verticalScroll(rememberScrollState())
+    ) {
+        Spacer(modifier = Modifier.height(32.dp))
+        MainTitle(
+            modifier = Modifier.padding(
+                horizontal = 16.dp,
+            )
+        )
+        Spacer(modifier = Modifier.height(32.dp))
+        when (currentState) {
+            EducationViewModel.EducationState.Loading -> {
+                LoadingView()
+            }
+            is EducationViewModel.EducationState.Error -> {}
+            is EducationViewModel.EducationState.Success -> {
                 ShowDefinitionCard(
                     modifier = Modifier.padding(
                         horizontal = 16.dp,
@@ -112,7 +121,8 @@ fun EducationScreenContent(
                 OptionButtons(
                     modifier = Modifier.padding(
                         horizontal = 16.dp
-                    )
+                    ),
+                    onContinueClick = onContinueClick
                 )
                 Spacer(modifier = Modifier.height(32.dp))
             }
@@ -149,12 +159,13 @@ fun MainTitle(
 @Composable
 fun OptionButtons(
     modifier: Modifier = Modifier,
+    onContinueClick: () -> Unit
 ) {
     Row(
         modifier = modifier
     ) {
         Button(
-            onClick = { /*TODO*/ },
+            onClick = onContinueClick,
             modifier = Modifier.weight(1f)
         ) {
             Text(
@@ -361,6 +372,7 @@ fun EducationScreenPreview() {
             isImgShown = true,
             onDefinitionClick = {},
             onImgClick = {},
+            onContinueClick = {},
             currentState = EducationViewModel.EducationState.Success(
                 definition = Definition(
                     id = 1,
