@@ -9,12 +9,15 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -28,12 +31,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import coil.compose.AsyncImage
 import com.vladusecho.lexicon.domain.entity.Definition
 import com.vladusecho.lexicon.presentation.ui.theme.LexiconTheme
 import com.vladusecho.lexicon.presentation.viewmodel.EducationViewModel
@@ -51,9 +56,15 @@ fun EducationScreen(
         EducationScreenContent(
             modifier = Modifier.padding(top = paddingValues.calculateTopPadding()),
             isDefinitionShown = viewModel.isDefinitionShown,
+            isImgShown = viewModel.isImgShown,
             onDefinitionClick = {
                 viewModel.processCommand(
                     EducationViewModel.EducationCommand.ShowDefinition(!viewModel.isDefinitionShown)
+                )
+            },
+            onImgClick = {
+                viewModel.processCommand(
+                    EducationViewModel.EducationCommand.ShowImg(!viewModel.isImgShown)
                 )
             }
         )
@@ -64,10 +75,13 @@ fun EducationScreen(
 fun EducationScreenContent(
     modifier: Modifier = Modifier,
     isDefinitionShown: Boolean,
-    onDefinitionClick: () -> Unit
+    isImgShown: Boolean,
+    onDefinitionClick: () -> Unit,
+    onImgClick: () -> Unit
 ) {
     Column(
         modifier = modifier
+            .verticalScroll(rememberScrollState())
     ) {
         Spacer(modifier = Modifier.height(32.dp))
         MainTitle(
@@ -88,7 +102,9 @@ fun EducationScreenContent(
                 partOfSpeech = com.vladusecho.lexicon.domain.entity.PartOfSpeech.NOUN
             ),
             isDefinitionShown = isDefinitionShown,
-            onDefinitionClick = onDefinitionClick
+            isImgShown = isImgShown,
+            onDefinitionClick = onDefinitionClick,
+            onImgClick = onImgClick
         )
         Spacer(modifier = Modifier.height(32.dp))
         OptionButtons(
@@ -96,6 +112,7 @@ fun EducationScreenContent(
                 horizontal = 16.dp
             )
         )
+        Spacer(modifier = Modifier.height(32.dp))
     }
 }
 
@@ -149,7 +166,9 @@ fun ShowDefinitionCard(
     modifier: Modifier = Modifier,
     definition: Definition,
     isDefinitionShown: Boolean,
-    onDefinitionClick: () -> Unit
+    isImgShown: Boolean,
+    onDefinitionClick: () -> Unit,
+    onImgClick: () -> Unit
 ) {
     Column(
         modifier = modifier
@@ -246,6 +265,61 @@ fun ShowDefinitionCard(
                 }
             }
         }
+        Spacer(modifier = Modifier.height(16.dp))
+        if (isImgShown) {
+            AsyncImage(
+                model = definition.imgUri,
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .aspectRatio(1 / 1f)
+                    .clip(RoundedCornerShape(16.dp))
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                    ) {
+                        onImgClick()
+                    }
+                    .border(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f), RoundedCornerShape(16.dp)),
+                contentScale = ContentScale.Crop
+            )
+        } else {
+            Box(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                    ) {
+                        onImgClick()
+                    }
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.onBackground),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(
+                        text = "Изображение скрыто",
+                        color = MaterialTheme.colorScheme.tertiary,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 16.sp
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = "Коснитесь здесь, чтобы отобразить изображение слова",
+                        color = MaterialTheme.colorScheme.tertiary,
+                        fontWeight = FontWeight.Normal,
+                        fontSize = 12.sp,
+                        lineHeight = 12.sp,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -276,7 +350,9 @@ fun EducationScreenPreview() {
     LexiconTheme {
         EducationScreenContent(
             isDefinitionShown = true,
-            onDefinitionClick = {}
+            isImgShown = true,
+            onDefinitionClick = {},
+            onImgClick = {}
         )
     }
 }
