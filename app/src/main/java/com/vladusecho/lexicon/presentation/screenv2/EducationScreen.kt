@@ -2,13 +2,17 @@ package com.vladusecho.lexicon.presentation.screenv2
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -19,6 +23,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
@@ -27,25 +33,38 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.vladusecho.lexicon.domain.entity.Definition
 import com.vladusecho.lexicon.presentation.ui.theme.LexiconTheme
+import com.vladusecho.lexicon.presentation.viewmodel.EducationViewModel
 
 @Composable
-fun EducationScreen() {
+fun EducationScreen(
+    viewModel: EducationViewModel = hiltViewModel()
+) {
+
     Scaffold(
         topBar = {
             EducationTopAppBar()
         }
     ) { paddingValues ->
         EducationScreenContent(
-            modifier = Modifier.padding(top = paddingValues.calculateTopPadding())
+            modifier = Modifier.padding(top = paddingValues.calculateTopPadding()),
+            isDefinitionShown = viewModel.isDefinitionShown,
+            onDefinitionClick = {
+                viewModel.processCommand(
+                    EducationViewModel.EducationCommand.ShowDefinition(!viewModel.isDefinitionShown)
+                )
+            }
         )
     }
 }
 
 @Composable
 fun EducationScreenContent(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isDefinitionShown: Boolean,
+    onDefinitionClick: () -> Unit
 ) {
     Column(
         modifier = modifier
@@ -68,7 +87,8 @@ fun EducationScreenContent(
                 isFavorite = false,
                 partOfSpeech = com.vladusecho.lexicon.domain.entity.PartOfSpeech.NOUN
             ),
-            isDefinitionShown = true
+            isDefinitionShown = isDefinitionShown,
+            onDefinitionClick = onDefinitionClick
         )
         Spacer(modifier = Modifier.height(32.dp))
         OptionButtons(
@@ -107,21 +127,11 @@ fun MainTitle(
 
 @Composable
 fun OptionButtons(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Row(
         modifier = modifier
     ) {
-        Button(
-            onClick = { /*TODO*/ },
-            modifier = Modifier.weight(1f)
-        ) {
-            Text(
-                text = "Определение",
-                fontWeight = FontWeight.Bold
-            )
-        }
-        Spacer(modifier = Modifier.width(16.dp))
         Button(
             onClick = { /*TODO*/ },
             modifier = Modifier.weight(1f)
@@ -138,7 +148,8 @@ fun OptionButtons(
 fun ShowDefinitionCard(
     modifier: Modifier = Modifier,
     definition: Definition,
-    isDefinitionShown: Boolean
+    isDefinitionShown: Boolean,
+    onDefinitionClick: () -> Unit
 ) {
     Column(
         modifier = modifier
@@ -148,7 +159,7 @@ fun ShowDefinitionCard(
                 MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f),
                 RoundedCornerShape(16.dp)
             )
-            .padding(16.dp),
+            .padding(vertical = 16.dp)
     ) {
         Row(
             modifier = modifier
@@ -173,19 +184,67 @@ fun ShowDefinitionCard(
             color = MaterialTheme.colorScheme.primary
         )
         if (isDefinitionShown) {
+            Spacer(modifier = Modifier.height(42.dp))
+            Column(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                    ) {
+                        onDefinitionClick()
+                    }
+
+            ) {
+                Text(
+                    text = "Определение",
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 16.sp,
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = definition.description,
+                    fontSize = 16.sp,
+                    color = MaterialTheme.colorScheme.tertiary
+                )
+            }
+        } else {
             Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = "Определение",
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Normal,
-                fontSize = 16.sp,
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = definition.description,
-                fontSize = 16.sp,
-                color = MaterialTheme.colorScheme.tertiary
-            )
+            Box(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                    ) {
+                        onDefinitionClick()
+                    }
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.onBackground),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(
+                        text = "Определение скрыто",
+                        color = MaterialTheme.colorScheme.tertiary,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 16.sp
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = "Коснитесь здесь, чтобы отобразить значение слова",
+                        color = MaterialTheme.colorScheme.tertiary,
+                        fontWeight = FontWeight.Normal,
+                        fontSize = 12.sp,
+                        lineHeight = 12.sp,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
         }
     }
 }
@@ -210,9 +269,14 @@ fun EducationTopAppBar() {
 }
 
 @Composable
-@Preview
+@Preview(
+    showBackground = true
+)
 fun EducationScreenPreview() {
     LexiconTheme {
-        EducationScreen()
+        EducationScreenContent(
+            isDefinitionShown = true,
+            onDefinitionClick = {}
+        )
     }
 }
