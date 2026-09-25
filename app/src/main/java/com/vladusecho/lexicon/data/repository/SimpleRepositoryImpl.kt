@@ -121,4 +121,10 @@ class SimpleRepositoryImpl @Inject constructor() : DefinitionsRepository {
             }
         }
     }
+
+    override suspend fun getRandomDefinition(): Result<Definition?> {
+        return runCatching {
+            _definitions.value.randomOrNull()
+        }.onFailure { if (it is CancellationException) throw it }
+    }
 }

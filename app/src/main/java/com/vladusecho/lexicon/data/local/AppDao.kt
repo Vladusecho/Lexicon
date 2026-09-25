@@ -35,4 +35,7 @@ interface AppDao {
 
     @Query("SELECT * FROM definitions WHERE isFavorite = 1 ORDER BY word ASC")
     fun getFavorites(): Flow<List<DefinitionEntity>>
+
+    @Query("SELECT * FROM definitions ORDER BY RANDOM() LIMIT 1")
+    suspend fun getRandomDefinition(): DefinitionEntity?
 }
