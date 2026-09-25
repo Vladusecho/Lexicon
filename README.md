@@ -43,9 +43,8 @@
 |:-:|:-:|:-:|
 | *Главный экран* | *Экран добавления определения* | *Экран просмотра определения* |
 | <img alt="image" width=300 src="https://github.com/user-attachments/assets/ab4296b2-6f17-43c7-8192-b54c76c17115" /> | <img alt="image" width=300 src="https://github.com/user-attachments/assets/fdf5b799-48b2-4778-84bd-be6d7ae1b699" /> |<img width=300 alt="image" src="https://github.com/user-attachments/assets/58e4f0ed-0f84-4d63-8e0b-fa21edf3fa86" /> |
-| *Экран настроек* | *Экран обучения* | *Что-то еще* |
-| <img width="300" alt="image" src="https://github.com/user-attachments/assets/3c5e0d1d-02b7-4933-9fb6-2674be8c6c11" />
- | | |
+| *Экран настроек* | *Экран обучения* | *Экран обучения* |
+| <img width="300" alt="image" src="https://github.com/user-attachments/assets/3c5e0d1d-02b7-4933-9fb6-2674be8c6c11" /> | <img width="300" alt="image" src="https://github.com/user-attachments/assets/2d1248ea-77d8-4ffc-b4b6-3b896bd64009" /> | <img width="300" alt="image" src="https://github.com/user-attachments/assets/3fde0954-64fb-4e74-ae7b-9d950c92280e" /> |
 
 
 </div>
@@ -53,9 +52,9 @@
 ## 🚀 Планы по развитию
 
 - [ ] **Категории и теги:** Группировка слов по темам (например, "Работа", "Путешествия").
-- [ ] **Резервное копирование:** Экспорт и импорт базы данных в формате JSON или CSV.
+- [x] **Резервное копирование:** Экспорт и импорт базы данных в формате JSON или CSV.
 - [ ] **Интеграция с API:** Автоматическое получение определений и синонимов из внешних онлайн-словарей.
-- [ ] **Режим обучения:** Карточки (Flashcards) для эффективного запоминания добавленных слов.
+- [x] **Режим обучения:** Карточки (Flashcards) для эффективного запоминания добавленных слов.
 - [ ] **Произношение:** Добавление аудио-дорожек к словам с помощью Text-to-Speech.
 
 ## 🤝 Контакты и поддержка
