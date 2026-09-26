@@ -9,19 +9,12 @@ import com.vladusecho.lexicon.domain.entity.Definition
 import com.vladusecho.lexicon.domain.usecase.definition.GetDefinitionsUseCase
 import com.vladusecho.lexicon.domain.usecase.definition.GetRandomDefinitionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -36,64 +29,63 @@ class EducationViewModel @Inject constructor(
     var isImgShown by mutableStateOf(false)
         private set
 
-    private val refreshTrigger = MutableSharedFlow<Unit>(replay = 1)
+    private val _state = MutableStateFlow<EducationState>(EducationState.Loading)
+    val state = _state.asStateFlow()
+
     private var lastDefinitionId: Int = -1
 
     init {
-        refreshTrigger.tryEmit(Unit)
+        viewModelScope.launch {
+            getDefinitionsUseCase()
+                .map { it.isEmpty() }
+                .distinctUntilChanged()
+                .collect { isEmpty ->
+                    if (isEmpty) {
+                        _state.value = EducationState.Error(ErrorType.NO_WORDS)
+                    } else {
+                        if (_state.value !is EducationState.Success) {
+                            loadNextWord()
+                        }
+                    }
+                }
+        }
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
-    val state = combine(
-        refreshTrigger,
-        getDefinitionsUseCase().map { it.isEmpty() }.distinctUntilChanged()
-    ) { _, isEmpty ->
-        isEmpty
-    }
-        .onEach {
+    private fun loadNextWord() {
+        viewModelScope.launch {
             isDefinitionShown = false
             isImgShown = false
-        }
-        .flatMapLatest { isEmpty ->
-            flow {
-                if (isEmpty) {
-                    emit(EducationState.Error(ErrorType.NO_WORDS))
-                } else {
-                    emit(EducationState.Loading)
-                    delay(500)
-                    getRandomDefinitionUseCase(lastDefinitionId).fold(
-                        onSuccess = { definition ->
-                            if (definition != null) {
-                                lastDefinitionId = definition.id
-                                emit(EducationState.Success(definition))
-                            } else {
-                                getRandomDefinitionUseCase(-1).fold(
-                                    onSuccess = { fallbackDefinition ->
-                                        if (fallbackDefinition != null) {
-                                            lastDefinitionId = fallbackDefinition.id
-                                            emit(EducationState.Success(fallbackDefinition))
-                                        } else {
-                                            emit(EducationState.Error(ErrorType.NO_WORDS))
-                                        }
-                                    },
-                                    onFailure = {
-                                        emit(EducationState.Error(ErrorType.UNKNOWN))
-                                    }
-                                )
+            _state.value = EducationState.Loading
+            getRandomDefinitionUseCase(lastDefinitionId)
+            delay(500)
+            getRandomDefinitionUseCase(lastDefinitionId).fold(
+                onSuccess = { definition ->
+                    if (definition != null) {
+                        lastDefinitionId = definition.id
+                        _state.value = EducationState.Success(definition)
+                    } else {
+                        getRandomDefinitionUseCase(-1).fold(
+                            onSuccess = { fallbackDefinition ->
+                                if (fallbackDefinition != null) {
+                                    lastDefinitionId = fallbackDefinition.id
+                                    _state.value = EducationState.Success(fallbackDefinition)
+                                } else {
+                                    _state.value = EducationState.Error(ErrorType.NO_WORDS)
+                                }
+                            },
+                            onFailure = {
+                                _state.value = EducationState.Error(ErrorType.UNKNOWN)
                             }
-                        },
-                        onFailure = {
-                            emit(EducationState.Error(ErrorType.UNKNOWN))
-                        }
-                    )
+                        )
+                    }
+                },
+                onFailure = {
+                    _state.value = EducationState.Error(ErrorType.UNKNOWN)
                 }
-            }
-        }.catch { emit(EducationState.Error(ErrorType.UNKNOWN)) }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = EducationState.Loading
-        )
+            )
+        }
+    }
+
 
     fun processCommand(command: EducationCommand) {
         when (command) {
@@ -106,7 +98,7 @@ class EducationViewModel @Inject constructor(
             }
 
             EducationCommand.ShowNextWord -> {
-                refreshTrigger.tryEmit(Unit)
+                loadNextWord()
             }
         }
     }
