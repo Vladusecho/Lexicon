@@ -107,28 +107,9 @@ fun HomeScreenV2(
             currentState = currentState,
             onShortDefinitionClick = onShortDefinitionClick,
             value = viewModel.query,
-            onValueChange = {
-                viewModel.processCommand(
-                    HomeViewModel.HomeCommand.QueryInput(it)
-                )
-            },
             selectedFilter = viewModel.selectedFilter,
-            onFilterClick = {
-                viewModel.processCommand(
-                    HomeViewModel.HomeCommand.FilterClick(it)
-                )
-            },
-            onFavouriteClick = { id, isFavourite ->
-                viewModel.processCommand(
-                    HomeViewModel.HomeCommand.ToggleFavourite(id, isFavourite)
-                )
-            },
             selectedPartOfSpeech = viewModel.selectedPartOfSpeech,
-            onPartOfSpeechClick = {
-                viewModel.processCommand(
-                    HomeViewModel.HomeCommand.PartOfSpeechClick(it)
-                )
-            }
+            onCommand = viewModel::processCommand
         )
     }
 }
@@ -141,12 +122,9 @@ fun HomeScreenV2Content(
     currentState: HomeViewModel.HomeState,
     onShortDefinitionClick: (Int) -> Unit,
     value: String,
-    onValueChange: (String) -> Unit,
     selectedFilter: FilterChips,
-    onPartOfSpeechClick: (PartOfSpeech) -> Unit,
     selectedPartOfSpeech: PartOfSpeech?,
-    onFilterClick: (FilterChips) -> Unit,
-    onFavouriteClick: (Int, Boolean) -> Unit
+    onCommand: (HomeViewModel.HomeCommand) -> Unit
 ) {
     LazyColumn(
         modifier = modifier
@@ -155,7 +133,7 @@ fun HomeScreenV2Content(
             Spacer(Modifier.height(24.dp))
             LexiconSearchBar(
                 value = value,
-                onValueChange = onValueChange
+                onValueChange = { onCommand(HomeViewModel.HomeCommand.QueryInput(it)) }
             )
         }
         stickyHeader {
@@ -174,9 +152,9 @@ fun HomeScreenV2Content(
                 FilterList(
                     modifier = Modifier.fillMaxWidth(),
                     selectedFilter = selectedFilter,
-                    onFilterClick = onFilterClick,
+                    onFilterClick = { onCommand(HomeViewModel.HomeCommand.FilterClick(it)) },
                     selectedPartOfSpeech = selectedPartOfSpeech,
-                    onPartOfSpeechClick = onPartOfSpeechClick
+                    onPartOfSpeechClick = { onCommand(HomeViewModel.HomeCommand.PartOfSpeechClick(it)) }
                 )
                 Spacer(Modifier.height(16.dp))
             }
@@ -275,7 +253,12 @@ fun HomeScreenV2Content(
                                 onClick = onShortDefinitionClick,
                                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                                 onFavouriteClick = {
-                                    onFavouriteClick(item.id, !item.isFavorite)
+                                    onCommand(
+                                        HomeViewModel.HomeCommand.ToggleFavourite(
+                                            item.id,
+                                            !item.isFavorite
+                                        )
+                                    )
                                 }
                             )
                         }
@@ -285,9 +268,11 @@ fun HomeScreenV2Content(
                             onClick = onShortDefinitionClick,
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                             onFavouriteClick = {
-                                onFavouriteClick(
-                                    definitions[index].id,
-                                    !definitions[index].isFavorite
+                                onCommand(
+                                    HomeViewModel.HomeCommand.ToggleFavourite(
+                                        definitions[index].id,
+                                        !definitions[index].isFavorite
+                                    )
                                 )
                             }
                         )
@@ -544,12 +529,9 @@ fun HomeScreenContentSuccessPreview() {
             ),
             onShortDefinitionClick = {},
             value = "",
-            onValueChange = {},
             selectedFilter = FilterChips.ALL,
-            onFilterClick = {},
-            onFavouriteClick = { _, _ -> },
             selectedPartOfSpeech = null,
-            onPartOfSpeechClick = {}
+            onCommand = {}
         )
     }
 }
@@ -564,12 +546,9 @@ fun HomeScreenContentLoadingPreview() {
             currentState = HomeViewModel.HomeState.Loading,
             onShortDefinitionClick = {},
             value = "",
-            onValueChange = {},
             selectedFilter = FilterChips.ALL,
-            onFilterClick = {},
-            onFavouriteClick = { _, _ -> },
             selectedPartOfSpeech = null,
-            onPartOfSpeechClick = {}
+            onCommand = {}
         )
     }
 }
@@ -600,12 +579,9 @@ fun HomeScreenErrorPreview() {
             currentState = HomeViewModel.HomeState.Error(HomeViewModel.ErrorType.NO_WORDS),
             onShortDefinitionClick = {},
             value = "",
-            onValueChange = {},
             selectedFilter = FilterChips.ALL,
-            onFilterClick = {},
-            onFavouriteClick = { _, _ -> },
             selectedPartOfSpeech = null,
-            onPartOfSpeechClick = {}
+            onCommand = {}
         )
     }
 }
