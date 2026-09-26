@@ -16,11 +16,6 @@ sealed class NavScreen {
     ) : NavScreen()
 
     @Serializable
-
-    object Favorites : NavScreen()
-
-    @Serializable
-
     object Settings : NavScreen()
 
     @Serializable
@@ -32,5 +27,8 @@ sealed class NavScreen {
     ) : NavScreen()
 
     @Serializable
-    object FavouritesGraph
+    object Education : NavScreen()
+
+    @Serializable
+    object EducationGraph : NavScreen()
 }

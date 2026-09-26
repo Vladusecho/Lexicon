@@ -17,7 +17,7 @@ sealed class NavItem(
     object Education : NavItem(
         label = "Обучение",
         iconId = R.drawable.ic_education,
-        screen = NavScreen.FavouritesGraph,
+        screen = NavScreen.EducationGraph,
     )
 
     object Settings : NavItem(

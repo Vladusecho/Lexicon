@@ -19,7 +19,6 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -32,89 +31,49 @@ class HomeViewModel @Inject constructor(
 
     var query by mutableStateOf("")
         private set
-    var isSearchActive by mutableStateOf(false)
-        private set
 
     var selectedFilter by mutableStateOf(FilterChips.ALL)
         private set
 
+    var selectedPartOfSpeech by mutableStateOf<PartOfSpeech?>(null)
+        private set
+
 
     @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
-    // StateFlow with the current state of the search
     val state = combine(
-        snapshotFlow { query } // Convert query to a flow
-            .debounce(500) // Debounce the flow to avoid making too many requests
-            .distinctUntilChanged(), // Only emit a new value if it's different from the previous one
-        snapshotFlow { selectedFilter }, // Convert selectedFilter to a flow
-        getDefinitionsUseCase() // Get the definitions from the use case
-    ) { query, selectedFilter, definitions ->
-        Triple(
-            query,
-            selectedFilter,
-            definitions
-        )
-    } // Combine the 3 flows into a triple
-        .map { (query, selectedFilter, definitions) -> // Switch to a new flow based on the selected filter
+        snapshotFlow { query }.debounce { currentQuery -> if (currentQuery.isEmpty()) 0L else 500L }
+            .distinctUntilChanged(),
+        snapshotFlow { selectedPartOfSpeech },
+        snapshotFlow { selectedFilter },
+        getDefinitionsUseCase()
+    ) { query, selectedPartOfSpeech, selectedFilter, definitions ->
 
-            val showAlphabetHeaders =
-                definitions.isNotEmpty() && selectedFilter != FilterChips.RECENT
-
-            val filteredList = when (selectedFilter) {
-                FilterChips.ALL -> {
-                    definitions
-                }
-
-                FilterChips.FAVORITE -> {
-                    definitions.filter { definition -> definition.isFavorite }
-                }
-
-                FilterChips.RECENT -> {
-                    definitions.sortedByDescending { definition -> definition.id }.take(3)
-                }
-
-                FilterChips.VERB -> {
-                    definitions.filter { definition -> definition.partOfSpeech == PartOfSpeech.VERB }
-                }
-                FilterChips.NOUN -> {
-                    definitions.filter { definition -> definition.partOfSpeech == PartOfSpeech.NOUN }
-                }
-                FilterChips.ADVERB -> {
-                    definitions.filter { definition -> definition.partOfSpeech == PartOfSpeech.ADVERB }
-                }
-                FilterChips.ADJECTIVE -> {
-                    definitions.filter { definition -> definition.partOfSpeech == PartOfSpeech.ADJECTIVE }
-                }
-
-                FilterChips.PARTICIPLE -> {
-                    definitions.filter { definition -> definition.partOfSpeech == PartOfSpeech.PARTICIPLE }
-                }
-                FilterChips.ADVERBIAL_PARTICIPLE -> {
-                    definitions.filter { definition -> definition.partOfSpeech == PartOfSpeech.ADVERBIAL_PARTICIPLE }
-                }
-            }.filter { definition -> definition.word.startsWith(query.trim(), ignoreCase = true) }
-            HomeState.Success(
-                filteredList,
-                showAlphabetHeaders
-            ) as HomeState  // Convert the flow to a state
+        if (definitions.isEmpty()) {
+            return@combine HomeState.Error(ErrorType.NO_WORDS)
         }
-        .catch { emit(HomeState.Error) } // Catch any errors and emit an error state
+
+        val showAlphabetHeaders =
+            selectedFilter != FilterChips.RECENT
+
+        val filteredList = when (selectedFilter) {
+            FilterChips.ALL -> definitions
+            FilterChips.FAVORITE -> definitions.filter { definition -> definition.isFavorite }
+            FilterChips.RECENT -> definitions.sortedByDescending { definition -> definition.id }.take(3)
+            FilterChips.PART_OF_SPEECH -> {
+                if (selectedPartOfSpeech != null) definitions.filter { it.partOfSpeech == selectedPartOfSpeech }
+                else definitions
+            }
+        }.filter { definition -> definition.word.startsWith(query.trim(), ignoreCase = true) }
+        HomeState.Success(
+            filteredList,
+            showAlphabetHeaders
+        ) as HomeState
+    }
+        .catch { emit(HomeState.Error(ErrorType.UNKNOWN)) }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = HomeState.Loading
-        )
-
-    val definitionsCount = state
-        .map {
-            when (it) {
-                is HomeState.Success -> it.definitions.size
-                else -> 0
-            }
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = 0
         )
 
     fun processCommand(command: HomeCommand) {
@@ -125,12 +84,17 @@ class HomeViewModel @Inject constructor(
 
             is HomeCommand.FilterClick -> {
                 selectedFilter = command.filter
+                if (selectedFilter != FilterChips.PART_OF_SPEECH) selectedPartOfSpeech = null
             }
 
             is HomeCommand.ToggleFavourite -> {
                 viewModelScope.launch {
                     toggleFavouriteUseCase(command.id, isFavourite = command.isFavourite)
                 }
+            }
+
+            is HomeCommand.PartOfSpeechClick -> {
+                selectedPartOfSpeech = command.partOfSpeech
             }
         }
     }
@@ -142,7 +106,9 @@ class HomeViewModel @Inject constructor(
         ) : HomeState
 
         object Loading : HomeState
-        object Error : HomeState
+        data class Error(
+            val errorType: ErrorType
+        ) : HomeState
     }
 
     sealed interface HomeCommand {
@@ -156,5 +122,14 @@ class HomeViewModel @Inject constructor(
         data class FilterClick(
             val filter: FilterChips
         ) : HomeCommand
+
+        data class PartOfSpeechClick(
+            val partOfSpeech: PartOfSpeech
+        ) : HomeCommand
+    }
+
+    enum class ErrorType {
+        NO_WORDS,
+        UNKNOWN
     }
 }

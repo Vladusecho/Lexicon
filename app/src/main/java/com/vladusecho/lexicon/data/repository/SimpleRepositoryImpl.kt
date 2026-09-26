@@ -5,6 +5,7 @@ import com.vladusecho.lexicon.domain.entity.PartOfSpeech
 import com.vladusecho.lexicon.domain.repository.DefinitionsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
@@ -120,5 +121,11 @@ class SimpleRepositoryImpl @Inject constructor() : DefinitionsRepository {
                     .sortedBy { definition -> definition.word.lowercase() }
             }
         }
+    }
+
+    override suspend fun getRandomDefinition(excludedId: Int): Result<Definition?> {
+        return runCatching {
+            _definitions.value.filter { it.id != excludedId }.randomOrNull()
+        }.onFailure { if (it is CancellationException) throw it }
     }
 }

@@ -18,7 +18,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -107,11 +106,11 @@ fun BottomNavigationBar(
                     Icon(
                         painter = painterResource(id = item.iconId),
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.tertiary
+                        tint = if (!isSelected) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.background
                     )
                 },
                 colors = NavigationBarItemDefaults.colors(
-                    indicatorColor = MaterialTheme.colorScheme.onBackground,
+                    indicatorColor = MaterialTheme.colorScheme.primary,
                 ),
                 label = {
                     Text(
