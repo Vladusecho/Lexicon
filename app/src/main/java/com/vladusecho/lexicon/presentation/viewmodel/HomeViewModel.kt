@@ -19,7 +19,6 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -36,70 +35,40 @@ class HomeViewModel @Inject constructor(
     var selectedFilter by mutableStateOf(FilterChips.ALL)
         private set
 
+    var selectedPartOfSpeech by mutableStateOf<PartOfSpeech?>(null)
+        private set
+
 
     @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
     val state = combine(
-        snapshotFlow { query }
-            .debounce { currentQuery ->
-                if (currentQuery.isEmpty()) 0L else 500L
-            }
+        snapshotFlow { query }.debounce { currentQuery -> if (currentQuery.isEmpty()) 0L else 500L }
             .distinctUntilChanged(),
+        snapshotFlow { selectedPartOfSpeech },
         snapshotFlow { selectedFilter },
         getDefinitionsUseCase()
-    ) { query, selectedFilter, definitions ->
-        Triple(
-            query,
-            selectedFilter,
-            definitions
-        )
-    }
-        .map { (query, selectedFilter, definitions) ->
+    ) { query, selectedPartOfSpeech, selectedFilter, definitions ->
 
-            if (definitions.isEmpty()) {
-                return@map HomeState.Error(ErrorType.NO_WORDS)
-            }
-
-            val showAlphabetHeaders =
-                selectedFilter != FilterChips.RECENT
-
-            val filteredList = when (selectedFilter) {
-                FilterChips.ALL -> {
-                    definitions
-                }
-
-                FilterChips.FAVORITE -> {
-                    definitions.filter { definition -> definition.isFavorite }
-                }
-
-                FilterChips.RECENT -> {
-                    definitions.sortedByDescending { definition -> definition.id }.take(3)
-                }
-
-                FilterChips.VERB -> {
-                    definitions.filter { definition -> definition.partOfSpeech == PartOfSpeech.VERB }
-                }
-                FilterChips.NOUN -> {
-                    definitions.filter { definition -> definition.partOfSpeech == PartOfSpeech.NOUN }
-                }
-                FilterChips.ADVERB -> {
-                    definitions.filter { definition -> definition.partOfSpeech == PartOfSpeech.ADVERB }
-                }
-                FilterChips.ADJECTIVE -> {
-                    definitions.filter { definition -> definition.partOfSpeech == PartOfSpeech.ADJECTIVE }
-                }
-
-                FilterChips.PARTICIPLE -> {
-                    definitions.filter { definition -> definition.partOfSpeech == PartOfSpeech.PARTICIPLE }
-                }
-                FilterChips.ADVERBIAL_PARTICIPLE -> {
-                    definitions.filter { definition -> definition.partOfSpeech == PartOfSpeech.ADVERBIAL_PARTICIPLE }
-                }
-            }.filter { definition -> definition.word.startsWith(query.trim(), ignoreCase = true) }
-            HomeState.Success(
-                filteredList,
-                showAlphabetHeaders
-            ) as HomeState
+        if (definitions.isEmpty()) {
+            return@combine HomeState.Error(ErrorType.NO_WORDS)
         }
+
+        val showAlphabetHeaders =
+            selectedFilter != FilterChips.RECENT
+
+        val filteredList = when (selectedFilter) {
+            FilterChips.ALL -> definitions
+            FilterChips.FAVORITE -> definitions.filter { definition -> definition.isFavorite }
+            FilterChips.RECENT -> definitions.sortedByDescending { definition -> definition.id }.take(3)
+            FilterChips.PART_OF_SPEECH -> {
+                if (selectedPartOfSpeech != null) definitions.filter { it.partOfSpeech == selectedPartOfSpeech }
+                else definitions
+            }
+        }.filter { definition -> definition.word.startsWith(query.trim(), ignoreCase = true) }
+        HomeState.Success(
+            filteredList,
+            showAlphabetHeaders
+        ) as HomeState
+    }
         .catch { emit(HomeState.Error(ErrorType.UNKNOWN)) }
         .stateIn(
             scope = viewModelScope,
@@ -115,12 +84,17 @@ class HomeViewModel @Inject constructor(
 
             is HomeCommand.FilterClick -> {
                 selectedFilter = command.filter
+                if (selectedFilter != FilterChips.PART_OF_SPEECH) selectedPartOfSpeech = null
             }
 
             is HomeCommand.ToggleFavourite -> {
                 viewModelScope.launch {
                     toggleFavouriteUseCase(command.id, isFavourite = command.isFavourite)
                 }
+            }
+
+            is HomeCommand.PartOfSpeechClick -> {
+                selectedPartOfSpeech = command.partOfSpeech
             }
         }
     }
@@ -147,6 +121,10 @@ class HomeViewModel @Inject constructor(
 
         data class FilterClick(
             val filter: FilterChips
+        ) : HomeCommand
+
+        data class PartOfSpeechClick(
+            val partOfSpeech: PartOfSpeech
         ) : HomeCommand
     }
 

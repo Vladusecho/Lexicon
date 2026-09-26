@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -21,6 +22,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -35,7 +38,9 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,6 +57,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vladusecho.lexicon.R
 import com.vladusecho.lexicon.domain.entity.Definition
+import com.vladusecho.lexicon.domain.entity.PartOfSpeech
 import com.vladusecho.lexicon.presentation.element.LoadingView
 import com.vladusecho.lexicon.presentation.element.ShortDefinitionV2
 import com.vladusecho.lexicon.presentation.ui.theme.LexiconTheme
@@ -116,6 +122,12 @@ fun HomeScreenV2(
                 viewModel.processCommand(
                     HomeViewModel.HomeCommand.ToggleFavourite(id, isFavourite)
                 )
+            },
+            selectedPartOfSpeech = viewModel.selectedPartOfSpeech,
+            onPartOfSpeechClick = {
+                viewModel.processCommand(
+                    HomeViewModel.HomeCommand.PartOfSpeechClick(it)
+                )
             }
         )
     }
@@ -131,6 +143,8 @@ fun HomeScreenV2Content(
     value: String,
     onValueChange: (String) -> Unit,
     selectedFilter: FilterChips,
+    onPartOfSpeechClick: (PartOfSpeech) -> Unit,
+    selectedPartOfSpeech: PartOfSpeech?,
     onFilterClick: (FilterChips) -> Unit,
     onFavouriteClick: (Int, Boolean) -> Unit
 ) {
@@ -160,7 +174,9 @@ fun HomeScreenV2Content(
                 FilterList(
                     modifier = Modifier.fillMaxWidth(),
                     selectedFilter = selectedFilter,
-                    onFilterClick = onFilterClick
+                    onFilterClick = onFilterClick,
+                    selectedPartOfSpeech = selectedPartOfSpeech,
+                    onPartOfSpeechClick = onPartOfSpeechClick
                 )
                 Spacer(Modifier.height(16.dp))
             }
@@ -338,10 +354,14 @@ fun LexiconSearchBar(
 fun FilterList(
     modifier: Modifier = Modifier,
     selectedFilter: FilterChips,
+    selectedPartOfSpeech: PartOfSpeech?,
+    onPartOfSpeechClick: (PartOfSpeech) -> Unit,
     onFilterClick: (FilterChips) -> Unit
 ) {
 
     val listState = rememberLazyListState()
+
+    var isMenuExpanded by remember { mutableStateOf(false) }
 
     val chips = remember(selectedFilter) {
         listOf(selectedFilter) + FilterChips.entries.filter { it != selectedFilter }
@@ -351,25 +371,82 @@ fun FilterList(
         listState.animateScrollToItem(0)
     }
 
-    LazyRow(
-        state = listState,
-        contentPadding = PaddingValues(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        modifier = modifier
-    ) {
-        items(
-            items = chips,
-            key = { it.name }
+    Box(modifier = modifier) {
+        LazyRow(
+            state = listState,
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            FilterButton(
-                name = it.label,
-                iconId = it.iconId,
-                isSelected = selectedFilter == it,
-                onClick = { onFilterClick(it) },
-            )
+            items(
+                items = chips,
+                key = { it.name }
+            ) { chip ->
+
+                val buttonLabel =
+                    if (chip == FilterChips.PART_OF_SPEECH && selectedPartOfSpeech != null) {
+                        selectedPartOfSpeech.label
+                    } else {
+                        chip.label
+                    }
+
+                FilterButton(
+                    name = buttonLabel,
+                    iconId = chip.iconId,
+                    isSelected = selectedFilter == chip,
+                    onClick = {
+                        if (chip == FilterChips.PART_OF_SPEECH) {
+                            isMenuExpanded = true
+                        }
+                        onFilterClick(chip)
+                    },
+                )
+            }
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+        ) {
+            DropdownMenu(
+                expanded = isMenuExpanded,
+                onDismissRequest = { isMenuExpanded = false },
+                modifier = Modifier
+                    .background(MaterialTheme.colorScheme.onBackground),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                PartOfSpeech.entries.forEachIndexed { index, part ->
+                    Column() {
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = part.label,
+                                    color = MaterialTheme.colorScheme.tertiary,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            },
+                            onClick = {
+                                isMenuExpanded = false
+                                onPartOfSpeechClick(part)
+                                onFilterClick(FilterChips.PART_OF_SPEECH)
+                            },
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(16.dp))
+                        )
+                        if (index != PartOfSpeech.entries.size - 1) {
+                            HorizontalDivider(
+                                thickness = 1.dp,
+                                color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.1f),
+                                modifier = Modifier.padding(horizontal = 16.dp)
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
+
 
 @Composable
 fun FilterButton(
@@ -409,6 +486,7 @@ fun FilterButton(
         )
     }
 }
+
 
 @Composable
 @Preview(
@@ -469,7 +547,9 @@ fun HomeScreenContentSuccessPreview() {
             onValueChange = {},
             selectedFilter = FilterChips.ALL,
             onFilterClick = {},
-            onFavouriteClick = { _, _ -> }
+            onFavouriteClick = { _, _ -> },
+            selectedPartOfSpeech = null,
+            onPartOfSpeechClick = {}
         )
     }
 }
@@ -487,7 +567,9 @@ fun HomeScreenContentLoadingPreview() {
             onValueChange = {},
             selectedFilter = FilterChips.ALL,
             onFilterClick = {},
-            onFavouriteClick = { _, _ -> }
+            onFavouriteClick = { _, _ -> },
+            selectedPartOfSpeech = null,
+            onPartOfSpeechClick = {}
         )
     }
 }
@@ -521,7 +603,9 @@ fun HomeScreenErrorPreview() {
             onValueChange = {},
             selectedFilter = FilterChips.ALL,
             onFilterClick = {},
-            onFavouriteClick = { _, _ -> }
+            onFavouriteClick = { _, _ -> },
+            selectedPartOfSpeech = null,
+            onPartOfSpeechClick = {}
         )
     }
 }
@@ -539,28 +623,8 @@ enum class FilterChips(val label: String, val iconId: Int) {
         label = "Недавние",
         iconId = R.drawable.ic_clock
     ),
-    VERB(
-        label = "Глагол.",
+    PART_OF_SPEECH(
+        label = "Часть речи",
         iconId = R.drawable.ic_cubes
-    ),
-    NOUN(
-        label = "Сущ.",
-        iconId = R.drawable.ic_cubes
-    ),
-    ADVERB(
-        label = "Нареч.",
-        iconId = R.drawable.ic_cubes
-    ),
-    ADJECTIVE(
-        label = "Прил.",
-        iconId = R.drawable.ic_cubes
-    ),
-    PARTICIPLE(
-        label = "Прич.",
-        iconId = R.drawable.ic_cubes
-    ),
-    ADVERBIAL_PARTICIPLE(
-        label = "Дееприч.",
-        iconId = R.drawable.ic_cubes
-    ),
+    )
 }
