@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -165,7 +166,39 @@ fun HomeScreenV2Content(
             }
         }
         when (currentState) {
-            HomeViewModel.HomeState.Error -> {
+            is HomeViewModel.HomeState.Error -> {
+                when (currentState.errorType) {
+                    HomeViewModel.ErrorType.NO_WORDS -> {
+                        item {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(horizontal = 16.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text(
+                                    text = "В словаре пока пусто",
+                                    color = MaterialTheme.colorScheme.tertiary,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 24.sp
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text(
+                                    text = "Вы ещё не добавили ни одного слова. Начните собирать свой персональный словарный запас прямо сейчас!",
+                                    color = MaterialTheme.colorScheme.tertiary,
+                                    fontWeight = FontWeight.Normal,
+                                    fontSize = 16.sp,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
+                    }
+
+                    HomeViewModel.ErrorType.UNKNOWN -> {
+
+                    }
+                }
             }
 
             HomeViewModel.HomeState.Loading -> {
@@ -348,7 +381,11 @@ fun FilterButton(
 ) {
     Row(
         modifier = modifier
-            .border(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f), RoundedCornerShape(16.dp))
+            .border(
+                1.dp,
+                MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f),
+                RoundedCornerShape(16.dp)
+            )
             .clip(RoundedCornerShape(16.dp))
             .clickable {
                 onClick()
@@ -468,6 +505,24 @@ fun FilterButtonNotSelectedPreview() {
 fun FilterButtonSelectedPreview() {
     LexiconTheme {
         FilterButton(name = "Все", iconId = R.drawable.ic_items, isSelected = true, onClick = {})
+    }
+}
+
+@Composable
+@Preview(
+    showBackground = true
+)
+fun HomeScreenErrorPreview() {
+    LexiconTheme {
+        HomeScreenV2Content(
+            currentState = HomeViewModel.HomeState.Error(HomeViewModel.ErrorType.NO_WORDS),
+            onShortDefinitionClick = {},
+            value = "",
+            onValueChange = {},
+            selectedFilter = FilterChips.ALL,
+            onFilterClick = {},
+            onFavouriteClick = { _, _ -> }
+        )
     }
 }
 

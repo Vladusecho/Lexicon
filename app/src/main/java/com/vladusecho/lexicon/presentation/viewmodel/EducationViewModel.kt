@@ -56,7 +56,6 @@ class EducationViewModel @Inject constructor(
             isDefinitionShown = false
             isImgShown = false
             _state.value = EducationState.Loading
-            getRandomDefinitionUseCase(lastDefinitionId)
             delay(500)
             getRandomDefinitionUseCase(lastDefinitionId).fold(
                 onSuccess = { definition ->

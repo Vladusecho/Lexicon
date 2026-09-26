@@ -32,32 +32,35 @@ class HomeViewModel @Inject constructor(
 
     var query by mutableStateOf("")
         private set
-    var isSearchActive by mutableStateOf(false)
-        private set
 
     var selectedFilter by mutableStateOf(FilterChips.ALL)
         private set
 
 
     @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
-    // StateFlow with the current state of the search
     val state = combine(
-        snapshotFlow { query } // Convert query to a flow
-            .debounce(500) // Debounce the flow to avoid making too many requests
-            .distinctUntilChanged(), // Only emit a new value if it's different from the previous one
-        snapshotFlow { selectedFilter }, // Convert selectedFilter to a flow
-        getDefinitionsUseCase() // Get the definitions from the use case
+        snapshotFlow { query }
+            .debounce { currentQuery ->
+                if (currentQuery.isEmpty()) 0L else 500L
+            }
+            .distinctUntilChanged(),
+        snapshotFlow { selectedFilter },
+        getDefinitionsUseCase()
     ) { query, selectedFilter, definitions ->
         Triple(
             query,
             selectedFilter,
             definitions
         )
-    } // Combine the 3 flows into a triple
-        .map { (query, selectedFilter, definitions) -> // Switch to a new flow based on the selected filter
+    }
+        .map { (query, selectedFilter, definitions) ->
+
+            if (definitions.isEmpty()) {
+                return@map HomeState.Error(ErrorType.NO_WORDS)
+            }
 
             val showAlphabetHeaders =
-                definitions.isNotEmpty() && selectedFilter != FilterChips.RECENT
+                selectedFilter != FilterChips.RECENT
 
             val filteredList = when (selectedFilter) {
                 FilterChips.ALL -> {
@@ -95,26 +98,13 @@ class HomeViewModel @Inject constructor(
             HomeState.Success(
                 filteredList,
                 showAlphabetHeaders
-            ) as HomeState  // Convert the flow to a state
+            ) as HomeState
         }
-        .catch { emit(HomeState.Error) } // Catch any errors and emit an error state
+        .catch { emit(HomeState.Error(ErrorType.UNKNOWN)) }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = HomeState.Loading
-        )
-
-    val definitionsCount = state
-        .map {
-            when (it) {
-                is HomeState.Success -> it.definitions.size
-                else -> 0
-            }
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = 0
         )
 
     fun processCommand(command: HomeCommand) {
@@ -142,7 +132,9 @@ class HomeViewModel @Inject constructor(
         ) : HomeState
 
         object Loading : HomeState
-        object Error : HomeState
+        data class Error(
+            val errorType: ErrorType
+        ) : HomeState
     }
 
     sealed interface HomeCommand {
@@ -156,5 +148,10 @@ class HomeViewModel @Inject constructor(
         data class FilterClick(
             val filter: FilterChips
         ) : HomeCommand
+    }
+
+    enum class ErrorType {
+        NO_WORDS,
+        UNKNOWN
     }
 }
