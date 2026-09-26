@@ -45,7 +45,7 @@ class DefinitionsRepositoryImpl @Inject constructor(
         }.map { it.toDefinitions() }
     }
 
-    override suspend fun getRandomDefinition(): Result<Definition?> = runCatching {
-        appDao.getRandomDefinition()?.toDefinition()
+    override suspend fun getRandomDefinition(excludedId: Int): Result<Definition?> = runCatching {
+        appDao.getRandomDefinition(excludedId)?.toDefinition()
     }.onFailure { if (it is CancellationException) throw it }
 }

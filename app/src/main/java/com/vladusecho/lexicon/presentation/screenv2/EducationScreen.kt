@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -39,6 +40,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.vladusecho.lexicon.domain.entity.Definition
+import com.vladusecho.lexicon.presentation.element.ErrorView
 import com.vladusecho.lexicon.presentation.element.LoadingView
 import com.vladusecho.lexicon.presentation.ui.theme.LexiconTheme
 import com.vladusecho.lexicon.presentation.viewmodel.EducationViewModel
@@ -105,7 +107,37 @@ fun EducationScreenContent(
             EducationViewModel.EducationState.Loading -> {
                 LoadingView()
             }
-            is EducationViewModel.EducationState.Error -> {}
+            is EducationViewModel.EducationState.Error -> {
+                when (currentState.errorType) {
+                    EducationViewModel.ErrorType.NO_WORDS -> {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = "В словаре пока нет слов",
+                                color = MaterialTheme.colorScheme.tertiary,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 24.sp
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = "Добавьте новые слова в словарь, чтобы начать бесконечную тренировку с карточками.",
+                                color = MaterialTheme.colorScheme.tertiary,
+                                fontWeight = FontWeight.Normal,
+                                fontSize = 16.sp,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+                    EducationViewModel.ErrorType.UNKNOWN -> {
+                        ErrorView()
+                    }
+                }
+            }
             is EducationViewModel.EducationState.Success -> {
                 ShowDefinitionCard(
                     modifier = Modifier.padding(
@@ -382,6 +414,23 @@ fun EducationScreenPreview() {
                     partOfSpeech = com.vladusecho.lexicon.domain.entity.PartOfSpeech.NOUN
                 )
             )
+        )
+    }
+}
+
+@Composable
+@Preview(
+    showBackground = true
+)
+fun EducationScreenErrorPreview() {
+    LexiconTheme() {
+        EducationScreenContent(
+            isDefinitionShown = true,
+            isImgShown = true,
+            onDefinitionClick = {},
+            onImgClick = {},
+            onContinueClick = {},
+            currentState = EducationViewModel.EducationState.Error(EducationViewModel.ErrorType.NO_WORDS)
         )
     }
 }

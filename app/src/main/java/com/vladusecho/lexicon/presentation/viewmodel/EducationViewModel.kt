@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vladusecho.lexicon.domain.entity.Definition
+import com.vladusecho.lexicon.domain.usecase.definition.GetDefinitionsUseCase
 import com.vladusecho.lexicon.domain.usecase.definition.GetRandomDefinitionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -14,16 +15,19 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
 @HiltViewModel
 class EducationViewModel @Inject constructor(
-    private val getRandomDefinitionUseCase: GetRandomDefinitionUseCase
+    private val getRandomDefinitionUseCase: GetRandomDefinitionUseCase,
+    private val getDefinitionsUseCase: GetDefinitionsUseCase
 ) : ViewModel() {
 
     var isDefinitionShown by mutableStateOf(false)
@@ -33,34 +37,58 @@ class EducationViewModel @Inject constructor(
         private set
 
     private val refreshTrigger = MutableSharedFlow<Unit>(replay = 1)
+    private var lastDefinitionId: Int = -1
 
     init {
         refreshTrigger.tryEmit(Unit)
     }
 
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
-    val state = refreshTrigger
+    val state = combine(
+        refreshTrigger,
+        getDefinitionsUseCase().map { it.isEmpty() }.distinctUntilChanged()
+    ) { _, isEmpty ->
+        isEmpty
+    }
         .onEach {
             isDefinitionShown = false
             isImgShown = false
         }
-        .flatMapLatest {
+        .flatMapLatest { isEmpty ->
             flow {
-                emit(EducationState.Loading)
-                delay(500)
-                getRandomDefinitionUseCase()
-                    .onSuccess { definition ->
-                         if (definition != null) {
-                             emit(EducationState.Success(definition))
-                         } else {
-                            emit(EducationState.Error("Словарь пустой"))
-                         }
-                    }
-                    .onFailure {
-                        emit(EducationState.Error("Не удалось получить определения"))
-                    }
+                if (isEmpty) {
+                    emit(EducationState.Error(ErrorType.NO_WORDS))
+                } else {
+                    emit(EducationState.Loading)
+                    delay(500)
+                    getRandomDefinitionUseCase(lastDefinitionId).fold(
+                        onSuccess = { definition ->
+                            if (definition != null) {
+                                lastDefinitionId = definition.id
+                                emit(EducationState.Success(definition))
+                            } else {
+                                getRandomDefinitionUseCase(-1).fold(
+                                    onSuccess = { fallbackDefinition ->
+                                        if (fallbackDefinition != null) {
+                                            lastDefinitionId = fallbackDefinition.id
+                                            emit(EducationState.Success(fallbackDefinition))
+                                        } else {
+                                            emit(EducationState.Error(ErrorType.NO_WORDS))
+                                        }
+                                    },
+                                    onFailure = {
+                                        emit(EducationState.Error(ErrorType.UNKNOWN))
+                                    }
+                                )
+                            }
+                        },
+                        onFailure = {
+                            emit(EducationState.Error(ErrorType.UNKNOWN))
+                        }
+                    )
+                }
             }
-    }.catch { emit(EducationState.Error("Ошибка")) }
+        }.catch { emit(EducationState.Error(ErrorType.UNKNOWN)) }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -90,7 +118,7 @@ class EducationViewModel @Inject constructor(
         ) : EducationState
 
         data class Error(
-            val message: String
+            val errorType: ErrorType
         ) : EducationState
     }
 
@@ -104,5 +132,10 @@ class EducationViewModel @Inject constructor(
         ) : EducationCommand
 
         data object ShowNextWord : EducationCommand
+    }
+
+    enum class ErrorType {
+        NO_WORDS,
+        UNKNOWN
     }
 }

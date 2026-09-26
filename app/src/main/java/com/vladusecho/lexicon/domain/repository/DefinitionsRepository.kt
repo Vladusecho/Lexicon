@@ -17,6 +17,6 @@ interface DefinitionsRepository {
 
     fun search(query: String, searchFavourite: Boolean): Flow<List<Definition>>
 
-    suspend fun getRandomDefinition(): Result<Definition?>
+    suspend fun getRandomDefinition(excludedId: Int): Result<Definition?>
 
 }

@@ -7,7 +7,7 @@ import javax.inject.Inject
 class GetRandomDefinitionUseCase @Inject constructor(
     private val definitionsRepository: DefinitionsRepository
 ) {
-    suspend operator fun invoke(): Result<Definition?> {
-        return definitionsRepository.getRandomDefinition()
+    suspend operator fun invoke(excludedId: Int): Result<Definition?> {
+        return definitionsRepository.getRandomDefinition(excludedId)
     }
 }
