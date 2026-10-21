@@ -19,6 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -29,6 +30,7 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.vladusecho.lexicon.presentation.navigation.AppNavGraph
 import com.vladusecho.lexicon.presentation.navigation.NavItem
+import com.vladusecho.lexicon.presentation.navigation.NavScreen
 import com.vladusecho.lexicon.presentation.navigation.NavigationState
 import com.vladusecho.lexicon.presentation.navigation.rememberNavigationState
 import com.vladusecho.lexicon.presentation.ui.theme.LexiconTheme
@@ -38,7 +40,6 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Initialize SplashScreen
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -46,7 +47,6 @@ class MainActivity : ComponentActivity() {
             val settingsViewModel = hiltViewModel<SettingsViewModel>()
             val isDarkMode by settingsViewModel.isDarkMode.collectAsStateWithLifecycle()
 
-            // Handle the splash screen transition.
             splashScreen.setKeepOnScreenCondition {
                 settingsViewModel.isSettingsLoaded.value
             }
@@ -55,11 +55,18 @@ class MainActivity : ComponentActivity() {
                 darkTheme = isDarkMode
             ) {
                 val navState = rememberNavigationState()
+                val backStackEntry by navState.navHostController.currentBackStackEntryAsState()
+                val currentDestination = backStackEntry?.destination
+
+                val shouldShowBottomBar = currentDestination?.hasRoute(NavScreen.Home::class) == true ||
+                    currentDestination?.hasRoute(NavScreen.Education::class) == true ||
+                    currentDestination?.hasRoute(NavScreen.Settings::class) == true
+
                 Scaffold(
                     bottomBar = {
-                        BottomNavigationBar(
-                            navState = navState
-                        )
+                        if (shouldShowBottomBar) {
+                            BottomNavigationBar(navState = navState)
+                        }
                     }
                 ) { paddingValues ->
                     Box(
@@ -67,9 +74,7 @@ class MainActivity : ComponentActivity() {
                             .fillMaxSize()
                             .padding(bottom = paddingValues.calculateBottomPadding()),
                     ) {
-                        AppNavGraph(
-                            navState = navState
-                        )
+                        AppNavGraph(navState = navState)
                     }
                 }
             }
@@ -94,10 +99,9 @@ fun BottomNavigationBar(
             NavItem.Settings,
         )
         items.forEach { item ->
-            val isSelected =
-                backStackEntry?.destination?.hierarchy?.any {
-                    it.hasRoute(item.screen::class)
-                } ?: false
+            val isSelected = backStackEntry?.destination?.hierarchy?.any {
+                it.hasRoute(item.screen::class)
+            } ?: false
 
             NavigationBarItem(
                 selected = isSelected,
@@ -105,7 +109,7 @@ fun BottomNavigationBar(
                 icon = {
                     Icon(
                         painter = painterResource(id = item.iconId),
-                        contentDescription = null,
+                        contentDescription = stringResource(id = item.labelResId),
                         tint = if (!isSelected) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.background
                     )
                 },
@@ -114,7 +118,7 @@ fun BottomNavigationBar(
                 ),
                 label = {
                     Text(
-                        text = item.label,
+                        text = stringResource(id = item.labelResId),
                         color = MaterialTheme.colorScheme.tertiary
                     )
                 }

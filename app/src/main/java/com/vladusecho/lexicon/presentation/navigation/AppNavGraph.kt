@@ -8,8 +8,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import com.vladusecho.lexicon.presentation.navigation.navGraph.homeScreenGraph
-import com.vladusecho.lexicon.presentation.screenv2.EducationScreen
-import com.vladusecho.lexicon.presentation.screenv2.SettingsScreenV2
+import com.vladusecho.lexicon.presentation.screen.EducationScreen
+import com.vladusecho.lexicon.presentation.screen.SettingsScreen
 
 @Composable
 fun AppNavGraph(
@@ -19,15 +19,15 @@ fun AppNavGraph(
         navController = navState.navHostController,
         startDestination = NavScreen.HomeGraph,
         enterTransition = {
-            fadeIn(animationSpec = tween(durationMillis = 0))
+            fadeIn(animationSpec = tween(durationMillis = 200))
         },
         exitTransition = {
-            fadeOut(animationSpec = tween(durationMillis = 0))
+            fadeOut(animationSpec = tween(durationMillis = 200))
         }
     ) {
         homeScreenGraph(navState)
         composable<NavScreen.Settings> {
-            SettingsScreenV2()
+            SettingsScreen()
         }
         navigation<NavScreen.EducationGraph>(
             startDestination = NavScreen.Education,

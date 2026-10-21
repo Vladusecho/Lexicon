@@ -6,13 +6,11 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import javax.inject.Inject
 
-
 class FileManagerHelper @Inject constructor(
     @field:ApplicationContext private val context: Context
 ) {
 
     fun saveImageToInternalStorage(imageUri: Uri): String? {
-
         return try {
             val inputStream = context.contentResolver.openInputStream(imageUri)
             val fileName = "image_${System.currentTimeMillis()}.jpg"
@@ -26,6 +24,20 @@ class FileManagerHelper @Inject constructor(
             file.absolutePath
         } catch (e: Exception) {
             null
+        }
+    }
+
+    fun deleteImage(filePath: String?): Boolean {
+        if (filePath.isNullOrBlank()) return false
+        return try {
+            val file = File(filePath)
+            if (file.exists() && file.canonicalPath.startsWith(context.filesDir.canonicalPath)) {
+                file.delete()
+            } else {
+                false
+            }
+        } catch (e: Exception) {
+            false
         }
     }
 }

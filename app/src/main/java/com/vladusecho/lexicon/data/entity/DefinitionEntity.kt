@@ -7,10 +7,11 @@ import com.vladusecho.lexicon.domain.entity.PartOfSpeech
 @Entity(tableName = "definitions")
 data class DefinitionEntity(
     @PrimaryKey(autoGenerate = true)
-    val id: Int,
+    val id: Int = 0,
     val word: String,
     val description: String,
     val imgUri: String?,
     val isFavorite: Boolean,
-    val partOfSpeech: PartOfSpeech
+    val partOfSpeech: PartOfSpeech,
+    val createdAt: Long = System.currentTimeMillis()
 )

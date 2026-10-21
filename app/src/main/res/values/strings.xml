@@ -1,3 +1,63 @@
 <resources>
     <string name="app_name">Lexicon</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">Словарь</string>
+    <string name="nav_education">Обучение</string>
+    <string name="nav_settings">Настройки</string>
+
+    <!-- Home Screen -->
+    <string name="search_placeholder">Поиск по словарю…</string>
+    <string name="filter_all">Все</string>
+    <string name="filter_favorite">Избранное</string>
+    <string name="filter_recent">Недавние</string>
+    <string name="filter_part_of_speech">Часть речи</string>
+    <string name="home_empty_title">В словаре пока пусто</string>
+    <string name="home_empty_description">Вы ещё не добавили ни одного слова. Начните собирать свой персональный словарный запас прямо сейчас!</string>
+    <string name="home_search_empty_title">Ничего не найдено</string>
+    <string name="home_search_empty_description">Попробуйте изменить поисковый запрос или сбросить фильтры.</string>
+
+    <!-- Create / Edit Definition Screen -->
+    <string name="create_title">Новое слово</string>
+    <string name="edit_title">Редактирование</string>
+    <string name="action_reset">СБРОСИТЬ</string>
+    <string name="action_save">Сохранить</string>
+    <string name="action_delete">Удалить</string>
+    <string name="action_cancel">Отмена</string>
+    <string name="field_word_label">Слово или термин</string>
+    <string name="field_word_placeholder">Введите слово</string>
+    <string name="field_description_label">Определение</string>
+    <string name="field_description_placeholder">Введите значение слова</string>
+    <string name="field_part_of_speech_label">Часть речи</string>
+    <string name="action_add_image">Прикрепить изображение</string>
+    <string name="action_remove_image">Удалить фото</string>
+
+    <!-- Details Screen -->
+    <string name="details_title">Определение</string>
+    <string name="dialog_delete_title">Удалить слово?</string>
+    <string name="dialog_delete_message">Слово «%1$s» будет удалено из вашего словаря без возможности восстановления.</string>
+
+    <!-- Education Screen -->
+    <string name="education_title">Повторение слов</string>
+    <string name="education_subtitle">Все слова • Общий словарь</string>
+    <string name="education_next">Далее</string>
+    <string name="education_definition_label">Определение</string>
+    <string name="education_definition_hidden">Нажмите, чтобы увидеть определение</string>
+    <string name="education_empty_title">В словаре пока нет слов</string>
+    <string name="education_empty_description">Добавьте новые слова в словарь, чтобы начать тренировку с карточками.</string>
+    <string name="education_show_image">Показать изображение</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">Настройки</string>
+    <string name="settings_theme_title">Оформление</string>
+    <string name="settings_dark_mode">Тёмная тема</string>
+    <string name="settings_backup_title">Резервное копирование</string>
+    <string name="settings_export">Экспорт данных</string>
+    <string name="settings_export_description">Сохранить все слова в файл JSON</string>
+    <string name="settings_import">Импорт данных</string>
+    <string name="settings_import_description">Восстановить словарь из файла</string>
+    <string name="export_success">Данные успешно экспортированы</string>
+    <string name="import_success">Данные успешно импортированы</string>
+    <string name="export_error">Ошибка при экспорте данных: %1$s</string>
+    <string name="import_error">Ошибка при импорте данных: %1$s</string>
 </resources>

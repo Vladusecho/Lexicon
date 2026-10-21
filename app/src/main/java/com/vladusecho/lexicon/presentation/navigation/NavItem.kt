@@ -1,27 +1,29 @@
 package com.vladusecho.lexicon.presentation.navigation
 
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import com.vladusecho.lexicon.R
 
 sealed class NavItem(
-    val label: String,
-    val iconId: Int,
+    @StringRes val labelResId: Int,
+    @DrawableRes val iconId: Int,
     val screen: Any,
 ) {
 
-    object Home : NavItem(
-        label = "Словарь",
+    data object Home : NavItem(
+        labelResId = R.string.nav_home,
         iconId = R.drawable.ic_library,
         screen = NavScreen.HomeGraph,
     )
 
-    object Education : NavItem(
-        label = "Обучение",
+    data object Education : NavItem(
+        labelResId = R.string.nav_education,
         iconId = R.drawable.ic_education,
         screen = NavScreen.EducationGraph,
     )
 
-    object Settings : NavItem(
-        label = "Настройки",
+    data object Settings : NavItem(
+        labelResId = R.string.nav_settings,
         iconId = R.drawable.ic_settings,
         screen = NavScreen.Settings,
     )

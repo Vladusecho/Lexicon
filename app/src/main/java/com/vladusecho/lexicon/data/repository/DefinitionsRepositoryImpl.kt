@@ -1,6 +1,8 @@
 package com.vladusecho.lexicon.data.repository
 
+import androidx.core.net.toUri
 import com.vladusecho.lexicon.data.local.AppDao
+import com.vladusecho.lexicon.data.local.FileManagerHelper
 import com.vladusecho.lexicon.data.mapper.toDefinition
 import com.vladusecho.lexicon.data.mapper.toDefinitionEntity
 import com.vladusecho.lexicon.data.mapper.toDefinitions
@@ -12,8 +14,10 @@ import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
 
 class DefinitionsRepositoryImpl @Inject constructor(
-    private val appDao: AppDao
+    private val appDao: AppDao,
+    private val fileManagerHelper: FileManagerHelper
 ) : DefinitionsRepository {
+
     override fun getDefinition(id: Int): Flow<Definition> {
         return appDao.getDefinition(id).map { it.toDefinition() }
     }
@@ -22,15 +26,54 @@ class DefinitionsRepositoryImpl @Inject constructor(
         return appDao.getDefinitions().map { it.toDefinitions() }
     }
 
-    override suspend fun createDefinition(definition: Definition): Result<Unit> = runCatching {
-        appDao.upsertDefinition(definition.toDefinitionEntity())
+    override suspend fun createDefinition(
+        definition: Definition,
+        imageUri: String?
+    ): Result<Unit> = runCatching {
+        val finalImagePath = if (!imageUri.isNullOrBlank()) {
+            if (imageUri.startsWith("content://") || imageUri.startsWith("file://")) {
+                fileManagerHelper.saveImageToInternalStorage(imageUri.toUri())
+            } else {
+                imageUri
+            }
+        } else {
+            definition.imgUri
+        }
+        val entity = definition.copy(imgUri = finalImagePath).toDefinitionEntity()
+        appDao.upsertDefinition(entity)
     }.onFailure { if (it is CancellationException) throw it }
 
-    override suspend fun updateDefinition(definition: Definition): Result<Unit> = runCatching {
-        appDao.upsertDefinition(definition.toDefinitionEntity())
+    override suspend fun updateDefinition(
+        definition: Definition,
+        newImageUri: String?,
+        isImageRemoved: Boolean
+    ): Result<Unit> = runCatching {
+        val existingEntity = appDao.getDefinitionOnce(definition.id)
+        val finalImagePath = when {
+            isImageRemoved -> {
+                fileManagerHelper.deleteImage(existingEntity?.imgUri)
+                null
+            }
+            !newImageUri.isNullOrBlank() && (newImageUri.startsWith("content://") || newImageUri.startsWith("file://")) -> {
+                val savedPath = fileManagerHelper.saveImageToInternalStorage(newImageUri.toUri())
+                if (savedPath != null) {
+                    fileManagerHelper.deleteImage(existingEntity?.imgUri)
+                }
+                savedPath ?: existingEntity?.imgUri
+            }
+            else -> {
+                definition.imgUri ?: existingEntity?.imgUri
+            }
+        }
+        val entity = definition.copy(imgUri = finalImagePath).toDefinitionEntity()
+        appDao.upsertDefinition(entity)
     }.onFailure { if (it is CancellationException) throw it }
 
     override suspend fun deleteDefinition(id: Int): Result<Unit> = runCatching {
+        val existing = appDao.getDefinitionOnce(id)
+        if (existing?.imgUri != null) {
+            fileManagerHelper.deleteImage(existing.imgUri)
+        }
         appDao.deleteDefinition(id)
     }.onFailure { if (it is CancellationException) throw it }
 
@@ -46,6 +89,19 @@ class DefinitionsRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getRandomDefinition(excludedId: Int): Result<Definition?> = runCatching {
-        appDao.getRandomDefinition(excludedId)?.toDefinition()
+        val entity = appDao.getRandomDefinition(excludedId) ?: appDao.getRandomDefinitionAny()
+        entity?.toDefinition()
     }.onFailure { if (it is CancellationException) throw it }
+
+    override fun checkIsFavorite(id: Int): Flow<Boolean> {
+        return appDao.checkIsFavorite(id)
+    }
+
+    override suspend fun toggleFavorite(id: Int, isFavorite: Boolean): Result<Unit> = runCatching {
+        appDao.toggleFavorite(id, isFavorite)
+    }.onFailure { if (it is CancellationException) throw it }
+
+    override fun getFavorites(): Flow<List<Definition>> {
+        return appDao.getFavorites().map { it.toDefinitions() }
+    }
 }

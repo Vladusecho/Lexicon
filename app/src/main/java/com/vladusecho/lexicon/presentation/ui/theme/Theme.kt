@@ -12,22 +12,34 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.util.fastCbrt
 import androidx.core.view.WindowCompat
-import javax.annotation.meta.When
 
 private val DarkColorScheme = darkColorScheme(
     primary = Periwinkle,
+    onPrimary = LittleBlack,
+    secondary = Periwinkle,
+    onSecondary = LittleBlack,
     tertiary = White,
     onBackground = DarkGray,
-    background = LittleBlack
+    background = LittleBlack,
+    surface = DarkSurface,
+    onSurface = White,
+    error = ErrorRed,
+    onError = White
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Blue, // Primary text
+    primary = Blue,
+    onPrimary = White,
+    secondary = Blue,
+    onSecondary = White,
     tertiary = Black,
     onBackground = LightGray,
-    background = White
+    background = White,
+    surface = LightSurface,
+    onSurface = Black,
+    error = ErrorRed,
+    onError = White
 )
 
 @Composable
@@ -46,7 +58,6 @@ fun LexiconTheme(
         else -> LightColorScheme
     }
 
-    // Set icons colors with app theme
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {

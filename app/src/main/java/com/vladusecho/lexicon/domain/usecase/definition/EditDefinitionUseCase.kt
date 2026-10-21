@@ -7,6 +7,10 @@ import javax.inject.Inject
 class EditDefinitionUseCase @Inject constructor(
     private val definitionsRepository: DefinitionsRepository
 ) {
-    suspend operator fun invoke(definition: Definition) =
-        definitionsRepository.updateDefinition(definition)
+    suspend operator fun invoke(
+        definition: Definition,
+        newImageUri: String? = null,
+        isImageRemoved: Boolean = false
+    ): Result<Unit> =
+        definitionsRepository.updateDefinition(definition, newImageUri, isImageRemoved)
 }

@@ -7,12 +7,9 @@ import com.vladusecho.lexicon.data.local.DataStoreHelper
 import com.vladusecho.lexicon.data.local.FileManagerHelper
 import com.vladusecho.lexicon.data.repository.BackupRepositoryImpl
 import com.vladusecho.lexicon.data.repository.DefinitionsRepositoryImpl
-import com.vladusecho.lexicon.data.repository.FavouritesRepositoryImpl
 import com.vladusecho.lexicon.data.repository.SettingsRepositoryImpl
-import com.vladusecho.lexicon.data.repository.SimpleRepositoryImpl
 import com.vladusecho.lexicon.domain.repository.BackupRepository
 import com.vladusecho.lexicon.domain.repository.DefinitionsRepository
-import com.vladusecho.lexicon.domain.repository.FavouritesRepository
 import com.vladusecho.lexicon.domain.repository.SettingsRepository
 import dagger.Binds
 import dagger.Module
@@ -40,12 +37,6 @@ interface DataModule {
 
     @Binds
     @Singleton
-    fun bindFavouritesRepository(
-        favouritesRepositoryImpl: FavouritesRepositoryImpl
-    ): FavouritesRepository
-
-    @Binds
-    @Singleton
     fun bindBackupRepository(
         backupRepositoryImpl: BackupRepositoryImpl
     ): BackupRepository
@@ -56,18 +47,20 @@ interface DataModule {
         @Singleton
         fun provideAppDatabase(
             @ApplicationContext context: Context
-        ) = Room.databaseBuilder(
+        ): AppDatabase = Room.databaseBuilder(
             context,
             AppDatabase::class.java,
             "app_database"
-        ).fallbackToDestructiveMigration().build()
+        )
+            .addMigrations(AppDatabase.MIGRATION_3_4)
+            .fallbackToDestructiveMigration()
+            .build()
 
         @Provides
         @Singleton
         fun provideAppDao(
             appDatabase: AppDatabase
         ) = appDatabase.appDao()
-
 
         @Provides
         @Singleton

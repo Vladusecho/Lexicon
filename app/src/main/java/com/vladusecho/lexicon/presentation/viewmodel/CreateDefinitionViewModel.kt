@@ -1,12 +1,8 @@
 package com.vladusecho.lexicon.presentation.viewmodel
 
 import android.net.Uri
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.vladusecho.lexicon.data.local.FileManagerHelper
 import com.vladusecho.lexicon.domain.entity.Definition
 import com.vladusecho.lexicon.domain.entity.PartOfSpeech
 import com.vladusecho.lexicon.domain.usecase.definition.CreateDefinitionUseCase
@@ -15,113 +11,101 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class CreateDefinitionViewModel @Inject constructor(
-    private val createDefinitionUseCase: CreateDefinitionUseCase,
-    private val fileManagerHelper: FileManagerHelper
+    private val createDefinitionUseCase: CreateDefinitionUseCase
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow<CreateDefinitionState>(CreateDefinitionState.Success)
-    val state = _state.asStateFlow()
+    data class CreateUiState(
+        val word: String = "",
+        val description: String = "",
+        val imageUri: Uri? = null,
+        val selectedPartOfSpeech: PartOfSpeech = PartOfSpeech.NOUN,
+        val isLoading: Boolean = false
+    ) {
+        val isValid: Boolean
+            get() = word.isNotBlank() && description.isNotBlank()
+    }
 
-    var imageUri by mutableStateOf<Uri?>(null)
-        private set
+    private val _uiState = MutableStateFlow(CreateUiState())
+    val uiState = _uiState.asStateFlow()
 
-    var word by mutableStateOf("")
-        private set
-    var description by mutableStateOf("")
-        private set
-
-    var selectedPartOfSpeech by mutableStateOf(PartOfSpeech.NOUN)
-        private set
-
-    val allCorrect get() = word.isNotBlank() && description.isNotBlank()
     private val _event = MutableSharedFlow<CreateDefinitionEvent>()
     val event = _event.asSharedFlow()
 
     fun processCommand(command: CreateDefinitionCommand) {
         when (command) {
-            is CreateDefinitionCommand.CreateDefinition -> {
-
-                viewModelScope.launch {
-                    val finalImagePath = command.imageUri?.let {
-                        fileManagerHelper.saveImageToInternalStorage(it)
-                    }
-                    val finalDefinition = command.definition.copy(imgUri = finalImagePath)
-                    createDefinitionUseCase(finalDefinition)
-                        .onSuccess {  _event.emit(CreateDefinitionEvent.FinishCreate) }
-                        .onFailure { _event.emit(CreateDefinitionEvent.ShowError(it.message ?: "Unknown error")) }
-                }
+            is CreateDefinitionCommand.UpdateWord -> {
+                _uiState.update { it.copy(word = command.word) }
             }
 
             is CreateDefinitionCommand.UpdateDescription -> {
-                description = command.description
-            }
-
-            is CreateDefinitionCommand.UpdateWord -> {
-                word = command.word
+                _uiState.update { it.copy(description = command.description) }
             }
 
             is CreateDefinitionCommand.UpdateImageUri -> {
-                imageUri = command.uri
+                _uiState.update { it.copy(imageUri = command.uri) }
             }
 
             CreateDefinitionCommand.RemoveImage -> {
-                imageUri = null
+                _uiState.update { it.copy(imageUri = null) }
             }
 
             is CreateDefinitionCommand.PickPartOfSpeech -> {
-                selectedPartOfSpeech = command.partOfSpeech
+                _uiState.update { it.copy(selectedPartOfSpeech = command.partOfSpeech) }
             }
 
             CreateDefinitionCommand.CleanData -> {
-                word = ""
-                description = ""
-                imageUri = null
-                selectedPartOfSpeech = PartOfSpeech.NOUN
+                _uiState.value = CreateUiState()
+            }
+
+            CreateDefinitionCommand.Save -> {
+                val state = _uiState.value
+                if (!state.isValid) return
+
+                val formattedWord = state.word.trim().replaceFirstChar {
+                    if (it.isLowerCase()) it.titlecase() else it.toString()
+                }
+
+                val definition = Definition(
+                    word = formattedWord,
+                    description = state.description.trim(),
+                    isFavorite = false,
+                    partOfSpeech = state.selectedPartOfSpeech
+                )
+
+                viewModelScope.launch {
+                    _uiState.update { it.copy(isLoading = true) }
+                    createDefinitionUseCase(definition, state.imageUri?.toString())
+                        .onSuccess {
+                            _uiState.update { it.copy(isLoading = false) }
+                            _event.emit(CreateDefinitionEvent.FinishCreate)
+                        }
+                        .onFailure { error ->
+                            _uiState.update { it.copy(isLoading = false) }
+                            _event.emit(CreateDefinitionEvent.ShowError(error.message ?: "Unknown error"))
+                        }
+                }
             }
         }
     }
 
-    sealed interface CreateDefinitionState {
-        object Success : CreateDefinitionState
-        object Loading : CreateDefinitionState
-        object Error : CreateDefinitionState
+    sealed interface CreateDefinitionEvent {
+        data object FinishCreate : CreateDefinitionEvent
+        data class ShowError(val message: String) : CreateDefinitionEvent
     }
 
     sealed interface CreateDefinitionCommand {
-        data class CreateDefinition(
-            val definition: Definition,
-            val imageUri: Uri? = null
-        ) : CreateDefinitionCommand
-
-        data class UpdateWord(
-            val word: String
-        ) : CreateDefinitionCommand
-
-        data class UpdateDescription(
-            val description: String
-        ) : CreateDefinitionCommand
-
-        data class UpdateImageUri(
-            val uri: Uri
-        ) : CreateDefinitionCommand
-
+        data class UpdateWord(val word: String) : CreateDefinitionCommand
+        data class UpdateDescription(val description: String) : CreateDefinitionCommand
+        data class UpdateImageUri(val uri: Uri?) : CreateDefinitionCommand
         data object RemoveImage : CreateDefinitionCommand
-
-        data class PickPartOfSpeech(
-            val partOfSpeech: PartOfSpeech
-        ) : CreateDefinitionCommand
-
+        data class PickPartOfSpeech(val partOfSpeech: PartOfSpeech) : CreateDefinitionCommand
         data object CleanData : CreateDefinitionCommand
-    }
-
-    sealed interface CreateDefinitionEvent {
-        data object FinishCreate : CreateDefinitionEvent
-
-        data class ShowError(val message: String) : CreateDefinitionEvent
+        data object Save : CreateDefinitionCommand
     }
 }

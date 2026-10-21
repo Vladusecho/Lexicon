@@ -5,10 +5,10 @@ import kotlinx.serialization.Serializable
 sealed class NavScreen {
 
     @Serializable
-    object Home : NavScreen()
+    data object Home : NavScreen()
 
     @Serializable
-    object HomeGraph : NavScreen()
+    data object HomeGraph : NavScreen()
 
     @Serializable
     data class Details(
@@ -16,10 +16,10 @@ sealed class NavScreen {
     ) : NavScreen()
 
     @Serializable
-    object Settings : NavScreen()
+    data object Settings : NavScreen()
 
     @Serializable
-    object CreateDefinition : NavScreen()
+    data object CreateDefinition : NavScreen()
 
     @Serializable
     data class EditDefinition(
@@ -27,8 +27,8 @@ sealed class NavScreen {
     ) : NavScreen()
 
     @Serializable
-    object Education : NavScreen()
+    data object Education : NavScreen()
 
     @Serializable
-    object EducationGraph : NavScreen()
+    data object EducationGraph : NavScreen()
 }

@@ -1,75 +1,105 @@
 package com.vladusecho.lexicon.presentation.viewmodel
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.vladusecho.lexicon.R
 import com.vladusecho.lexicon.domain.entity.Definition
 import com.vladusecho.lexicon.domain.entity.PartOfSpeech
 import com.vladusecho.lexicon.domain.usecase.definition.GetDefinitionsUseCase
 import com.vladusecho.lexicon.domain.usecase.definition.ToggleFavouriteUseCase
-import com.vladusecho.lexicon.presentation.screenv2.FilterChips
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+enum class FilterChips(
+    @StringRes val labelResId: Int,
+    @DrawableRes val iconId: Int
+) {
+    ALL(
+        labelResId = R.string.filter_all,
+        iconId = R.drawable.ic_items
+    ),
+    FAVORITE(
+        labelResId = R.string.filter_favorite,
+        iconId = R.drawable.ic_favorite
+    ),
+    RECENT(
+        labelResId = R.string.filter_recent,
+        iconId = R.drawable.ic_clock
+    ),
+    PART_OF_SPEECH(
+        labelResId = R.string.filter_part_of_speech,
+        iconId = R.drawable.ic_cubes
+    )
+}
+
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     getDefinitionsUseCase: GetDefinitionsUseCase,
-    val toggleFavouriteUseCase: ToggleFavouriteUseCase
+    private val toggleFavouriteUseCase: ToggleFavouriteUseCase
 ) : ViewModel() {
 
-    var query by mutableStateOf("")
-        private set
+    private val _query = MutableStateFlow("")
+    val query: StateFlow<String> = _query.asStateFlow()
 
-    var selectedFilter by mutableStateOf(FilterChips.ALL)
-        private set
+    private val _selectedFilter = MutableStateFlow(FilterChips.ALL)
+    val selectedFilter: StateFlow<FilterChips> = _selectedFilter.asStateFlow()
 
-    var selectedPartOfSpeech by mutableStateOf<PartOfSpeech?>(null)
-        private set
+    private val _selectedPartOfSpeech = MutableStateFlow<PartOfSpeech?>(null)
+    val selectedPartOfSpeech: StateFlow<PartOfSpeech?> = _selectedPartOfSpeech.asStateFlow()
 
-
-    @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
-    val state = combine(
-        snapshotFlow { query }.debounce { currentQuery -> if (currentQuery.isEmpty()) 0L else 500L }
-            .distinctUntilChanged(),
-        snapshotFlow { selectedPartOfSpeech },
-        snapshotFlow { selectedFilter },
+    val state: StateFlow<HomeState> = combine(
+        _query,
+        _selectedPartOfSpeech,
+        _selectedFilter,
         getDefinitionsUseCase()
     ) { query, selectedPartOfSpeech, selectedFilter, definitions ->
-
         if (definitions.isEmpty()) {
-            return@combine HomeState.Error(ErrorType.NO_WORDS)
+            return@combine HomeState.Empty(ErrorType.NO_WORDS)
         }
 
-        val showAlphabetHeaders =
-            selectedFilter != FilterChips.RECENT
-
-        val filteredList = when (selectedFilter) {
+        val filteredByChip = when (selectedFilter) {
             FilterChips.ALL -> definitions
-            FilterChips.FAVORITE -> definitions.filter { definition -> definition.isFavorite }
-            FilterChips.RECENT -> definitions.sortedByDescending { definition -> definition.id }.take(3)
+            FilterChips.FAVORITE -> definitions.filter { it.isFavorite }
+            FilterChips.RECENT -> definitions.sortedByDescending { it.createdAt.takeIf { t -> t > 0 } ?: it.id.toLong() }
             FilterChips.PART_OF_SPEECH -> {
-                if (selectedPartOfSpeech != null) definitions.filter { it.partOfSpeech == selectedPartOfSpeech }
-                else definitions
+                if (selectedPartOfSpeech != null) {
+                    definitions.filter { it.partOfSpeech == selectedPartOfSpeech }
+                } else {
+                    definitions
+                }
             }
-        }.filter { definition -> definition.word.startsWith(query.trim(), ignoreCase = true) }
-        HomeState.Success(
-            filteredList,
-            showAlphabetHeaders
-        ) as HomeState
+        }
+
+        val trimmedQuery = query.trim()
+        val finalList = if (trimmedQuery.isEmpty()) {
+            filteredByChip
+        } else {
+            filteredByChip.filter { definition ->
+                definition.word.contains(trimmedQuery, ignoreCase = true) ||
+                    definition.description.contains(trimmedQuery, ignoreCase = true)
+            }
+        }
+
+        if (finalList.isEmpty()) {
+            HomeState.Empty(ErrorType.NO_SEARCH_RESULTS)
+        } else {
+            HomeState.Success(
+                definitions = finalList,
+                showAlphabetHeaders = selectedFilter != FilterChips.RECENT && trimmedQuery.isEmpty()
+            )
+        }
     }
-        .catch { emit(HomeState.Error(ErrorType.UNKNOWN)) }
+        .catch { emit(HomeState.Empty(ErrorType.NO_WORDS)) }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -79,12 +109,14 @@ class HomeViewModel @Inject constructor(
     fun processCommand(command: HomeCommand) {
         when (command) {
             is HomeCommand.QueryInput -> {
-                query = command.query
+                _query.value = command.query
             }
 
             is HomeCommand.FilterClick -> {
-                selectedFilter = command.filter
-                if (selectedFilter != FilterChips.PART_OF_SPEECH) selectedPartOfSpeech = null
+                _selectedFilter.value = command.filter
+                if (command.filter != FilterChips.PART_OF_SPEECH) {
+                    _selectedPartOfSpeech.value = null
+                }
             }
 
             is HomeCommand.ToggleFavourite -> {
@@ -94,7 +126,7 @@ class HomeViewModel @Inject constructor(
             }
 
             is HomeCommand.PartOfSpeechClick -> {
-                selectedPartOfSpeech = command.partOfSpeech
+                _selectedPartOfSpeech.value = command.partOfSpeech
             }
         }
     }
@@ -105,31 +137,22 @@ class HomeViewModel @Inject constructor(
             val showAlphabetHeaders: Boolean
         ) : HomeState
 
-        object Loading : HomeState
-        data class Error(
+        data class Empty(
             val errorType: ErrorType
         ) : HomeState
-    }
 
-    sealed interface HomeCommand {
-        data class QueryInput(val query: String) : HomeCommand
-
-        data class ToggleFavourite(
-            val id: Int,
-            val isFavourite: Boolean
-        ) : HomeCommand
-
-        data class FilterClick(
-            val filter: FilterChips
-        ) : HomeCommand
-
-        data class PartOfSpeechClick(
-            val partOfSpeech: PartOfSpeech
-        ) : HomeCommand
+        data object Loading : HomeState
     }
 
     enum class ErrorType {
         NO_WORDS,
-        UNKNOWN
+        NO_SEARCH_RESULTS
+    }
+
+    sealed interface HomeCommand {
+        data class QueryInput(val query: String) : HomeCommand
+        data class FilterClick(val filter: FilterChips) : HomeCommand
+        data class ToggleFavourite(val id: Int, val isFavourite: Boolean) : HomeCommand
+        data class PartOfSpeechClick(val partOfSpeech: PartOfSpeech?) : HomeCommand
     }
 }

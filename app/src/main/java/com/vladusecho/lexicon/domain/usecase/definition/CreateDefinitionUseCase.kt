@@ -8,6 +8,6 @@ class CreateDefinitionUseCase @Inject constructor(
     private val definitionsRepository: DefinitionsRepository
 ) {
 
-    suspend operator fun invoke(definition: Definition): Result<Unit> =
-        definitionsRepository.createDefinition(definition)
+    suspend operator fun invoke(definition: Definition, imageUri: String? = null): Result<Unit> =
+        definitionsRepository.createDefinition(definition, imageUri)
 }

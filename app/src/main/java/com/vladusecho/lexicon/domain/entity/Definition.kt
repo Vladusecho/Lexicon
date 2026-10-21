@@ -4,12 +4,13 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Definition(
-    val id: Int,
+    val id: Int = 0,
     val word: String,
     val description: String,
     val imgUri: String? = null,
-    val isFavorite: Boolean,
-    val partOfSpeech: PartOfSpeech
+    val isFavorite: Boolean = false,
+    val partOfSpeech: PartOfSpeech = PartOfSpeech.NOUN,
+    val createdAt: Long = System.currentTimeMillis()
 )
 
 @Serializable

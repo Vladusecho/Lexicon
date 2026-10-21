@@ -9,9 +9,16 @@ interface DefinitionsRepository {
 
     fun getDefinitions(): Flow<List<Definition>>
 
-    suspend fun createDefinition(definition: Definition): Result<Unit>
+    suspend fun createDefinition(
+        definition: Definition,
+        imageUri: String? = null
+    ): Result<Unit>
 
-    suspend fun updateDefinition(definition: Definition): Result<Unit>
+    suspend fun updateDefinition(
+        definition: Definition,
+        newImageUri: String? = null,
+        isImageRemoved: Boolean = false
+    ): Result<Unit>
 
     suspend fun deleteDefinition(id: Int): Result<Unit>
 
@@ -19,4 +26,9 @@ interface DefinitionsRepository {
 
     suspend fun getRandomDefinition(excludedId: Int): Result<Definition?>
 
+    fun checkIsFavorite(id: Int): Flow<Boolean>
+
+    suspend fun toggleFavorite(id: Int, isFavorite: Boolean): Result<Unit>
+
+    fun getFavorites(): Flow<List<Definition>>
 }

@@ -1,15 +1,14 @@
 package com.vladusecho.lexicon.presentation.viewmodel
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import com.vladusecho.lexicon.domain.entity.Definition
-import com.vladusecho.lexicon.domain.usecase.definition.CheckIsFavouriteUseCase
 import com.vladusecho.lexicon.domain.usecase.definition.DeleteDefinitionUseCase
 import com.vladusecho.lexicon.domain.usecase.definition.GetDefinitionByIdUseCase
 import com.vladusecho.lexicon.domain.usecase.definition.ToggleFavouriteUseCase
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
+import com.vladusecho.lexicon.presentation.navigation.NavScreen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -19,39 +18,31 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-@HiltViewModel(
-    assistedFactory = DetailsViewModelFactory::class
-)
-class DetailsViewModel @AssistedInject constructor(
+@HiltViewModel
+class DetailsViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
     getDefinitionByIdUseCase: GetDefinitionByIdUseCase,
-    checkIsFavouriteUseCase: CheckIsFavouriteUseCase,
     private val deleteDefinitionUseCase: DeleteDefinitionUseCase,
-    private val toggleFavouriteUseCase: ToggleFavouriteUseCase,
-    @Assisted("id") private val id: Int
+    private val toggleFavouriteUseCase: ToggleFavouriteUseCase
 ) : ViewModel() {
 
-    // StateFlow with the current state of the definition
-    val state: StateFlow<DetailsState> = getDefinitionByIdUseCase(id)
+    private val id: Int = savedStateHandle.toRoute<NavScreen.Details>().id
+
+    val state: StateFlow<DetailsUiState> = getDefinitionByIdUseCase(id)
         .map { definition ->
-            DetailsState.Success(definition) as DetailsState
-        } // Convert the flow to a state
-        .catch { emit(DetailsState.Error) } // Catch any errors and emit an error state
+            DetailsUiState.Success(definition) as DetailsUiState
+        }
+        .catch { emit(DetailsUiState.Error) }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = DetailsState.Loading
+            initialValue = DetailsUiState.Loading
         )
 
     private val _event = MutableSharedFlow<DetailsEvent>()
     val event = _event.asSharedFlow()
-
-    val isFavourite: StateFlow<Boolean> = checkIsFavouriteUseCase(id)
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = false
-        )
 
     fun processCommand(command: DetailsCommand) {
         viewModelScope.launch {
@@ -63,16 +54,19 @@ class DetailsViewModel @AssistedInject constructor(
                 }
 
                 is DetailsCommand.ToggleFavourite -> {
-                    toggleFavouriteUseCase(id, !isFavourite.value)
+                    val currentState = state.value
+                    if (currentState is DetailsUiState.Success) {
+                        toggleFavouriteUseCase(id, !currentState.definition.isFavorite)
+                    }
                 }
             }
         }
     }
 
-    sealed interface DetailsState {
-        data class Success(val definition: Definition) : DetailsState
-        object Loading : DetailsState
-        object Error : DetailsState
+    sealed interface DetailsUiState {
+        data class Success(val definition: Definition) : DetailsUiState
+        data object Loading : DetailsUiState
+        data object Error : DetailsUiState
     }
 
     sealed interface DetailsCommand {
@@ -82,14 +76,6 @@ class DetailsViewModel @AssistedInject constructor(
 
     sealed interface DetailsEvent {
         data object DeleteDefinition : DetailsEvent
-
         data class ShowError(val message: String) : DetailsEvent
     }
-}
-
-@AssistedFactory
-interface DetailsViewModelFactory {
-    fun create(
-        @Assisted("id") id: Int
-    ): DetailsViewModel
 }

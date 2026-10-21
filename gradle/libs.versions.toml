@@ -18,8 +18,14 @@ ksp = "2.3.9"
 junitJupiter = "5.14.0"
 datastorePreferences = "1.2.1"
 room = "2.8.4"
+coroutines = "1.9.0"
+turbine = "1.2.0"
+mockk = "1.13.12"
 
 [libraries]
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
+turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }

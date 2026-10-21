@@ -6,10 +6,10 @@ import androidx.navigation.navigation
 import androidx.navigation.toRoute
 import com.vladusecho.lexicon.presentation.navigation.NavScreen
 import com.vladusecho.lexicon.presentation.navigation.NavigationState
-import com.vladusecho.lexicon.presentation.screenv2.CreateDefinitionScreenV2
-import com.vladusecho.lexicon.presentation.screenv2.DetailsScreenV2
-import com.vladusecho.lexicon.presentation.screenv2.EditDefinitionScreenV2
-import com.vladusecho.lexicon.presentation.screenv2.HomeScreenV2
+import com.vladusecho.lexicon.presentation.screen.CreateDefinitionScreen
+import com.vladusecho.lexicon.presentation.screen.DetailsScreen
+import com.vladusecho.lexicon.presentation.screen.EditDefinitionScreen
+import com.vladusecho.lexicon.presentation.screen.HomeScreen
 
 fun NavGraphBuilder.homeScreenGraph(
     navState: NavigationState
@@ -18,7 +18,7 @@ fun NavGraphBuilder.homeScreenGraph(
         startDestination = NavScreen.Home
     ) {
         composable<NavScreen.Home> {
-            HomeScreenV2(
+            HomeScreen(
                 onShortDefinitionClick = {
                     navState.navHostController.navigate(NavScreen.Details(it))
                 },
@@ -29,7 +29,7 @@ fun NavGraphBuilder.homeScreenGraph(
         }
         composable<NavScreen.Details> { backStackEntry ->
             val args = backStackEntry.toRoute<NavScreen.Details>()
-            DetailsScreenV2(
+            DetailsScreen(
                 id = args.id,
                 onBackClick = {
                     navState.navHostController.navigateUp()
@@ -40,7 +40,7 @@ fun NavGraphBuilder.homeScreenGraph(
             )
         }
         composable<NavScreen.CreateDefinition> {
-            CreateDefinitionScreenV2(
+            CreateDefinitionScreen(
                 onBackClick = {
                     navState.navHostController.navigateUp()
                 }
@@ -48,7 +48,7 @@ fun NavGraphBuilder.homeScreenGraph(
         }
         composable<NavScreen.EditDefinition> { backStackEntry ->
             val args = backStackEntry.toRoute<NavScreen.EditDefinition>()
-            EditDefinitionScreenV2(
+            EditDefinitionScreen(
                 id = args.id,
                 onBackClick = {
                     navState.navHostController.navigateUp()

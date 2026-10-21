@@ -1,10 +1,10 @@
 package com.vladusecho.lexicon.domain.usecase.definition
 
-import com.vladusecho.lexicon.domain.repository.FavouritesRepository
+import com.vladusecho.lexicon.domain.repository.DefinitionsRepository
 import javax.inject.Inject
 
 class CheckIsFavouriteUseCase @Inject constructor(
-    private val favouritesRepository: FavouritesRepository
+    private val definitionsRepository: DefinitionsRepository
 ) {
-    operator fun invoke(id: Int) = favouritesRepository.checkIsFavorite(id)
+    operator fun invoke(id: Int) = definitionsRepository.checkIsFavorite(id)
 }

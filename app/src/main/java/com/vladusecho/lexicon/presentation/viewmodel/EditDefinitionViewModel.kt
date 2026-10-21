@@ -1,174 +1,154 @@
 package com.vladusecho.lexicon.presentation.viewmodel
 
 import android.net.Uri
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.core.net.toUri
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.vladusecho.lexicon.data.local.FileManagerHelper
+import androidx.navigation.toRoute
 import com.vladusecho.lexicon.domain.entity.Definition
 import com.vladusecho.lexicon.domain.entity.PartOfSpeech
-import com.vladusecho.lexicon.domain.usecase.definition.CheckIsFavouriteUseCase
 import com.vladusecho.lexicon.domain.usecase.definition.EditDefinitionUseCase
 import com.vladusecho.lexicon.domain.usecase.definition.GetDefinitionByIdUseCase
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
+import com.vladusecho.lexicon.presentation.navigation.NavScreen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-@HiltViewModel(
-    assistedFactory = EditDefinitionViewModelFactory::class
-)
-class EditDefinitionViewModel @AssistedInject constructor(
+@HiltViewModel
+class EditDefinitionViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
     getDefinitionByIdUseCase: GetDefinitionByIdUseCase,
-    checkIsFavouriteUseCase: CheckIsFavouriteUseCase,
-    private val editDefinitionUseCase: EditDefinitionUseCase,
-    private val fileManagerHelper: FileManagerHelper,
-    @Assisted("id") private val id: Int
+    private val editDefinitionUseCase: EditDefinitionUseCase
 ) : ViewModel() {
 
-    var imageUri by mutableStateOf<Uri?>(null)
-        private set
+    private val id: Int = savedStateHandle.toRoute<NavScreen.EditDefinition>().id
 
-    private var _word by mutableStateOf("")
-    val word: String
-        get() = _word
-    private var _description by mutableStateOf("")
-    val description: String
-        get() = _description
+    data class EditUiState(
+        val word: String = "",
+        val description: String = "",
+        val imageUri: Uri? = null,
+        val isNewImagePicked: Boolean = false,
+        val isImageRemoved: Boolean = false,
+        val selectedPartOfSpeech: PartOfSpeech = PartOfSpeech.NOUN,
+        val isFavorite: Boolean = false,
+        val isLoading: Boolean = false,
+        val isInitialLoaded: Boolean = false
+    ) {
+        val isValid: Boolean
+            get() = word.isNotBlank() && description.isNotBlank()
+    }
 
-    var selectedPartOfSpeech by mutableStateOf(PartOfSpeech.NOUN)
-        private set
-
-    val allCorrect get() = word.isNotBlank() && description.isNotBlank()
-
-    val isFavorite = checkIsFavouriteUseCase(id)
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.Eagerly,
-            initialValue = false
-        )
-
-    val state = getDefinitionByIdUseCase(id)
-        .take(1)
-        .map { definition ->
-            _word = definition.word
-            _description = definition.description
-            imageUri = definition.imgUri?.toUri()
-            selectedPartOfSpeech = definition.partOfSpeech
-            EditDefinitionState.Success as EditDefinitionState
-        }
-        .catch { emit(EditDefinitionState.Error) }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = EditDefinitionState.Loading
-        )
+    private val _uiState = MutableStateFlow(EditUiState())
+    val uiState = _uiState.asStateFlow()
 
     private val _event = MutableSharedFlow<EditDefinitionEvent>()
     val event = _event.asSharedFlow()
 
-    fun processCommand(command: EditDefinitionCommand) {
-        when (command) {
-            is EditDefinitionCommand.EditDefinition -> {
-
-                viewModelScope.launch {
-                    val currentImageUri = imageUri
-                    val finalImageUri = if (currentImageUri == null) {
-                        null
-                    } else if (currentImageUri.toString().startsWith("content://")) {
-                        fileManagerHelper.saveImageToInternalStorage(currentImageUri)
-                    } else {
-                        currentImageUri.path
-                    }
-                    val finalDefinition = command.definition.copy(imgUri = finalImageUri)
-                    editDefinitionUseCase(finalDefinition)
-                        .onSuccess {  _event.emit(EditDefinitionEvent.FinishEdit) }
-                        .onFailure { _event.emit(EditDefinitionEvent.ShowError(it.message ?: "Unknown error")) }
+    init {
+        viewModelScope.launch {
+            getDefinitionByIdUseCase(id).take(1).collect { definition ->
+                _uiState.update {
+                    it.copy(
+                        word = definition.word,
+                        description = definition.description,
+                        imageUri = definition.imgUri?.toUri(),
+                        selectedPartOfSpeech = definition.partOfSpeech,
+                        isFavorite = definition.isFavorite,
+                        isInitialLoaded = true
+                    )
                 }
-            }
-
-            is EditDefinitionCommand.UpdateDescription -> {
-                _description = command.description
-            }
-
-            is EditDefinitionCommand.UpdateWord -> {
-                _word = command.word
-            }
-
-            is EditDefinitionCommand.UpdateImageUri -> {
-                imageUri = command.uri
-            }
-
-            EditDefinitionCommand.RemoveImage -> {
-                imageUri = null
-            }
-            EditDefinitionCommand.CleanData -> {
-                _word = ""
-                _description = ""
-                imageUri = null
-                selectedPartOfSpeech = PartOfSpeech.NOUN
-            }
-            is EditDefinitionCommand.PickPartOfSpeech -> {
-                selectedPartOfSpeech = command.partOfSpeech
             }
         }
     }
 
+    fun processCommand(command: EditDefinitionCommand) {
+        when (command) {
+            is EditDefinitionCommand.UpdateWord -> {
+                _uiState.update { it.copy(word = command.word) }
+            }
 
-    sealed interface EditDefinitionState {
-        data object Success : EditDefinitionState
-        data object Loading : EditDefinitionState
-        data object Error : EditDefinitionState
-    }
+            is EditDefinitionCommand.UpdateDescription -> {
+                _uiState.update { it.copy(description = command.description) }
+            }
 
-    sealed interface EditDefinitionCommand {
-        data class EditDefinition(
-            val definition: Definition,
-            val imageUri: Uri?
-        ) : EditDefinitionCommand
+            is EditDefinitionCommand.UpdateImageUri -> {
+                _uiState.update {
+                    it.copy(
+                        imageUri = command.uri,
+                        isNewImagePicked = true,
+                        isImageRemoved = false
+                    )
+                }
+            }
 
-        data class UpdateWord(
-            val word: String
-        ) : EditDefinitionCommand
+            EditDefinitionCommand.RemoveImage -> {
+                _uiState.update {
+                    it.copy(
+                        imageUri = null,
+                        isNewImagePicked = false,
+                        isImageRemoved = true
+                    )
+                }
+            }
 
-        data class UpdateDescription(
-            val description: String
-        ) : EditDefinitionCommand
+            is EditDefinitionCommand.PickPartOfSpeech -> {
+                _uiState.update { it.copy(selectedPartOfSpeech = command.partOfSpeech) }
+            }
 
-        data class UpdateImageUri(
-            val uri: Uri
-        ) : EditDefinitionCommand
+            EditDefinitionCommand.Save -> {
+                val state = _uiState.value
+                if (!state.isValid) return
 
-        data object RemoveImage : EditDefinitionCommand
+                val formattedWord = state.word.trim().replaceFirstChar {
+                    if (it.isLowerCase()) it.titlecase() else it.toString()
+                }
 
-        data object CleanData : EditDefinitionCommand
+                val updatedDefinition = Definition(
+                    id = id,
+                    word = formattedWord,
+                    description = state.description.trim(),
+                    isFavorite = state.isFavorite,
+                    partOfSpeech = state.selectedPartOfSpeech
+                )
 
-        data class PickPartOfSpeech(
-            val partOfSpeech: PartOfSpeech
-        ) : EditDefinitionCommand
+                viewModelScope.launch {
+                    _uiState.update { it.copy(isLoading = true) }
+                    editDefinitionUseCase(
+                        definition = updatedDefinition,
+                        newImageUri = if (state.isNewImagePicked) state.imageUri?.toString() else null,
+                        isImageRemoved = state.isImageRemoved
+                    )
+                        .onSuccess {
+                            _uiState.update { it.copy(isLoading = false) }
+                            _event.emit(EditDefinitionEvent.FinishEdit)
+                        }
+                        .onFailure { error ->
+                            _uiState.update { it.copy(isLoading = false) }
+                            _event.emit(EditDefinitionEvent.ShowError(error.message ?: "Unknown error"))
+                        }
+                }
+            }
+        }
     }
 
     sealed interface EditDefinitionEvent {
         data object FinishEdit : EditDefinitionEvent
-
         data class ShowError(val message: String) : EditDefinitionEvent
     }
-}
 
-@AssistedFactory
-interface EditDefinitionViewModelFactory {
-    fun create(
-        @Assisted("id") id: Int
-    ): EditDefinitionViewModel
+    sealed interface EditDefinitionCommand {
+        data class UpdateWord(val word: String) : EditDefinitionCommand
+        data class UpdateDescription(val description: String) : EditDefinitionCommand
+        data class UpdateImageUri(val uri: Uri?) : EditDefinitionCommand
+        data object RemoveImage : EditDefinitionCommand
+        data class PickPartOfSpeech(val partOfSpeech: PartOfSpeech) : EditDefinitionCommand
+        data object Save : EditDefinitionCommand
+    }
 }

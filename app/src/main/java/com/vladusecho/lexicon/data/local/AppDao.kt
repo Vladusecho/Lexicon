@@ -12,7 +12,10 @@ interface AppDao {
     @Query("SELECT * FROM definitions WHERE id = :id")
     fun getDefinition(id: Int): Flow<DefinitionEntity>
 
-    @Query("SELECT * FROM definitions ORDER BY word ASC")
+    @Query("SELECT * FROM definitions WHERE id = :id")
+    suspend fun getDefinitionOnce(id: Int): DefinitionEntity?
+
+    @Query("SELECT * FROM definitions ORDER BY word COLLATE NOCASE ASC")
     fun getDefinitions(): Flow<List<DefinitionEntity>>
 
     @Upsert
@@ -21,10 +24,10 @@ interface AppDao {
     @Query("DELETE FROM definitions WHERE id = :id")
     suspend fun deleteDefinition(id: Int)
 
-    @Query("SELECT * FROM definitions WHERE word LIKE '%' || :query || '%'")
+    @Query("SELECT * FROM definitions WHERE word LIKE '%' || :query || '%' ORDER BY word COLLATE NOCASE ASC")
     fun searchAll(query: String): Flow<List<DefinitionEntity>>
 
-    @Query("SELECT * FROM definitions WHERE word LIKE '%' || :query || '%' AND isFavorite = 1")
+    @Query("SELECT * FROM definitions WHERE word LIKE '%' || :query || '%' AND isFavorite = 1 ORDER BY word COLLATE NOCASE ASC")
     fun searchFavourites(query: String): Flow<List<DefinitionEntity>>
 
     @Query("SELECT isFavorite FROM definitions WHERE id = :id")
@@ -33,9 +36,12 @@ interface AppDao {
     @Query("UPDATE definitions SET isFavorite = :isFavorite WHERE id = :id")
     suspend fun toggleFavorite(id: Int, isFavorite: Boolean)
 
-    @Query("SELECT * FROM definitions WHERE isFavorite = 1 ORDER BY word ASC")
+    @Query("SELECT * FROM definitions WHERE isFavorite = 1 ORDER BY word COLLATE NOCASE ASC")
     fun getFavorites(): Flow<List<DefinitionEntity>>
 
     @Query("SELECT * FROM definitions WHERE id != :excludedId ORDER BY RANDOM() LIMIT 1")
     suspend fun getRandomDefinition(excludedId: Int): DefinitionEntity?
+
+    @Query("SELECT * FROM definitions ORDER BY RANDOM() LIMIT 1")
+    suspend fun getRandomDefinitionAny(): DefinitionEntity?
 }
