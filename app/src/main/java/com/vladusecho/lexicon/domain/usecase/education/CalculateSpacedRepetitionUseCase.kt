@@ -2,6 +2,8 @@ package com.vladusecho.lexicon.domain.usecase.education
 
 import com.vladusecho.lexicon.domain.entity.Definition
 import com.vladusecho.lexicon.domain.entity.ReviewQuality
+import java.time.Instant
+import java.time.ZoneId
 import javax.inject.Inject
 import kotlin.math.max
 
@@ -17,7 +19,8 @@ class CalculateSpacedRepetitionUseCase @Inject constructor() {
     operator fun invoke(
         definition: Definition,
         quality: ReviewQuality,
-        currentTime: Long = System.currentTimeMillis()
+        currentTime: Long = System.currentTimeMillis(),
+        zoneId: ZoneId = ZoneId.systemDefault()
     ): SpacedRepetitionResult {
         val q = quality.grade
         val currentEf = definition.easeFactor
@@ -63,8 +66,11 @@ class CalculateSpacedRepetitionUseCase @Inject constructor() {
             }
         }
 
-        val oneDayMillis = 24 * 60 * 60 * 1000L
-        val nextReviewDate = currentTime + newInterval * oneDayMillis
+        val nextReviewDate = calculateStartOfDayInFuture(
+            days = newInterval,
+            fromTime = currentTime,
+            zoneId = zoneId
+        )
 
         return SpacedRepetitionResult(
             repetitions = newReps,
@@ -74,12 +80,23 @@ class CalculateSpacedRepetitionUseCase @Inject constructor() {
         )
     }
 
+    fun calculateStartOfDayInFuture(
+        days: Int,
+        fromTime: Long,
+        zoneId: ZoneId = ZoneId.systemDefault()
+    ): Long {
+        val today = Instant.ofEpochMilli(fromTime).atZone(zoneId).toLocalDate()
+        val targetDate = today.plusDays(days.toLong())
+        return targetDate.atStartOfDay(zoneId).toInstant().toEpochMilli()
+    }
+
     fun previewIntervalDays(
         definition: Definition,
-        currentTime: Long = System.currentTimeMillis()
+        currentTime: Long = System.currentTimeMillis(),
+        zoneId: ZoneId = ZoneId.systemDefault()
     ): Map<ReviewQuality, Int> {
         return ReviewQuality.entries.associateWith { quality ->
-            invoke(definition, quality, currentTime).intervalDays
+            invoke(definition, quality, currentTime, zoneId).intervalDays
         }
     }
 }
