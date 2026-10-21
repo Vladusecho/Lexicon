@@ -40,12 +40,12 @@
     <!-- Education Screen -->
     <string name="education_title">Повторение слов</string>
     <string name="education_subtitle">Все слова • Общий словарь</string>
-    <string name="education_next">Далее</string>
+    <string name="education_next">Следующее слово</string>
     <string name="education_definition_label">Определение</string>
-    <string name="education_definition_hidden">Нажмите, чтобы увидеть определение</string>
+    <string name="education_flip_hint_front">Коснитесь карточки, чтобы перевернуть</string>
+    <string name="education_flip_hint_back">Коснитесь, чтобы перевернуть обратно</string>
     <string name="education_empty_title">В словаре пока нет слов</string>
     <string name="education_empty_description">Добавьте новые слова в словарь, чтобы начать тренировку с карточками.</string>
-    <string name="education_show_image">Показать изображение</string>
 
     <!-- Settings Screen -->
     <string name="settings_title">Настройки</string>

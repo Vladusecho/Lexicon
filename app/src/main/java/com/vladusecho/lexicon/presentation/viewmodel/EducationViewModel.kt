@@ -48,8 +48,7 @@ class EducationViewModel @Inject constructor(
                         lastDefinitionId = definition.id
                         _state.value = EducationState.Success(
                             definition = definition,
-                            isDefinitionShown = false,
-                            isImgShown = false
+                            isFlipped = false
                         )
                     } else {
                         getRandomDefinitionUseCase(-1).fold(
@@ -58,8 +57,7 @@ class EducationViewModel @Inject constructor(
                                     lastDefinitionId = fallbackDefinition.id
                                     _state.value = EducationState.Success(
                                         definition = fallbackDefinition,
-                                        isDefinitionShown = false,
-                                        isImgShown = false
+                                        isFlipped = false
                                     )
                                 } else {
                                     _state.value = EducationState.Error(ErrorType.NO_WORDS)
@@ -80,17 +78,10 @@ class EducationViewModel @Inject constructor(
 
     fun processCommand(command: EducationCommand) {
         when (command) {
-            is EducationCommand.ToggleDefinition -> {
+            is EducationCommand.FlipCard -> {
                 val current = _state.value
                 if (current is EducationState.Success) {
-                    _state.value = current.copy(isDefinitionShown = !current.isDefinitionShown)
-                }
-            }
-
-            is EducationCommand.ToggleImg -> {
-                val current = _state.value
-                if (current is EducationState.Success) {
-                    _state.value = current.copy(isImgShown = !current.isImgShown)
+                    _state.value = current.copy(isFlipped = !current.isFlipped)
                 }
             }
 
@@ -103,8 +94,7 @@ class EducationViewModel @Inject constructor(
     sealed interface EducationState {
         data class Success(
             val definition: Definition,
-            val isDefinitionShown: Boolean = false,
-            val isImgShown: Boolean = false
+            val isFlipped: Boolean = false
         ) : EducationState
 
         data class Error(val errorType: ErrorType) : EducationState
@@ -117,8 +107,7 @@ class EducationViewModel @Inject constructor(
     }
 
     sealed interface EducationCommand {
-        data object ToggleDefinition : EducationCommand
-        data object ToggleImg : EducationCommand
+        data object FlipCard : EducationCommand
         data object ShowNextWord : EducationCommand
     }
 }

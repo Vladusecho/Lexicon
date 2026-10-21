@@ -1,9 +1,14 @@
 package com.vladusecho.lexicon.presentation.screen
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,14 +17,20 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -32,7 +43,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -59,13 +72,10 @@ fun EducationScreen(
         EducationScreenContent(
             modifier = Modifier.padding(top = paddingValues.calculateTopPadding()),
             currentState = state,
-            onDefinitionClick = {
-                viewModel.processCommand(EducationViewModel.EducationCommand.ToggleDefinition)
+            onCardFlip = {
+                viewModel.processCommand(EducationViewModel.EducationCommand.FlipCard)
             },
-            onImgClick = {
-                viewModel.processCommand(EducationViewModel.EducationCommand.ToggleImg)
-            },
-            onContinueClick = {
+            onNextClick = {
                 viewModel.processCommand(EducationViewModel.EducationCommand.ShowNextWord)
             }
         )
@@ -76,16 +86,16 @@ fun EducationScreen(
 fun EducationScreenContent(
     modifier: Modifier = Modifier,
     currentState: EducationViewModel.EducationState,
-    onDefinitionClick: () -> Unit,
-    onImgClick: () -> Unit,
-    onContinueClick: () -> Unit
+    onCardFlip: () -> Unit,
+    onNextClick: () -> Unit
 ) {
     Column(
         modifier = modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(20.dp))
         EducationHeader(modifier = Modifier.padding(horizontal = 16.dp))
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -128,31 +138,241 @@ fun EducationScreenContent(
             }
 
             is EducationViewModel.EducationState.Success -> {
-                ShowDefinitionCard(
-                    modifier = Modifier.padding(horizontal = 16.dp),
+                Flashcard(
+                    modifier = Modifier.padding(horizontal = 20.dp),
                     definition = currentState.definition,
-                    isDefinitionShown = currentState.isDefinitionShown,
-                    isImgShown = currentState.isImgShown,
-                    onDefinitionClick = onDefinitionClick,
-                    onImgClick = onImgClick
+                    isFlipped = currentState.isFlipped,
+                    onFlip = onCardFlip
                 )
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(28.dp))
                 Button(
-                    onClick = onContinueClick,
+                    onClick = onNextClick,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                        .padding(horizontal = 20.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                    shape = RoundedCornerShape(16.dp)
                 ) {
                     Text(
                         text = stringResource(id = R.string.education_next),
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.background,
-                        fontSize = 16.sp
+                        fontSize = 16.sp,
+                        modifier = Modifier.padding(vertical = 4.dp)
                     )
                 }
                 Spacer(modifier = Modifier.height(32.dp))
             }
+        }
+    }
+}
+
+@Composable
+fun Flashcard(
+    modifier: Modifier = Modifier,
+    definition: Definition,
+    isFlipped: Boolean,
+    onFlip: () -> Unit
+) {
+    val rotation by animateFloatAsState(
+        targetValue = if (isFlipped) 180f else 0f,
+        animationSpec = tween(durationMillis = 450, easing = FastOutSlowInEasing),
+        label = "flashcardFlip"
+    )
+
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .graphicsLayer {
+                rotationY = rotation
+                cameraDistance = 14f * density
+            }
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = onFlip
+            ),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.background
+        ),
+        border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
+    ) {
+        if (rotation <= 90f) {
+            FlashcardFront(definition = definition)
+        } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .graphicsLayer {
+                        rotationY = 180f
+                    }
+            ) {
+                FlashcardBack(definition = definition)
+            }
+        }
+    }
+}
+
+@Composable
+fun FlashcardFront(
+    definition: Definition
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 340.dp)
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceBetween
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Start
+        ) {
+            Box(
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.onBackground)
+                    .padding(vertical = 4.dp, horizontal = 14.dp)
+            ) {
+                Text(
+                    text = definition.partOfSpeech.label,
+                    color = MaterialTheme.colorScheme.tertiary,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+        }
+
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(vertical = 24.dp)
+        ) {
+            Text(
+                text = definition.word,
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 34.sp,
+                color = MaterialTheme.colorScheme.primary,
+                textAlign = TextAlign.Center
+            )
+        }
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_flip),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.45f),
+                modifier = Modifier.size(16.dp)
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+                text = stringResource(id = R.string.education_flip_hint_front),
+                color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.5f),
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Medium
+            )
+        }
+    }
+}
+
+@Composable
+fun FlashcardBack(
+    definition: Definition
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 340.dp)
+            .padding(24.dp),
+        verticalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = definition.word,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Box(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.onBackground)
+                        .padding(vertical = 3.dp, horizontal = 12.dp)
+                ) {
+                    Text(
+                        text = definition.partOfSpeech.label,
+                        color = MaterialTheme.colorScheme.tertiary,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = stringResource(id = R.string.education_definition_label),
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold,
+                fontSize = 14.sp
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = definition.description,
+                color = MaterialTheme.colorScheme.tertiary,
+                fontSize = 16.sp,
+                lineHeight = 24.sp
+            )
+
+            if (definition.imgUri != null) {
+                Spacer(modifier = Modifier.height(16.dp))
+                AsyncImage(
+                    model = definition.imgUri,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(1.4f)
+                        .clip(RoundedCornerShape(14.dp))
+                        .border(
+                            1.dp,
+                            MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f),
+                            RoundedCornerShape(14.dp)
+                        ),
+                    contentScale = ContentScale.Crop
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_flip),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.45f),
+                modifier = Modifier.size(16.dp)
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+                text = stringResource(id = R.string.education_flip_hint_back),
+                color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.5f),
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Medium
+            )
         }
     }
 }
@@ -180,140 +400,6 @@ fun EducationHeader(
             color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.5f),
             textAlign = TextAlign.Center
         )
-    }
-}
-
-@Composable
-fun ShowDefinitionCard(
-    modifier: Modifier = Modifier,
-    definition: Definition,
-    isDefinitionShown: Boolean,
-    isImgShown: Boolean,
-    onDefinitionClick: () -> Unit,
-    onImgClick: () -> Unit
-) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .border(
-                1.dp,
-                MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f),
-                RoundedCornerShape(16.dp)
-            )
-            .padding(16.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.onBackground)
-                .padding(vertical = 4.dp, horizontal = 16.dp)
-        ) {
-            Text(
-                text = definition.partOfSpeech.label,
-                color = MaterialTheme.colorScheme.tertiary,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Center,
-            text = definition.word,
-            fontWeight = FontWeight.Bold,
-            fontSize = 32.sp,
-            color = MaterialTheme.colorScheme.primary
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-        if (isDefinitionShown) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(MaterialTheme.colorScheme.onBackground)
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null,
-                        onClick = onDefinitionClick
-                    )
-                    .padding(16.dp)
-            ) {
-                Text(
-                    text = stringResource(id = R.string.education_definition_label),
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp,
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = definition.description,
-                    fontSize = 16.sp,
-                    color = MaterialTheme.colorScheme.tertiary,
-                    lineHeight = 22.sp
-                )
-            }
-        } else {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(MaterialTheme.colorScheme.onBackground)
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null,
-                        onClick = onDefinitionClick
-                    )
-                    .padding(16.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = stringResource(id = R.string.education_definition_hidden),
-                    color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.7f),
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 14.sp,
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
-
-        if (definition.imgUri != null) {
-            Spacer(modifier = Modifier.height(16.dp))
-            if (isImgShown) {
-                AsyncImage(
-                    model = definition.imgUri,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(1f)
-                        .clip(RoundedCornerShape(12.dp))
-                        .clickable(onClick = onImgClick)
-                        .border(
-                            1.dp,
-                            MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f),
-                            RoundedCornerShape(12.dp)
-                        ),
-                    contentScale = ContentScale.Crop
-                )
-            } else {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(MaterialTheme.colorScheme.onBackground)
-                        .clickable(onClick = onImgClick)
-                        .padding(16.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = stringResource(id = R.string.education_show_image),
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 14.sp
-                    )
-                }
-            }
-        }
     }
 }
 
