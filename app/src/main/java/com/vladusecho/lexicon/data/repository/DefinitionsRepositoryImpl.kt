@@ -104,4 +104,22 @@ class DefinitionsRepositoryImpl @Inject constructor(
     override fun getFavorites(): Flow<List<Definition>> {
         return appDao.getFavorites().map { it.toDefinitions() }
     }
+
+    override fun getDueDefinitions(currentTime: Long): Flow<List<Definition>> {
+        return appDao.getDueDefinitions(currentTime).map { it.toDefinitions() }
+    }
+
+    override fun getDueWordsCount(currentTime: Long): Flow<Int> {
+        return appDao.getDueDefinitionsCount(currentTime)
+    }
+
+    override suspend fun updateReviewProgress(
+        id: Int,
+        repetitions: Int,
+        intervalDays: Int,
+        easeFactor: Float,
+        nextReviewDate: Long
+    ): Result<Unit> = runCatching {
+        appDao.updateReviewProgress(id, repetitions, intervalDays, easeFactor, nextReviewDate)
+    }.onFailure { if (it is CancellationException) throw it }
 }

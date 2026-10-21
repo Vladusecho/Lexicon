@@ -3,76 +3,102 @@ package com.vladusecho.lexicon.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vladusecho.lexicon.domain.entity.Definition
+import com.vladusecho.lexicon.domain.entity.ReviewQuality
 import com.vladusecho.lexicon.domain.usecase.definition.GetDefinitionsUseCase
 import com.vladusecho.lexicon.domain.usecase.definition.GetRandomDefinitionUseCase
+import com.vladusecho.lexicon.domain.usecase.education.CalculateSpacedRepetitionUseCase
+import com.vladusecho.lexicon.domain.usecase.education.GetDueDefinitionsUseCase
+import com.vladusecho.lexicon.domain.usecase.education.ReviewDefinitionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class EducationViewModel @Inject constructor(
-    private val getRandomDefinitionUseCase: GetRandomDefinitionUseCase,
-    private val getDefinitionsUseCase: GetDefinitionsUseCase
+    private val getDueDefinitionsUseCase: GetDueDefinitionsUseCase,
+    private val getDefinitionsUseCase: GetDefinitionsUseCase,
+    private val reviewDefinitionUseCase: ReviewDefinitionUseCase,
+    private val calculateSpacedRepetitionUseCase: CalculateSpacedRepetitionUseCase,
+    private val getRandomDefinitionUseCase: GetRandomDefinitionUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<EducationState>(EducationState.Loading)
     val state = _state.asStateFlow()
 
-    private var lastDefinitionId: Int = -1
+    private val dueQueue = mutableListOf<Definition>()
+    private var isFreePractice = false
+    private var reviewedCountInSession = 0
+    private var lastRandomId = -1
 
     init {
+        startSession()
+    }
+
+    fun startSession() {
         viewModelScope.launch {
-            getDefinitionsUseCase()
-                .map { it.isEmpty() }
-                .distinctUntilChanged()
-                .collect { isEmpty ->
-                    if (isEmpty) {
-                        _state.value = EducationState.Error(ErrorType.NO_WORDS)
-                    } else if (_state.value !is EducationState.Success) {
-                        loadNextWord()
-                    }
-                }
+            _state.value = EducationState.Loading
+            isFreePractice = false
+            val allWords = getDefinitionsUseCase().first()
+            if (allWords.isEmpty()) {
+                _state.value = EducationState.Error(ErrorType.NO_WORDS)
+                return@launch
+            }
+
+            val dueWords = getDueDefinitionsUseCase(System.currentTimeMillis()).first()
+            dueQueue.clear()
+            dueQueue.addAll(dueWords)
+
+            if (dueQueue.isNotEmpty()) {
+                showNextDueWord()
+            } else {
+                _state.value = EducationState.AllDone(reviewedCount = reviewedCountInSession)
+            }
         }
     }
 
-    private fun loadNextWord() {
+    private fun showNextDueWord() {
+        if (dueQueue.isNotEmpty()) {
+            val nextDefinition = dueQueue.removeAt(0)
+            val intervals = calculateSpacedRepetitionUseCase.previewIntervalDays(nextDefinition)
+            _state.value = EducationState.Success(
+                definition = nextDefinition,
+                isFlipped = false,
+                intervalPreviews = intervals,
+                remainingCount = dueQueue.size + 1,
+                isFreePracticeMode = false
+            )
+        } else {
+            _state.value = EducationState.AllDone(reviewedCount = reviewedCountInSession)
+        }
+    }
+
+    fun startFreePractice() {
+        isFreePractice = true
+        loadNextRandomWord()
+    }
+
+    private fun loadNextRandomWord() {
         viewModelScope.launch {
             _state.value = EducationState.Loading
-            getRandomDefinitionUseCase(lastDefinitionId).fold(
-                onSuccess = { definition ->
-                    if (definition != null) {
-                        lastDefinitionId = definition.id
-                        _state.value = EducationState.Success(
-                            definition = definition,
-                            isFlipped = false
-                        )
-                    } else {
-                        getRandomDefinitionUseCase(-1).fold(
-                            onSuccess = { fallbackDefinition ->
-                                if (fallbackDefinition != null) {
-                                    lastDefinitionId = fallbackDefinition.id
-                                    _state.value = EducationState.Success(
-                                        definition = fallbackDefinition,
-                                        isFlipped = false
-                                    )
-                                } else {
-                                    _state.value = EducationState.Error(ErrorType.NO_WORDS)
-                                }
-                            },
-                            onFailure = {
-                                _state.value = EducationState.Error(ErrorType.UNKNOWN)
-                            }
-                        )
-                    }
-                },
-                onFailure = {
-                    _state.value = EducationState.Error(ErrorType.UNKNOWN)
-                }
-            )
+            val definition = getRandomDefinitionUseCase(lastRandomId).getOrNull()
+                ?: getRandomDefinitionUseCase(-1).getOrNull()
+
+            if (definition != null) {
+                lastRandomId = definition.id
+                val intervals = calculateSpacedRepetitionUseCase.previewIntervalDays(definition)
+                _state.value = EducationState.Success(
+                    definition = definition,
+                    isFlipped = false,
+                    intervalPreviews = intervals,
+                    remainingCount = 0,
+                    isFreePracticeMode = true
+                )
+            } else {
+                _state.value = EducationState.Error(ErrorType.NO_WORDS)
+            }
         }
     }
 
@@ -85,8 +111,32 @@ class EducationViewModel @Inject constructor(
                 }
             }
 
-            is EducationCommand.ShowNextWord -> {
-                loadNextWord()
+            is EducationCommand.SubmitReview -> {
+                val current = _state.value
+                if (current is EducationState.Success) {
+                    viewModelScope.launch {
+                        reviewDefinitionUseCase(current.definition, command.quality)
+                        reviewedCountInSession++
+
+                        if (command.quality == ReviewQuality.AGAIN && !current.isFreePracticeMode) {
+                            dueQueue.add(current.definition)
+                        }
+
+                        if (current.isFreePracticeMode) {
+                            loadNextRandomWord()
+                        } else {
+                            showNextDueWord()
+                        }
+                    }
+                }
+            }
+
+            is EducationCommand.StartFreePractice -> {
+                startFreePractice()
+            }
+
+            is EducationCommand.RestartDueSession -> {
+                startSession()
             }
         }
     }
@@ -94,7 +144,14 @@ class EducationViewModel @Inject constructor(
     sealed interface EducationState {
         data class Success(
             val definition: Definition,
-            val isFlipped: Boolean = false
+            val isFlipped: Boolean = false,
+            val intervalPreviews: Map<ReviewQuality, Int> = emptyMap(),
+            val remainingCount: Int = 0,
+            val isFreePracticeMode: Boolean = false
+        ) : EducationState
+
+        data class AllDone(
+            val reviewedCount: Int
         ) : EducationState
 
         data class Error(val errorType: ErrorType) : EducationState
@@ -108,6 +165,8 @@ class EducationViewModel @Inject constructor(
 
     sealed interface EducationCommand {
         data object FlipCard : EducationCommand
-        data object ShowNextWord : EducationCommand
+        data class SubmitReview(val quality: ReviewQuality) : EducationCommand
+        data object StartFreePractice : EducationCommand
+        data object RestartDueSession : EducationCommand
     }
 }

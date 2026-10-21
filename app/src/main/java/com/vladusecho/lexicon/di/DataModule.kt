@@ -52,7 +52,7 @@ interface DataModule {
             AppDatabase::class.java,
             "app_database"
         )
-            .addMigrations(AppDatabase.MIGRATION_3_4)
+            .addMigrations(AppDatabase.MIGRATION_3_4, AppDatabase.MIGRATION_4_5)
             .fallbackToDestructiveMigration()
             .build()
 

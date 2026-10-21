@@ -10,7 +10,11 @@ data class Definition(
     val imgUri: String? = null,
     val isFavorite: Boolean = false,
     val partOfSpeech: PartOfSpeech = PartOfSpeech.NOUN,
-    val createdAt: Long = System.currentTimeMillis()
+    val createdAt: Long = System.currentTimeMillis(),
+    val repetitions: Int = 0,
+    val intervalDays: Int = 0,
+    val easeFactor: Float = 2.5f,
+    val nextReviewDate: Long = 0L
 )
 
 @Serializable

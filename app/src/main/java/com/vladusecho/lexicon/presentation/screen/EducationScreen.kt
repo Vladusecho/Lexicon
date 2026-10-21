@@ -1,8 +1,11 @@
 package com.vladusecho.lexicon.presentation.screen
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -32,6 +35,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -43,6 +47,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -56,6 +61,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.vladusecho.lexicon.R
 import com.vladusecho.lexicon.domain.entity.Definition
+import com.vladusecho.lexicon.domain.entity.ReviewQuality
 import com.vladusecho.lexicon.presentation.element.ErrorView
 import com.vladusecho.lexicon.presentation.element.LoadingView
 import com.vladusecho.lexicon.presentation.viewmodel.EducationViewModel
@@ -75,8 +81,14 @@ fun EducationScreen(
             onCardFlip = {
                 viewModel.processCommand(EducationViewModel.EducationCommand.FlipCard)
             },
-            onNextClick = {
-                viewModel.processCommand(EducationViewModel.EducationCommand.ShowNextWord)
+            onReviewSubmit = { quality ->
+                viewModel.processCommand(EducationViewModel.EducationCommand.SubmitReview(quality))
+            },
+            onStartFreePractice = {
+                viewModel.processCommand(EducationViewModel.EducationCommand.StartFreePractice)
+            },
+            onRestartDue = {
+                viewModel.processCommand(EducationViewModel.EducationCommand.RestartDueSession)
             }
         )
     }
@@ -87,7 +99,9 @@ fun EducationScreenContent(
     modifier: Modifier = Modifier,
     currentState: EducationViewModel.EducationState,
     onCardFlip: () -> Unit,
-    onNextClick: () -> Unit
+    onReviewSubmit: (ReviewQuality) -> Unit,
+    onStartFreePractice: () -> Unit,
+    onRestartDue: () -> Unit
 ) {
     Column(
         modifier = modifier
@@ -95,9 +109,7 @@ fun EducationScreenContent(
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(20.dp))
-        EducationHeader(modifier = Modifier.padding(horizontal = 16.dp))
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         when (currentState) {
             EducationViewModel.EducationState.Loading -> {
@@ -110,7 +122,7 @@ fun EducationScreenContent(
                         Column(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(horizontal = 24.dp, vertical = 32.dp),
+                                .padding(horizontal = 24.dp, vertical = 48.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
@@ -137,32 +149,224 @@ fun EducationScreenContent(
                 }
             }
 
+            is EducationViewModel.EducationState.AllDone -> {
+                AllDoneCard(
+                    onStartFreePractice = onStartFreePractice,
+                    onRestartDue = onRestartDue
+                )
+            }
+
             is EducationViewModel.EducationState.Success -> {
+                EducationHeader(
+                    remainingCount = currentState.remainingCount,
+                    isFreePractice = currentState.isFreePracticeMode,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+                Spacer(modifier = Modifier.height(20.dp))
                 Flashcard(
                     modifier = Modifier.padding(horizontal = 20.dp),
                     definition = currentState.definition,
                     isFlipped = currentState.isFlipped,
                     onFlip = onCardFlip
                 )
-                Spacer(modifier = Modifier.height(28.dp))
-                Button(
-                    onClick = onNextClick,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                    shape = RoundedCornerShape(16.dp)
+                Spacer(modifier = Modifier.height(24.dp))
+
+                AnimatedVisibility(
+                    visible = currentState.isFlipped,
+                    enter = fadeIn(),
+                    exit = fadeOut()
                 ) {
-                    Text(
-                        text = stringResource(id = R.string.education_next),
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.background,
-                        fontSize = 16.sp,
-                        modifier = Modifier.padding(vertical = 4.dp)
+                    ReviewButtonsRow(
+                        intervalPreviews = currentState.intervalPreviews,
+                        onReviewSubmit = onReviewSubmit,
+                        modifier = Modifier.padding(horizontal = 16.dp)
                     )
                 }
+
+                AnimatedVisibility(
+                    visible = !currentState.isFlipped,
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
+                    Button(
+                        onClick = onCardFlip,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Text(
+                            text = "Показать ответ",
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.background,
+                            fontSize = 16.sp,
+                            modifier = Modifier.padding(vertical = 4.dp)
+                        )
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(32.dp))
             }
+        }
+    }
+}
+
+@Composable
+fun ReviewButtonsRow(
+    intervalPreviews: Map<ReviewQuality, Int>,
+    onReviewSubmit: (ReviewQuality) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        ReviewButton(
+            quality = ReviewQuality.AGAIN,
+            days = intervalPreviews[ReviewQuality.AGAIN] ?: 1,
+            color = Color(0xFFE53935),
+            onClick = { onReviewSubmit(ReviewQuality.AGAIN) },
+            modifier = Modifier.weight(1f)
+        )
+        ReviewButton(
+            quality = ReviewQuality.HARD,
+            days = intervalPreviews[ReviewQuality.HARD] ?: 1,
+            color = Color(0xFFFB8C00),
+            onClick = { onReviewSubmit(ReviewQuality.HARD) },
+            modifier = Modifier.weight(1f)
+        )
+        ReviewButton(
+            quality = ReviewQuality.GOOD,
+            days = intervalPreviews[ReviewQuality.GOOD] ?: 3,
+            color = Color(0xFF43A047),
+            onClick = { onReviewSubmit(ReviewQuality.GOOD) },
+            modifier = Modifier.weight(1f)
+        )
+        ReviewButton(
+            quality = ReviewQuality.EASY,
+            days = intervalPreviews[ReviewQuality.EASY] ?: 6,
+            color = Color(0xFF1E88E5),
+            onClick = { onReviewSubmit(ReviewQuality.EASY) },
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+fun ReviewButton(
+    quality: ReviewQuality,
+    days: Int,
+    color: Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(14.dp))
+            .background(color.copy(alpha = 0.12f))
+            .border(1.5.dp, color.copy(alpha = 0.6f), RoundedCornerShape(14.dp))
+            .clickable(onClick = onClick)
+            .padding(vertical = 10.dp, horizontal = 4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = quality.label,
+            color = color,
+            fontWeight = FontWeight.Bold,
+            fontSize = 14.sp
+        )
+        Spacer(modifier = Modifier.height(2.dp))
+        Text(
+            text = formatDaysInterval(days),
+            color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.65f),
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
+
+private fun formatDaysInterval(days: Int): String {
+    return when {
+        days <= 1 -> "<1 дн"
+        days in 2..4 -> "$days дн"
+        days in 5..20 -> "$days дн"
+        days in 21..30 -> "$days дн"
+        else -> "${days / 30} мес"
+    }
+}
+
+@Composable
+fun AllDoneCard(
+    onStartFreePractice: () -> Unit,
+    onRestartDue: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Spacer(modifier = Modifier.height(32.dp))
+        Box(
+            modifier = Modifier
+                .size(72.dp)
+                .clip(CircleShape)
+                .background(Color(0xFF43A047).copy(alpha = 0.15f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_check),
+                contentDescription = null,
+                tint = Color(0xFF43A047),
+                modifier = Modifier.size(36.dp)
+            )
+        }
+        Spacer(modifier = Modifier.height(20.dp))
+        Text(
+            text = stringResource(id = R.string.education_all_done_title),
+            fontWeight = FontWeight.Bold,
+            fontSize = 24.sp,
+            color = MaterialTheme.colorScheme.primary,
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = stringResource(id = R.string.education_all_done_desc),
+            color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.7f),
+            fontSize = 15.sp,
+            textAlign = TextAlign.Center,
+            lineHeight = 22.sp
+        )
+        Spacer(modifier = Modifier.height(36.dp))
+        Button(
+            onClick = onStartFreePractice,
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+            shape = RoundedCornerShape(16.dp)
+        ) {
+            Text(
+                text = stringResource(id = R.string.education_start_free_practice),
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.background,
+                fontSize = 16.sp,
+                modifier = Modifier.padding(vertical = 4.dp)
+            )
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+        OutlinedButton(
+            onClick = onRestartDue,
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.3f))
+        ) {
+            Text(
+                text = "Проверить снова",
+                color = MaterialTheme.colorScheme.tertiary,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 15.sp
+            )
         }
     }
 }
@@ -379,6 +583,8 @@ fun FlashcardBack(
 
 @Composable
 fun EducationHeader(
+    remainingCount: Int,
+    isFreePractice: Boolean,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -394,10 +600,14 @@ fun EducationHeader(
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = stringResource(id = R.string.education_subtitle),
-            fontWeight = FontWeight.Medium,
+            text = if (isFreePractice) {
+                stringResource(id = R.string.education_start_free_practice)
+            } else {
+                stringResource(id = R.string.education_remaining, remainingCount)
+            },
+            fontWeight = FontWeight.SemiBold,
             fontSize = 14.sp,
-            color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.5f),
+            color = if (isFreePractice) MaterialTheme.colorScheme.primary else Color(0xFF43A047),
             textAlign = TextAlign.Center
         )
     }

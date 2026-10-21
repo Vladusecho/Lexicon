@@ -44,4 +44,19 @@ interface AppDao {
 
     @Query("SELECT * FROM definitions ORDER BY RANDOM() LIMIT 1")
     suspend fun getRandomDefinitionAny(): DefinitionEntity?
+
+    @Query("SELECT * FROM definitions WHERE nextReviewDate <= :currentTime ORDER BY nextReviewDate ASC")
+    fun getDueDefinitions(currentTime: Long): Flow<List<DefinitionEntity>>
+
+    @Query("SELECT COUNT(*) FROM definitions WHERE nextReviewDate <= :currentTime")
+    fun getDueDefinitionsCount(currentTime: Long): Flow<Int>
+
+    @Query("UPDATE definitions SET repetitions = :repetitions, intervalDays = :intervalDays, easeFactor = :easeFactor, nextReviewDate = :nextReviewDate WHERE id = :id")
+    suspend fun updateReviewProgress(
+        id: Int,
+        repetitions: Int,
+        intervalDays: Int,
+        easeFactor: Float,
+        nextReviewDate: Long
+    )
 }

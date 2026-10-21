@@ -31,4 +31,16 @@ interface DefinitionsRepository {
     suspend fun toggleFavorite(id: Int, isFavorite: Boolean): Result<Unit>
 
     fun getFavorites(): Flow<List<Definition>>
+
+    fun getDueDefinitions(currentTime: Long): Flow<List<Definition>>
+
+    fun getDueWordsCount(currentTime: Long): Flow<Int>
+
+    suspend fun updateReviewProgress(
+        id: Int,
+        repetitions: Int,
+        intervalDays: Int,
+        easeFactor: Float,
+        nextReviewDate: Long
+    ): Result<Unit>
 }

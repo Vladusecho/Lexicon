@@ -10,7 +10,11 @@ fun DefinitionEntity.toDefinition() = Definition(
     imgUri = this.imgUri,
     isFavorite = this.isFavorite,
     partOfSpeech = this.partOfSpeech,
-    createdAt = this.createdAt
+    createdAt = this.createdAt,
+    repetitions = this.repetitions,
+    intervalDays = this.intervalDays,
+    easeFactor = this.easeFactor,
+    nextReviewDate = this.nextReviewDate
 )
 
 fun List<DefinitionEntity>.toDefinitions() = this.map { it.toDefinition() }
@@ -22,5 +26,9 @@ fun Definition.toDefinitionEntity() = DefinitionEntity(
     imgUri = this.imgUri,
     isFavorite = this.isFavorite,
     partOfSpeech = this.partOfSpeech,
-    createdAt = this.createdAt
+    createdAt = this.createdAt,
+    repetitions = this.repetitions,
+    intervalDays = this.intervalDays,
+    easeFactor = this.easeFactor,
+    nextReviewDate = this.nextReviewDate
 )
