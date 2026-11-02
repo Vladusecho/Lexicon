@@ -149,6 +149,22 @@ fun EditDefinitionScreen(
                 )
                 Spacer(Modifier.height(24.dp))
                 SectionTitle(
+                    text = "КАТЕГОРИЯ",
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+                Spacer(Modifier.height(16.dp))
+                CategorySelector(
+                    category = uiState.category,
+                    availableCategories = uiState.availableCategories,
+                    onCategoryChange = {
+                        viewModel.processCommand(EditDefinitionViewModel.EditDefinitionCommand.UpdateCategory(it))
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                )
+                Spacer(Modifier.height(24.dp))
+                SectionTitle(
                     text = "ЧАСТЬ РЕЧИ",
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )

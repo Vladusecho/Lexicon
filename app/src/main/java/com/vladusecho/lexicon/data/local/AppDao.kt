@@ -45,11 +45,46 @@ interface AppDao {
     @Query("SELECT * FROM definitions ORDER BY RANDOM() LIMIT 1")
     suspend fun getRandomDefinitionAny(): DefinitionEntity?
 
-    @Query("SELECT * FROM definitions WHERE nextReviewDate <= :currentTime ORDER BY nextReviewDate ASC")
-    fun getDueDefinitions(currentTime: Long): Flow<List<DefinitionEntity>>
+    @Query("SELECT DISTINCT category FROM definitions WHERE category IS NOT NULL AND category != '' ORDER BY category COLLATE NOCASE ASC")
+    fun getAllCategories(): Flow<List<String>>
 
-    @Query("SELECT COUNT(*) FROM definitions WHERE nextReviewDate <= :currentTime")
-    fun getDueDefinitionsCount(currentTime: Long): Flow<Int>
+    @Query("""
+        SELECT * FROM definitions 
+        WHERE nextReviewDate <= :currentTime 
+        AND (:category IS NULL OR category = :category)
+        AND (:onlyFavorites = 0 OR isFavorite = 1)
+        ORDER BY nextReviewDate ASC
+    """)
+    fun getDueDefinitions(
+        currentTime: Long,
+        category: String?,
+        onlyFavorites: Boolean
+    ): Flow<List<DefinitionEntity>>
+
+    @Query("""
+        SELECT COUNT(*) FROM definitions 
+        WHERE nextReviewDate <= :currentTime 
+        AND (:category IS NULL OR category = :category)
+        AND (:onlyFavorites = 0 OR isFavorite = 1)
+    """)
+    fun getDueDefinitionsCount(
+        currentTime: Long,
+        category: String?,
+        onlyFavorites: Boolean
+    ): Flow<Int>
+
+    @Query("""
+        SELECT * FROM definitions 
+        WHERE (:category IS NULL OR category = :category)
+        AND (:onlyFavorites = 0 OR isFavorite = 1)
+        AND (:excludedId = -1 OR id != :excludedId)
+        ORDER BY RANDOM() LIMIT 1
+    """)
+    suspend fun getRandomDefinitionFiltered(
+        category: String?,
+        onlyFavorites: Boolean,
+        excludedId: Int = -1
+    ): DefinitionEntity?
 
     @Query("UPDATE definitions SET repetitions = :repetitions, intervalDays = :intervalDays, easeFactor = :easeFactor, nextReviewDate = :nextReviewDate WHERE id = :id")
     suspend fun updateReviewProgress(

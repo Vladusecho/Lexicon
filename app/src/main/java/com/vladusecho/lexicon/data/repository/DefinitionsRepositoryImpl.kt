@@ -105,13 +105,36 @@ class DefinitionsRepositoryImpl @Inject constructor(
         return appDao.getFavorites().map { it.toDefinitions() }
     }
 
-    override fun getDueDefinitions(currentTime: Long): Flow<List<Definition>> {
-        return appDao.getDueDefinitions(currentTime).map { it.toDefinitions() }
+    override fun getAllCategories(): Flow<List<String>> {
+        return appDao.getAllCategories()
     }
 
-    override fun getDueWordsCount(currentTime: Long): Flow<Int> {
-        return appDao.getDueDefinitionsCount(currentTime)
+    override fun getDueDefinitions(
+        currentTime: Long,
+        category: String?,
+        onlyFavorites: Boolean
+    ): Flow<List<Definition>> {
+        return appDao.getDueDefinitions(currentTime, category, onlyFavorites).map { it.toDefinitions() }
     }
+
+    override fun getDueWordsCount(
+        currentTime: Long,
+        category: String?,
+        onlyFavorites: Boolean
+    ): Flow<Int> {
+        return appDao.getDueDefinitionsCount(currentTime, category, onlyFavorites)
+    }
+
+    override suspend fun getRandomDefinitionFiltered(
+        category: String?,
+        onlyFavorites: Boolean,
+        excludedId: Int
+    ): Result<Definition?> = runCatching {
+        val entity = appDao.getRandomDefinitionFiltered(category, onlyFavorites, excludedId)
+            ?: appDao.getRandomDefinitionFiltered(category, onlyFavorites, -1)
+            ?: if (category == null && !onlyFavorites) appDao.getRandomDefinitionAny() else null
+        entity?.toDefinition()
+    }.onFailure { if (it is CancellationException) throw it }
 
     override suspend fun updateReviewProgress(
         id: Int,

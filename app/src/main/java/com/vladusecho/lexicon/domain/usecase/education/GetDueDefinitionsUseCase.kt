@@ -9,7 +9,11 @@ class GetDueDefinitionsUseCase @Inject constructor(
     private val definitionsRepository: DefinitionsRepository
 ) {
 
-    operator fun invoke(currentTime: Long = System.currentTimeMillis()): Flow<List<Definition>> {
-        return definitionsRepository.getDueDefinitions(currentTime)
+    operator fun invoke(
+        currentTime: Long = System.currentTimeMillis(),
+        category: String? = null,
+        onlyFavorites: Boolean = false
+    ): Flow<List<Definition>> {
+        return definitionsRepository.getDueDefinitions(currentTime, category, onlyFavorites)
     }
 }

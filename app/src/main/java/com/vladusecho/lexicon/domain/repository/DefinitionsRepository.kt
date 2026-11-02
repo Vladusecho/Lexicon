@@ -32,9 +32,25 @@ interface DefinitionsRepository {
 
     fun getFavorites(): Flow<List<Definition>>
 
-    fun getDueDefinitions(currentTime: Long): Flow<List<Definition>>
+    fun getAllCategories(): Flow<List<String>>
 
-    fun getDueWordsCount(currentTime: Long): Flow<Int>
+    fun getDueDefinitions(
+        currentTime: Long,
+        category: String? = null,
+        onlyFavorites: Boolean = false
+    ): Flow<List<Definition>>
+
+    fun getDueWordsCount(
+        currentTime: Long,
+        category: String? = null,
+        onlyFavorites: Boolean = false
+    ): Flow<Int>
+
+    suspend fun getRandomDefinitionFiltered(
+        category: String? = null,
+        onlyFavorites: Boolean = false,
+        excludedId: Int = -1
+    ): Result<Definition?>
 
     suspend fun updateReviewProgress(
         id: Int,

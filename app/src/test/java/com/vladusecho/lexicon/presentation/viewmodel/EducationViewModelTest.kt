@@ -4,6 +4,7 @@ import app.cash.turbine.test
 import com.vladusecho.lexicon.domain.entity.Definition
 import com.vladusecho.lexicon.domain.entity.PartOfSpeech
 import com.vladusecho.lexicon.domain.entity.ReviewQuality
+import com.vladusecho.lexicon.domain.usecase.definition.GetAllCategoriesUseCase
 import com.vladusecho.lexicon.domain.usecase.definition.GetDefinitionsUseCase
 import com.vladusecho.lexicon.domain.usecase.definition.GetRandomDefinitionUseCase
 import com.vladusecho.lexicon.domain.usecase.education.CalculateSpacedRepetitionUseCase
@@ -21,6 +22,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
@@ -35,6 +37,7 @@ class EducationViewModelTest {
     private val reviewDefinitionUseCase: ReviewDefinitionUseCase = mockk()
     private val calculateSpacedRepetitionUseCase: CalculateSpacedRepetitionUseCase = mockk()
     private val getRandomDefinitionUseCase: GetRandomDefinitionUseCase = mockk()
+    private val getAllCategoriesUseCase: GetAllCategoriesUseCase = mockk()
 
     private val testDefinition = Definition(
         id = 1,
@@ -42,11 +45,32 @@ class EducationViewModelTest {
         description = "Терпимость к иному мировоззрению",
         isFavorite = false,
         partOfSpeech = PartOfSpeech.NOUN,
+        category = "Философия",
         repetitions = 0,
         intervalDays = 0,
         easeFactor = 2.5f,
         nextReviewDate = 0L
     )
+
+    private val itDefinition = Definition(
+        id = 2,
+        word = "Рефакторинг",
+        description = "Улучшение структуры кода",
+        isFavorite = true,
+        partOfSpeech = PartOfSpeech.NOUN,
+        category = "IT",
+        repetitions = 0,
+        intervalDays = 0,
+        easeFactor = 2.5f,
+        nextReviewDate = 0L
+    )
+
+    @Before
+    fun setUp() {
+        every { getAllCategoriesUseCase() } returns MutableStateFlow(listOf("Философия", "IT"))
+        every { getDueDefinitionsUseCase(any(), any(), any()) } returns MutableStateFlow(emptyList())
+        every { calculateSpacedRepetitionUseCase.previewIntervalDays(any(), any()) } returns emptyMap()
+    }
 
     private fun createViewModel(): EducationViewModel {
         return EducationViewModel(
@@ -54,7 +78,8 @@ class EducationViewModelTest {
             getDefinitionsUseCase = getDefinitionsUseCase,
             reviewDefinitionUseCase = reviewDefinitionUseCase,
             calculateSpacedRepetitionUseCase = calculateSpacedRepetitionUseCase,
-            getRandomDefinitionUseCase = getRandomDefinitionUseCase
+            getRandomDefinitionUseCase = getRandomDefinitionUseCase,
+            getAllCategoriesUseCase = getAllCategoriesUseCase
         )
     }
 
@@ -74,7 +99,7 @@ class EducationViewModelTest {
     @Test
     fun `when due definitions exist, loads first due word with isFlipped false`() = runTest {
         every { getDefinitionsUseCase() } returns MutableStateFlow(listOf(testDefinition))
-        every { getDueDefinitionsUseCase(any()) } returns MutableStateFlow(listOf(testDefinition))
+        every { getDueDefinitionsUseCase(any(), any(), any()) } returns MutableStateFlow(listOf(testDefinition))
         every { calculateSpacedRepetitionUseCase.previewIntervalDays(testDefinition, any()) } returns mapOf(
             ReviewQuality.AGAIN to 1,
             ReviewQuality.HARD to 1,
@@ -97,7 +122,7 @@ class EducationViewModelTest {
     @Test
     fun `when no due words for today, shows AllDone state`() = runTest {
         every { getDefinitionsUseCase() } returns MutableStateFlow(listOf(testDefinition))
-        every { getDueDefinitionsUseCase(any()) } returns MutableStateFlow(emptyList())
+        every { getDueDefinitionsUseCase(any(), any(), any()) } returns MutableStateFlow(emptyList())
 
         val viewModel = createViewModel()
 
@@ -110,7 +135,7 @@ class EducationViewModelTest {
     @Test
     fun `FlipCard toggles isFlipped state`() = runTest {
         every { getDefinitionsUseCase() } returns MutableStateFlow(listOf(testDefinition))
-        every { getDueDefinitionsUseCase(any()) } returns MutableStateFlow(listOf(testDefinition))
+        every { getDueDefinitionsUseCase(any(), any(), any()) } returns MutableStateFlow(listOf(testDefinition))
         every { calculateSpacedRepetitionUseCase.previewIntervalDays(testDefinition, any()) } returns emptyMap()
 
         val viewModel = createViewModel()
@@ -132,7 +157,7 @@ class EducationViewModelTest {
     @Test
     fun `SubmitReview calls reviewDefinitionUseCase and moves to next word or AllDone`() = runTest {
         every { getDefinitionsUseCase() } returns MutableStateFlow(listOf(testDefinition))
-        every { getDueDefinitionsUseCase(any()) } returns MutableStateFlow(listOf(testDefinition))
+        every { getDueDefinitionsUseCase(any(), any(), any()) } returns MutableStateFlow(listOf(testDefinition))
         every { calculateSpacedRepetitionUseCase.previewIntervalDays(testDefinition, any()) } returns emptyMap()
         coEvery { reviewDefinitionUseCase(testDefinition, ReviewQuality.GOOD, any()) } returns Result.success(
             SpacedRepetitionResult(repetitions = 1, intervalDays = 1, easeFactor = 2.5f, nextReviewDate = 2000L)
@@ -149,6 +174,77 @@ class EducationViewModelTest {
             assertTrue(nextState is EducationViewModel.EducationState.AllDone)
 
             coVerify(exactly = 1) { reviewDefinitionUseCase(testDefinition, ReviewQuality.GOOD, any()) }
+        }
+    }
+
+    @Test
+    fun `when category selected, queries due definitions with category filter`() = runTest {
+        every { getDefinitionsUseCase() } returns MutableStateFlow(listOf(testDefinition, itDefinition))
+        every { getDueDefinitionsUseCase(any(), null, false) } returns MutableStateFlow(listOf(testDefinition))
+        every { getDueDefinitionsUseCase(any(), "IT", false) } returns MutableStateFlow(listOf(itDefinition))
+        every { calculateSpacedRepetitionUseCase.previewIntervalDays(any(), any()) } returns emptyMap()
+
+        val viewModel = createViewModel()
+
+        viewModel.state.test {
+            awaitItem() // Initial state with null category
+
+            viewModel.processCommand(EducationViewModel.EducationCommand.SelectCategory("IT"))
+
+            // Skip intermediate loading if emitted
+            var current = awaitItem()
+            if (current is EducationViewModel.EducationState.Loading) {
+                current = awaitItem()
+            }
+            assertTrue(current is EducationViewModel.EducationState.Success)
+            val success = current as EducationViewModel.EducationState.Success
+            assertEquals("Рефакторинг", success.definition.word)
+            assertEquals("IT", success.selectedCategory)
+        }
+    }
+
+    @Test
+    fun `when category has no matching words, emits EMPTY_CATEGORY error`() = runTest {
+        every { getDefinitionsUseCase() } returns MutableStateFlow(listOf(testDefinition))
+
+        val viewModel = createViewModel()
+
+        viewModel.state.test {
+            awaitItem() // Initial state
+
+            viewModel.processCommand(EducationViewModel.EducationCommand.SelectCategory("Кулинария"))
+
+            var current = awaitItem()
+            if (current is EducationViewModel.EducationState.Loading) {
+                current = awaitItem()
+            }
+            assertTrue(current is EducationViewModel.EducationState.Error)
+            assertEquals(EducationViewModel.ErrorType.EMPTY_CATEGORY, (current as EducationViewModel.EducationState.Error).errorType)
+        }
+    }
+
+    @Test
+    fun `when onlyFavorites toggled, filters by favorite definitions`() = runTest {
+        every { getDefinitionsUseCase() } returns MutableStateFlow(listOf(testDefinition, itDefinition))
+        every { getDueDefinitionsUseCase(any(), null, false) } returns MutableStateFlow(listOf(testDefinition, itDefinition))
+        every { getDueDefinitionsUseCase(any(), null, true) } returns MutableStateFlow(listOf(itDefinition))
+        every { calculateSpacedRepetitionUseCase.previewIntervalDays(any(), any()) } returns emptyMap()
+
+        val viewModel = createViewModel()
+
+        viewModel.state.test {
+            awaitItem() // Initial state
+
+            viewModel.processCommand(EducationViewModel.EducationCommand.ToggleOnlyFavorites)
+
+            var current = awaitItem()
+            if (current is EducationViewModel.EducationState.Loading) {
+                current = awaitItem()
+            }
+            assertTrue(current is EducationViewModel.EducationState.Success)
+            val success = current as EducationViewModel.EducationState.Success
+            assertEquals("Рефакторинг", success.definition.word)
+            assertTrue(success.onlyFavorites)
         }
     }
 }

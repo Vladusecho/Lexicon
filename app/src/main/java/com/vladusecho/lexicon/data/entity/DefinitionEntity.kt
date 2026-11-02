@@ -17,5 +17,6 @@ data class DefinitionEntity(
     val repetitions: Int = 0,
     val intervalDays: Int = 0,
     val easeFactor: Float = 2.5f,
-    val nextReviewDate: Long = 0L
+    val nextReviewDate: Long = 0L,
+    val category: String? = null
 )

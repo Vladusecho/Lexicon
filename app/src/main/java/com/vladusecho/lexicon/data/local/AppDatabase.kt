@@ -10,7 +10,7 @@ import com.vladusecho.lexicon.data.entity.DefinitionEntity
     entities = [
         DefinitionEntity::class,
     ],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -30,6 +30,12 @@ abstract class AppDatabase : RoomDatabase() {
                 db.execSQL("ALTER TABLE definitions ADD COLUMN intervalDays INTEGER NOT NULL DEFAULT 0")
                 db.execSQL("ALTER TABLE definitions ADD COLUMN easeFactor REAL NOT NULL DEFAULT 2.5")
                 db.execSQL("ALTER TABLE definitions ADD COLUMN nextReviewDate INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
+        val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE definitions ADD COLUMN category TEXT DEFAULT NULL")
             }
         }
     }

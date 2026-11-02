@@ -28,6 +28,8 @@
     <string name="field_word_placeholder">Введите слово</string>
     <string name="field_description_label">Определение</string>
     <string name="field_description_placeholder">Введите значение слова</string>
+    <string name="field_category_label">Категория (необязательно)</string>
+    <string name="field_category_placeholder">Например: IT, Путешествия…</string>
     <string name="field_part_of_speech_label">Часть речи</string>
     <string name="action_add_image">Прикрепить изображение</string>
     <string name="action_remove_image">Удалить фото</string>
@@ -50,6 +52,11 @@
     <string name="education_all_done_desc">Вы повторили все запланированные на сегодня слова. Возвращайтесь завтра для закрепления памяти!</string>
     <string name="education_start_free_practice">Свободная тренировка</string>
     <string name="education_remaining">Осталось на сегодня: %1$d</string>
+    <string name="education_category_all">Все</string>
+    <string name="education_category_favorites">Избранное</string>
+    <string name="education_in_category">Категория: %1$s</string>
+    <string name="education_category_empty_title">В этой категории нет слов</string>
+    <string name="education_category_empty_desc">Добавьте слова в категорию или выберите другую категорию для повторения.</string>
     <string name="review_again">Снова</string>
     <string name="review_hard">Трудно</string>
     <string name="review_good">Хорошо</string>

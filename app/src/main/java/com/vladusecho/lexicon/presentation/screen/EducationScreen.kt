@@ -10,6 +10,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -75,22 +76,153 @@ fun EducationScreen(
     Scaffold(
         topBar = { EducationTopAppBar() }
     ) { paddingValues ->
-        EducationScreenContent(
-            modifier = Modifier.padding(top = paddingValues.calculateTopPadding()),
-            currentState = state,
-            onCardFlip = {
-                viewModel.processCommand(EducationViewModel.EducationCommand.FlipCard)
-            },
-            onReviewSubmit = { quality ->
-                viewModel.processCommand(EducationViewModel.EducationCommand.SubmitReview(quality))
-            },
-            onStartFreePractice = {
-                viewModel.processCommand(EducationViewModel.EducationCommand.StartFreePractice)
-            },
-            onRestartDue = {
-                viewModel.processCommand(EducationViewModel.EducationCommand.RestartDueSession)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = paddingValues.calculateTopPadding())
+        ) {
+            EducationCategoryFilterBar(
+                categories = state.categories,
+                selectedCategory = state.selectedCategory,
+                onlyFavorites = state.onlyFavorites,
+                onSelectCategory = { category ->
+                    viewModel.processCommand(EducationViewModel.EducationCommand.SelectCategory(category))
+                },
+                onToggleFavorites = {
+                    viewModel.processCommand(EducationViewModel.EducationCommand.ToggleOnlyFavorites)
+                }
+            )
+
+            EducationScreenContent(
+                modifier = Modifier.weight(1f),
+                currentState = state,
+                onCardFlip = {
+                    viewModel.processCommand(EducationViewModel.EducationCommand.FlipCard)
+                },
+                onReviewSubmit = { quality ->
+                    viewModel.processCommand(EducationViewModel.EducationCommand.SubmitReview(quality))
+                },
+                onStartFreePractice = {
+                    viewModel.processCommand(EducationViewModel.EducationCommand.StartFreePractice)
+                },
+                onRestartDue = {
+                    viewModel.processCommand(EducationViewModel.EducationCommand.RestartDueSession)
+                },
+                onResetFilter = {
+                    viewModel.processCommand(EducationViewModel.EducationCommand.SelectCategory(null))
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun EducationCategoryFilterBar(
+    categories: List<String>,
+    selectedCategory: String?,
+    onlyFavorites: Boolean,
+    onSelectCategory: (String?) -> Unit,
+    onToggleFavorites: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState())
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Favorites toggle chip
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(12.dp))
+                .border(
+                    width = 1.dp,
+                    color = if (onlyFavorites) Color(0xFFFFB300) else MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f),
+                    shape = RoundedCornerShape(12.dp)
+                )
+                .clickable(onClick = onToggleFavorites)
+                .background(
+                    if (onlyFavorites) Color(0xFFFFB300).copy(alpha = 0.15f)
+                    else MaterialTheme.colorScheme.background
+                )
+                .padding(horizontal = 12.dp, vertical = 7.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Icon(
+                    painter = if (onlyFavorites) {
+                        painterResource(id = R.drawable.ic_favorite_filled)
+                    } else {
+                        painterResource(id = R.drawable.ic_favorite)
+                    },
+                    contentDescription = null,
+                    tint = if (onlyFavorites) Color(0xFFFFB300) else MaterialTheme.colorScheme.tertiary,
+                    modifier = Modifier.size(16.dp)
+                )
+                Text(
+                    text = stringResource(id = R.string.education_category_favorites),
+                    color = if (onlyFavorites) Color(0xFFFFB300) else MaterialTheme.colorScheme.tertiary,
+                    fontWeight = if (onlyFavorites) FontWeight.SemiBold else FontWeight.Medium,
+                    fontSize = 13.sp
+                )
             }
-        )
+        }
+
+        // "Все" chip
+        val isAllSelected = selectedCategory == null
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(12.dp))
+                .border(
+                    width = 1.dp,
+                    color = if (isAllSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f),
+                    shape = RoundedCornerShape(12.dp)
+                )
+                .clickable { onSelectCategory(null) }
+                .background(
+                    if (isAllSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                    else MaterialTheme.colorScheme.background
+                )
+                .padding(horizontal = 14.dp, vertical = 7.dp)
+        ) {
+            Text(
+                text = stringResource(id = R.string.education_category_all),
+                color = if (isAllSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary,
+                fontWeight = if (isAllSelected) FontWeight.SemiBold else FontWeight.Medium,
+                fontSize = 13.sp
+            )
+        }
+
+        // Category chips
+        categories.forEach { category ->
+            val isSelected = selectedCategory.equals(category, ignoreCase = true)
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(12.dp))
+                    .border(
+                        width = 1.dp,
+                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f),
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                    .clickable { onSelectCategory(category) }
+                    .background(
+                        if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                        else MaterialTheme.colorScheme.background
+                    )
+                    .padding(horizontal = 14.dp, vertical = 7.dp)
+            ) {
+                Text(
+                    text = category,
+                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary,
+                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
+                    fontSize = 13.sp
+                )
+            }
+        }
     }
 }
 
@@ -101,7 +233,8 @@ fun EducationScreenContent(
     onCardFlip: () -> Unit,
     onReviewSubmit: (ReviewQuality) -> Unit,
     onStartFreePractice: () -> Unit,
-    onRestartDue: () -> Unit
+    onRestartDue: () -> Unit,
+    onResetFilter: () -> Unit
 ) {
     Column(
         modifier = modifier
@@ -109,10 +242,10 @@ fun EducationScreenContent(
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         when (currentState) {
-            EducationViewModel.EducationState.Loading -> {
+            is EducationViewModel.EducationState.Loading -> {
                 LoadingView()
             }
 
@@ -143,6 +276,44 @@ fun EducationScreenContent(
                         }
                     }
 
+                    EducationViewModel.ErrorType.EMPTY_CATEGORY -> {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 24.dp, vertical = 48.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = stringResource(id = R.string.education_category_empty_title),
+                                color = MaterialTheme.colorScheme.tertiary,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 22.sp,
+                                textAlign = TextAlign.Center
+                            )
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Text(
+                                text = stringResource(id = R.string.education_category_empty_desc),
+                                color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.7f),
+                                fontWeight = FontWeight.Normal,
+                                fontSize = 15.sp,
+                                textAlign = TextAlign.Center
+                            )
+                            Spacer(modifier = Modifier.height(24.dp))
+                            Button(
+                                onClick = onResetFilter,
+                                shape = RoundedCornerShape(16.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                            ) {
+                                Text(
+                                    text = "Показать все слова",
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.background,
+                                    fontSize = 15.sp
+                                )
+                            }
+                        }
+                    }
+
                     EducationViewModel.ErrorType.UNKNOWN -> {
                         ErrorView()
                     }
@@ -152,7 +323,10 @@ fun EducationScreenContent(
             is EducationViewModel.EducationState.AllDone -> {
                 AllDoneCard(
                     onStartFreePractice = onStartFreePractice,
-                    onRestartDue = onRestartDue
+                    onRestartDue = onRestartDue,
+                    onResetFilter = onResetFilter,
+                    selectedCategory = currentState.selectedCategory,
+                    onlyFavorites = currentState.onlyFavorites
                 )
             }
 
@@ -160,9 +334,11 @@ fun EducationScreenContent(
                 EducationHeader(
                     remainingCount = currentState.remainingCount,
                     isFreePractice = currentState.isFreePracticeMode,
+                    selectedCategory = currentState.selectedCategory,
+                    onlyFavorites = currentState.onlyFavorites,
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(16.dp))
                 Flashcard(
                     modifier = Modifier.padding(horizontal = 20.dp),
                     definition = currentState.definition,
@@ -300,6 +476,9 @@ private fun formatDaysInterval(days: Int): String {
 fun AllDoneCard(
     onStartFreePractice: () -> Unit,
     onRestartDue: () -> Unit,
+    onResetFilter: () -> Unit,
+    selectedCategory: String? = null,
+    onlyFavorites: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -325,9 +504,13 @@ fun AllDoneCard(
         }
         Spacer(modifier = Modifier.height(20.dp))
         Text(
-            text = stringResource(id = R.string.education_all_done_title),
+            text = when {
+                selectedCategory != null -> "В категории «$selectedCategory» всё повторено! 🎉"
+                onlyFavorites -> "Все избранные слова повторены! 🎉"
+                else -> stringResource(id = R.string.education_all_done_title)
+            },
             fontWeight = FontWeight.Bold,
-            fontSize = 24.sp,
+            fontSize = 22.sp,
             color = MaterialTheme.colorScheme.primary,
             textAlign = TextAlign.Center
         )
@@ -367,6 +550,22 @@ fun AllDoneCard(
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 15.sp
             )
+        }
+        if (selectedCategory != null || onlyFavorites) {
+            Spacer(modifier = Modifier.height(12.dp))
+            OutlinedButton(
+                onClick = onResetFilter,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.4f))
+            ) {
+                Text(
+                    text = "Повторить все слова словаря",
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 15.sp
+                )
+            }
         }
     }
 }
@@ -433,7 +632,8 @@ fun FlashcardFront(
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Start
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
                 modifier = Modifier
@@ -447,6 +647,21 @@ fun FlashcardFront(
                     fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold
                 )
+            }
+            if (!definition.category.isNullOrBlank()) {
+                Box(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
+                        .padding(vertical = 4.dp, horizontal = 14.dp)
+                ) {
+                    Text(
+                        text = definition.category,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
             }
         }
 
@@ -507,18 +722,38 @@ fun FlashcardBack(
                     fontSize = 20.sp,
                     color = MaterialTheme.colorScheme.primary
                 )
-                Box(
-                    modifier = Modifier
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.onBackground)
-                        .padding(vertical = 3.dp, horizontal = 12.dp)
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = definition.partOfSpeech.label,
-                        color = MaterialTheme.colorScheme.tertiary,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
+                    Box(
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.onBackground)
+                            .padding(vertical = 3.dp, horizontal = 12.dp)
+                    ) {
+                        Text(
+                            text = definition.partOfSpeech.label,
+                            color = MaterialTheme.colorScheme.tertiary,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                    if (!definition.category.isNullOrBlank()) {
+                        Box(
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
+                                .padding(vertical = 3.dp, horizontal = 12.dp)
+                        ) {
+                            Text(
+                                text = definition.category,
+                                color = MaterialTheme.colorScheme.primary,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                    }
                 }
             }
 
@@ -585,6 +820,8 @@ fun FlashcardBack(
 fun EducationHeader(
     remainingCount: Int,
     isFreePractice: Boolean,
+    selectedCategory: String? = null,
+    onlyFavorites: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -598,6 +835,23 @@ fun EducationHeader(
             color = MaterialTheme.colorScheme.tertiary,
             textAlign = TextAlign.Center
         )
+        if (selectedCategory != null || onlyFavorites) {
+            Spacer(modifier = Modifier.height(2.dp))
+            val filterLabel = buildString {
+                if (selectedCategory != null) append(selectedCategory)
+                if (onlyFavorites) {
+                    if (isNotEmpty()) append(" • ")
+                    append("★ Избранное")
+                }
+            }
+            Text(
+                text = filterLabel,
+                fontWeight = FontWeight.Medium,
+                fontSize = 13.sp,
+                color = MaterialTheme.colorScheme.primary,
+                textAlign = TextAlign.Center
+            )
+        }
         Spacer(modifier = Modifier.height(4.dp))
         Text(
             text = if (isFreePractice) {

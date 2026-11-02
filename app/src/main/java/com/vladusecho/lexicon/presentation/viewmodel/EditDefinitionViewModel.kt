@@ -9,6 +9,7 @@ import androidx.navigation.toRoute
 import com.vladusecho.lexicon.domain.entity.Definition
 import com.vladusecho.lexicon.domain.entity.PartOfSpeech
 import com.vladusecho.lexicon.domain.usecase.definition.EditDefinitionUseCase
+import com.vladusecho.lexicon.domain.usecase.definition.GetAllCategoriesUseCase
 import com.vladusecho.lexicon.domain.usecase.definition.GetDefinitionByIdUseCase
 import com.vladusecho.lexicon.presentation.navigation.NavScreen
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,18 +26,22 @@ import javax.inject.Inject
 class EditDefinitionViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     getDefinitionByIdUseCase: GetDefinitionByIdUseCase,
+    getAllCategoriesUseCase: GetAllCategoriesUseCase,
     private val editDefinitionUseCase: EditDefinitionUseCase
 ) : ViewModel() {
 
     private val id: Int = savedStateHandle.toRoute<NavScreen.EditDefinition>().id
 
     data class EditUiState(
+        val originalDefinition: Definition? = null,
         val word: String = "",
         val description: String = "",
         val imageUri: Uri? = null,
         val isNewImagePicked: Boolean = false,
         val isImageRemoved: Boolean = false,
         val selectedPartOfSpeech: PartOfSpeech = PartOfSpeech.NOUN,
+        val category: String = "",
+        val availableCategories: List<String> = emptyList(),
         val isFavorite: Boolean = false,
         val isLoading: Boolean = false,
         val isInitialLoaded: Boolean = false
@@ -53,13 +58,21 @@ class EditDefinitionViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
+            getAllCategoriesUseCase().collect { categories ->
+                _uiState.update { it.copy(availableCategories = categories) }
+            }
+        }
+
+        viewModelScope.launch {
             getDefinitionByIdUseCase(id).take(1).collect { definition ->
                 _uiState.update {
                     it.copy(
+                        originalDefinition = definition,
                         word = definition.word,
                         description = definition.description,
                         imageUri = definition.imgUri?.toUri(),
                         selectedPartOfSpeech = definition.partOfSpeech,
+                        category = definition.category ?: "",
                         isFavorite = definition.isFavorite,
                         isInitialLoaded = true
                     )
@@ -102,6 +115,10 @@ class EditDefinitionViewModel @Inject constructor(
                 _uiState.update { it.copy(selectedPartOfSpeech = command.partOfSpeech) }
             }
 
+            is EditDefinitionCommand.UpdateCategory -> {
+                _uiState.update { it.copy(category = command.category) }
+            }
+
             EditDefinitionCommand.Save -> {
                 val state = _uiState.value
                 if (!state.isValid) return
@@ -110,12 +127,19 @@ class EditDefinitionViewModel @Inject constructor(
                     if (it.isLowerCase()) it.titlecase() else it.toString()
                 }
 
-                val updatedDefinition = Definition(
+                val finalCategory = state.category.trim().takeIf { it.isNotBlank() }
+
+                val updatedDefinition = (state.originalDefinition ?: Definition(
+                    id = id,
+                    word = formattedWord,
+                    description = state.description.trim()
+                )).copy(
                     id = id,
                     word = formattedWord,
                     description = state.description.trim(),
                     isFavorite = state.isFavorite,
-                    partOfSpeech = state.selectedPartOfSpeech
+                    partOfSpeech = state.selectedPartOfSpeech,
+                    category = finalCategory
                 )
 
                 viewModelScope.launch {
@@ -149,6 +173,7 @@ class EditDefinitionViewModel @Inject constructor(
         data class UpdateImageUri(val uri: Uri?) : EditDefinitionCommand
         data object RemoveImage : EditDefinitionCommand
         data class PickPartOfSpeech(val partOfSpeech: PartOfSpeech) : EditDefinitionCommand
+        data class UpdateCategory(val category: String) : EditDefinitionCommand
         data object Save : EditDefinitionCommand
     }
 }

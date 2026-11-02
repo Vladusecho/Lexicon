@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.vladusecho.lexicon.domain.entity.Definition
 import com.vladusecho.lexicon.domain.entity.PartOfSpeech
 import com.vladusecho.lexicon.domain.usecase.definition.CreateDefinitionUseCase
+import com.vladusecho.lexicon.domain.usecase.definition.GetAllCategoriesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,7 +18,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CreateDefinitionViewModel @Inject constructor(
-    private val createDefinitionUseCase: CreateDefinitionUseCase
+    private val createDefinitionUseCase: CreateDefinitionUseCase,
+    getAllCategoriesUseCase: GetAllCategoriesUseCase
 ) : ViewModel() {
 
     data class CreateUiState(
@@ -25,6 +27,8 @@ class CreateDefinitionViewModel @Inject constructor(
         val description: String = "",
         val imageUri: Uri? = null,
         val selectedPartOfSpeech: PartOfSpeech = PartOfSpeech.NOUN,
+        val category: String = "",
+        val availableCategories: List<String> = emptyList(),
         val isLoading: Boolean = false
     ) {
         val isValid: Boolean
@@ -36,6 +40,14 @@ class CreateDefinitionViewModel @Inject constructor(
 
     private val _event = MutableSharedFlow<CreateDefinitionEvent>()
     val event = _event.asSharedFlow()
+
+    init {
+        viewModelScope.launch {
+            getAllCategoriesUseCase().collect { categories ->
+                _uiState.update { it.copy(availableCategories = categories) }
+            }
+        }
+    }
 
     fun processCommand(command: CreateDefinitionCommand) {
         when (command) {
@@ -59,8 +71,13 @@ class CreateDefinitionViewModel @Inject constructor(
                 _uiState.update { it.copy(selectedPartOfSpeech = command.partOfSpeech) }
             }
 
+            is CreateDefinitionCommand.UpdateCategory -> {
+                _uiState.update { it.copy(category = command.category) }
+            }
+
             CreateDefinitionCommand.CleanData -> {
-                _uiState.value = CreateUiState()
+                val currentCategories = _uiState.value.availableCategories
+                _uiState.value = CreateUiState(availableCategories = currentCategories)
             }
 
             CreateDefinitionCommand.Save -> {
@@ -71,11 +88,14 @@ class CreateDefinitionViewModel @Inject constructor(
                     if (it.isLowerCase()) it.titlecase() else it.toString()
                 }
 
+                val finalCategory = state.category.trim().takeIf { it.isNotBlank() }
+
                 val definition = Definition(
                     word = formattedWord,
                     description = state.description.trim(),
                     isFavorite = false,
-                    partOfSpeech = state.selectedPartOfSpeech
+                    partOfSpeech = state.selectedPartOfSpeech,
+                    category = finalCategory
                 )
 
                 viewModelScope.launch {
@@ -105,6 +125,7 @@ class CreateDefinitionViewModel @Inject constructor(
         data class UpdateImageUri(val uri: Uri?) : CreateDefinitionCommand
         data object RemoveImage : CreateDefinitionCommand
         data class PickPartOfSpeech(val partOfSpeech: PartOfSpeech) : CreateDefinitionCommand
+        data class UpdateCategory(val category: String) : CreateDefinitionCommand
         data object CleanData : CreateDefinitionCommand
         data object Save : CreateDefinitionCommand
     }

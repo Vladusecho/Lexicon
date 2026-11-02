@@ -183,6 +183,22 @@ fun CreateDefinitionScreen(
             )
             Spacer(Modifier.height(24.dp))
             SectionTitle(
+                text = "КАТЕГОРИЯ",
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+            Spacer(Modifier.height(16.dp))
+            CategorySelector(
+                category = uiState.category,
+                availableCategories = uiState.availableCategories,
+                onCategoryChange = {
+                    viewModel.processCommand(CreateDefinitionViewModel.CreateDefinitionCommand.UpdateCategory(it))
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+            )
+            Spacer(Modifier.height(24.dp))
+            SectionTitle(
                 text = "ЧАСТЬ РЕЧИ",
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
@@ -383,6 +399,69 @@ fun ImagePickerBox(
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 15.sp
                 )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun CategorySelector(
+    modifier: Modifier = Modifier,
+    category: String,
+    availableCategories: List<String>,
+    onCategoryChange: (String) -> Unit
+) {
+    val defaultSuggestions = listOf("IT", "Путешествия", "Бизнес", "Разговорный", "Книги")
+    val combinedSuggestions = (availableCategories + defaultSuggestions)
+        .filter { it.isNotBlank() }
+        .distinct()
+
+    Column(modifier = modifier) {
+        DefinitionInputField(
+            title = stringResource(id = R.string.field_category_label),
+            placeholder = stringResource(id = R.string.field_category_placeholder),
+            value = category,
+            onValueChange = onCategoryChange,
+            singleLine = true
+        )
+        if (combinedSuggestions.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(10.dp))
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                combinedSuggestions.forEach { suggestion ->
+                    val isSelected = category.equals(suggestion, ignoreCase = true)
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .border(
+                                width = 1.dp,
+                                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f),
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .clickable {
+                                if (isSelected) {
+                                    onCategoryChange("")
+                                } else {
+                                    onCategoryChange(suggestion)
+                                }
+                            }
+                            .background(
+                                if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                                else MaterialTheme.colorScheme.onBackground
+                            )
+                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                    ) {
+                        Text(
+                            text = suggestion,
+                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary,
+                            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                            fontSize = 13.sp
+                        )
+                    }
+                }
             }
         }
     }

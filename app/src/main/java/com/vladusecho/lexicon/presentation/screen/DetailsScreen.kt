@@ -3,6 +3,8 @@ package com.vladusecho.lexicon.presentation.screen
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -31,6 +33,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
@@ -224,7 +227,8 @@ fun DetailsContent(
                 WordWithPartOfSpeech(
                     modifier = Modifier.padding(horizontal = 16.dp),
                     word = currentState.definition.word,
-                    partOfSpeech = currentState.definition.partOfSpeech
+                    partOfSpeech = currentState.definition.partOfSpeech,
+                    category = currentState.definition.category
                 )
                 Spacer(modifier = Modifier.height(24.dp))
                 DefinitionWithImage(
@@ -282,7 +286,8 @@ fun DefinitionWithImage(
 fun WordWithPartOfSpeech(
     modifier: Modifier = Modifier,
     word: String,
-    partOfSpeech: PartOfSpeech
+    partOfSpeech: PartOfSpeech,
+    category: String? = null
 ) {
     Column(modifier = modifier) {
         Text(
@@ -293,17 +298,37 @@ fun WordWithPartOfSpeech(
         )
         Spacer(modifier = Modifier.height(8.dp))
         Row(
-            modifier = Modifier
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.onBackground)
-                .padding(vertical = 4.dp, horizontal = 16.dp)
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = partOfSpeech.label,
-                color = MaterialTheme.colorScheme.tertiary,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.SemiBold
-            )
+            Box(
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.onBackground)
+                    .padding(vertical = 4.dp, horizontal = 16.dp)
+            ) {
+                Text(
+                    text = partOfSpeech.label,
+                    color = MaterialTheme.colorScheme.tertiary,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+            if (!category.isNullOrBlank()) {
+                Box(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
+                        .padding(vertical = 4.dp, horizontal = 16.dp)
+                ) {
+                    Text(
+                        text = category,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
         }
     }
 }

@@ -14,7 +14,8 @@ fun DefinitionEntity.toDefinition() = Definition(
     repetitions = this.repetitions,
     intervalDays = this.intervalDays,
     easeFactor = this.easeFactor,
-    nextReviewDate = this.nextReviewDate
+    nextReviewDate = this.nextReviewDate,
+    category = this.category
 )
 
 fun List<DefinitionEntity>.toDefinitions() = this.map { it.toDefinition() }
@@ -30,5 +31,6 @@ fun Definition.toDefinitionEntity() = DefinitionEntity(
     repetitions = this.repetitions,
     intervalDays = this.intervalDays,
     easeFactor = this.easeFactor,
-    nextReviewDate = this.nextReviewDate
+    nextReviewDate = this.nextReviewDate,
+    category = this.category
 )
